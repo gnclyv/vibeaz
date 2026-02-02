@@ -1,143 +1,211 @@
-// 1. Firebase funksiyalarını window-dan götürürük (index.html-dəki window təyinatlarına uyğun)
-const db = window.db;
-const firebaseCollection = window.firebaseCollection || window.collection;
-const firebaseAddDoc = window.firebaseAddDoc || window.addDoc;
-const firebaseOnSnapshot = window.firebaseOnSnapshot || window.onSnapshot;
-const firebaseQuery = window.firebaseQuery || window.query;
-const firebaseOrderBy = window.firebaseOrderBy || window.orderBy;
-const firebaseServerTimestamp = window.firebaseServerTimestamp || window.serverTimestamp;
-// Like üçün lazım olan əlavə Firebase funksiyaları (əgər index.html-də yoxdursa bura diqqət)
-import { updateDoc, doc, increment } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, increment, arrayUnion, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// 2. ImgBB API
+// Sənin yeni və düzgün konfiqurasiyan
+// 1. FİREBASE KONFİQURASİYAN (Buranı öz məlumatlarınla doldur)
+const firebaseConfig = {
+  apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
+  authDomain: "vibeaz-1e98a.firebaseapp.com",
+  databaseURL: "https://vibeaz-1e98a-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vibeaz-1e98a",
+  storageBucket: "vibeaz-1e98a.firebasestorage.app",
+  messagingSenderId: "953434260285",
+  appId: "1:953434260285:web:6263b4372487ba6d673b54",
+  measurementId: "G-2928WJCY1B"
+    apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
+    authDomain: "vibeaz-1e98a.firebaseapp.com",
+    projectId: "vibeaz-1e98a",
+    storageBucket: "vibeaz-1e98a.firebasestorage.app",
+    messagingSenderId: "953434260285",
+    appId: "1:953434260285:web:6263b4372487ba6d673b54"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// 3. Əsas Yükləmə Funksiyası
-// 1. Like Funksiyası
-async function handleLike(postId) {
-    const postRef = doc(db, "posts", postId);
-    try {
-        await updateDoc(postRef, {
-            likes: increment(1) // Like sayını 1 vahid artırır
-        });
-    } catch (error) {
-        console.error("Like xətası:", error);
+// ReCAPTCHA qurulur
+window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+    'size': 'invisible'
+}, auth);
+// --- SMS GİRİŞ SİSTEMİ ---
+window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' }, auth);
+
+// Giriş yoxlaması
+onAuthStateChanged(auth, async (user) => {
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app');
+    if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+        }
+    } else {
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
     }
-}
-
-// 2. Fayl Yükləmə (Post paylaşanda like: 0 olaraq başlayır)
-async function handleFileUpload(type) {
-const fileInput = document.getElementById('fileInput');
-fileInput.value = ""; 
-@@ -20,8 +32,7 @@ async function handleFileUpload(type) {
-const file = fileInput.files[0];
-if (!file) return;
-
-        alert("Zəhmət olmasa gözləyin, yüklənir...");
-
-        alert("Yüklənir...");
-const formData = new FormData();
-formData.append("image", file);
-
-@@ -35,79 +46,58 @@ async function handleFileUpload(type) {
-
-let userText = "";
-if (type === 'posts') {
-                userText = prompt("Post üçün başlıq yazın:") || "";
-                userText = prompt("Başlıq yazın:") || "";
-}
-
-            // Firebase-ə göndərmə (Xətasız variant)
-await firebaseAddDoc(firebaseCollection(db, type), {
-url: imageUrl,
-text: userText,
-author: "İstifadəçi",
-                likes: 0, // Yeni postda like 0 olur
-timestamp: firebaseServerTimestamp()
 });
 
-            alert("Uğurla paylaşıldı! ✨");
-            alert("Paylaşıldı!");
-} catch (error) {
-            console.error("Xəta:", error);
-            alert("Xəta baş verdi, yenidən yoxlayın.");
-            alert("Xəta baş verdi.");
-}
+// SMS Göndərmə
+// SMS Göndər
+document.getElementById('send-sms-btn').onclick = () => {
+    const username = document.getElementById('username').value;
+const number = document.getElementById('phoneNumber').value;
+
+    if (!username || !number.startsWith('+')) {
+        alert("Adı daxil edin və nömrəni +994 formatında yazın!");
+        return;
+    }
+    const username = document.getElementById('username').value;
+    if(!username) return alert("İstifadəçi adı yazın");
+
+signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+        .then(result => {
+            window.confirmationResult = result;
+document.getElementById('reg-form').classList.add('hidden');
+document.getElementById('verification-area').classList.remove('hidden');
+        }).catch((error) => {
+            alert("Xəta: " + error.message);
+        });
+        }).catch(err => alert("Xəta: " + err.message));
 };
+
+// Təsdiqləmə
+// Kodu Təsdiqlə
+document.getElementById('verify-sms-btn').onclick = () => {
+const code = document.getElementById('smsCode').value;
+const username = document.getElementById('username').value;
+
+window.confirmationResult.confirm(code).then(async (result) => {
+        await setDoc(doc(db, "users", result.user.uid), {
+            username: username,
+            phoneNumber: result.user.phoneNumber,
+            createdAt: new Date()
+        });
+        await setDoc(doc(db, "users", result.user.uid), { username: username });
+location.reload();
+}).catch(() => alert("Kod səhvdir!"));
+};
+
+// Çıxış
+document.getElementById('logout-btn').onclick = () => {
+    signOut(auth).then(() => location.reload());
+// --- ANA SƏHİFƏ FUNKSİYALARI ---
+
+// Like Funksiyası
+window.handleLike = async (postId) => {
+    let likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
+    if (likedPosts.includes(postId)) return;
+    try {
+        await updateDoc(doc(db, "posts", postId), { likes: increment(1) });
+        likedPosts.push(postId);
+        localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+    } catch (e) { console.error(e); }
+};
+
+// Şərh Funksiyası
+window.handleComment = async (postId) => {
+    const input = document.getElementById(`comment-input-${postId}`);
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+        await updateDoc(doc(db, "posts", postId), {
+            comments: arrayUnion({ text, author: "İstifadəçi", time: Date.now() })
+        });
+        input.value = "";
+    } catch (e) { console.error(e); }
+};
+
+// Şəkil Yükləmə (Post və ya Story)
+async function handleFileUpload(type) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.click();
+    fileInput.onchange = async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append("image", file);
+        
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const result = await res.json();
+        const url = result.data.url;
+
+        let text = type === 'posts' ? prompt("Başlıq yazın:") : "";
+        
+        await addDoc(collection(db, type), {
+            url, text, likes: 0, comments: [], timestamp: serverTimestamp()
+        });
+        alert("Paylaşıldı!");
+    };
 }
 
-// 4. Düymələrin aktiv edilməsi
-document.getElementById('shareBtn').onclick = () => handleFileUpload('stories');
-document.getElementById('mainAddBtn').onclick = () => handleFileUpload('posts');
-
-// 5. STORY BÖLMƏSİ (Yeni Dizayn)
-firebaseOnSnapshot(firebaseQuery(firebaseCollection(db, "stories"), firebaseOrderBy("timestamp", "desc")), (snapshot) => {
-    const storyContainer = document.getElementById('stories');
-    storyContainer.innerHTML = `
-        <div class="story-card add-btn" id="shareBtn">
-            <div class="story-circle"><i class="fa fa-plus"></i></div>
-            <span>Sənin hekayən</span>
-        </div>`;
-    
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        storyContainer.innerHTML += `
-            <div class="story-card">
-                <div class="story-circle">
-                    <img src="${data.url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; border:2px solid white;">
-                </div>
-                <span>İstifadəçi</span>
-            </div>`;
+// Məzmunu Yüklə (Girişdən sonra)
+function loadContent() {
+    // Story-ləri Yüklə
+    onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
+        const container = document.getElementById('stories-container');
+        container.innerHTML = `<div class="story-item" id="addStoryBtn"><div class="story-circle">+</div><p>Paylaş</p></div>`;
+        snap.forEach(doc => {
+            const data = doc.data();
+            container.innerHTML += `
+                <div class="story-item">
+                    <img src="${data.url}" class="story-circle">
+                    <p>İstifadəçi</p>
+                </div>`;
+        });
+        document.getElementById('addStoryBtn').onclick = () => handleFileUpload('stories');
     });
-    // Yenidən yaranan düyməni klikə bağlayırıq
-    document.getElementById('shareBtn').onclick = () => handleFileUpload('stories');
-});
 
-// 6. POST FEED (Təyyarə loqosu silinmiş və təmizlənmiş)
-// 3. Postları Göstərmək (Like düyməsi ilə)
-firebaseOnSnapshot(firebaseQuery(firebaseCollection(db, "posts"), firebaseOrderBy("timestamp", "desc")), (snapshot) => {
-const postList = document.getElementById('post-list');
-postList.innerHTML = '';
+    // Postları Yüklə
+    onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
+        const list = document.getElementById('post-list');
+        list.innerHTML = '';
+        const likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
 
-    snapshot.forEach(doc => {
-        const data = doc.data();
-    snapshot.forEach(postDoc => {
-        const data = postDoc.data();
-        const postId = postDoc.id;
-        const likeCount = data.likes || 0;
+        snap.forEach(postDoc => {
+            const data = postDoc.data();
+            const id = postDoc.id;
+            const isLiked = likedPosts.includes(id);
+            const commentsHTML = (data.comments || []).map(c => `<p><strong>${c.author}</strong> ${c.text}</p>`).join('');
 
-postList.innerHTML += `
-           <div class="post-card" style="margin-bottom:20px; background:white; border-bottom:1px solid #dbdbdb;">
-               <div style="padding: 10px; display: flex; align-items: center; gap: 10px;">
-                   <div style="width:32px; height:32px; background:#efefef; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                      <i class="fa fa-user" style="color:#ccc; font-size:14px;"></i>
-                   </div>
-                   <div style="width:32px; height:32px; background:#efefef; border-radius:50%;"></div>
-                  <span style="font-weight:600;">İstifadəçi</span>
-               </div>
-               
-                <img src="${data.url}" style="width:100%; display:block;">
-                <img src="${data.url}" style="width:100%; display:block;" ondblclick="handleLike('${postId}')">
-               
-               <div style="padding:12px 15px;">
-                    <div style="display:flex; gap:15px; font-size:22px; margin-bottom:8px;">
-                        <i class="fa-regular fa-heart" style="cursor:pointer;"></i>
-                        <i class="fa-regular fa-comment" style="cursor:pointer;"></i>
-                        </div>
-                    <div style="display:flex; gap:15px; font-size:22px; margin-bottom:5px;">
-                        <i class="fa-regular fa-heart" style="cursor:pointer;" onclick="handleLike('${postId}')"></i>
-                        <i class="fa-regular fa-comment"></i>
+            list.innerHTML += `
+                <div class="post-card">
+                    <div class="post-header"><span>İstifadəçi</span></div>
+                    <img src="${data.url}" ondblclick="handleLike('${id}')">
+                    <div class="post-info">
+                        <button onclick="handleLike('${id}')">${isLiked ? '❤️' : '🤍'}</button>
+                        <strong>${data.likes || 0} bəyənmə</strong>
+                        <p>${data.text || ""}</p>
+                        <div class="comments-box">${commentsHTML}</div>
+                        <input type="text" id="comment-input-${id}" placeholder="Şərh...">
+                        <button onclick="handleComment('${id}')">Paylaş</button>
                     </div>
-                    <p style="margin:0 0 5px 0; font-weight:bold; font-size:14px;">${likeCount} bəyənmə</p>
-                   <p style="margin:0; font-size:14px;">
-                       <strong>İstifadəçi</strong> ${data.text || ""}
-                   </p>
-               </div>
-           </div>`;
-});
+                </div>`;
+        });
+    });
+}
+
+// --- AUTH MÜŞAHİDƏÇİSİ ---
+onAuthStateChanged(auth, (user) => {
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app');
+    if (user) {
+        authScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        loadContent();
+    } else {
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
+    }
 });
 
-// Digər düymələri və story-ni bura əlavə etməyi unutma (əvvəlki koddakı kimi)
-document.getElementById('shareBtn').onclick = () => handleFileUpload('stories');
+document.getElementById('logout-btn').onclick = () => signOut(auth);
 document.getElementById('mainAddBtn').onclick = () => handleFileUpload('posts');
-window.handleLike = handleLike; // Funksiyanı HTML daxilində işlətmək üçün window-a bağlayırıq

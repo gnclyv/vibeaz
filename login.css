@@ -1,39 +1,68 @@
-
+/* Ümumi tənzimləmələr */
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #fafafa;
+    background-color: #000;
+    color: #fff;
     margin: 0;
-    font-family: sans-serif;
+    padding: 0;
+    padding-bottom: 70px; /* Alt menyu üçün boşluq */
 }
-.auth-box {
-    background: white;
-    padding: 30px;
-    border: 1px solid #dbdbdb;
-    border-radius: 8px;
-    width: 320px;
-    text-align: center;
-}
-.logo { font-family: cursive; font-size: 35px; margin-bottom: 25px; }
-input {
+
+/* Post konteyneri */
+#post-list {
+    max-width: 600px; /* Kompüterdə genişliyi məhdudlaşdırır */
+    margin: 0 auto;
     width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border: 1px solid #dbdbdb;
-    border-radius: 4px;
-    box-sizing: border-box;
 }
-button {
+
+/* Post Kartı */
+.post-card {
+    background: #000;
+    border-bottom: 1px solid #262626; /* Instagram tərzi alt xətt */
+    margin-bottom: 10px;
     width: 100%;
-    padding: 12px;
-    background-color: #0095f6;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
 }
-.hidden { display: none; }
+
+/* Şəkil - Mobil ekranda eni 100% tutur */
+.post-card img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 1 / 1; /* Şəkilləri kvadrat saxlayır */
+    object-fit: cover;
+}
+
+/* Başlıq və İnfo hissələri */
+.post-header, .post-info {
+    padding: 12px 15px;
+}
+
+/* Mobil Üçün Media Query */
+@media (max-width: 480px) {
+    .post-card {
+        border-radius: 0; /* Mobildə kənarları itiririk ki, ekranı tam tutsun */
+        border-left: none;
+        border-right: none;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    /* Paylaşma düyməsini mobildə aşağı sağ küncə sabitleyirik */
+    #mainAddBtn {
+        position: fixed;
+        bottom: 85px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+        border: none;
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

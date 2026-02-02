@@ -1,17 +1,17 @@
 :root {
     --primary-color: #4f46e5;
     --bg-color: #f8fafc;
-    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-bg: rgba(255, 255, 255, 0.9);
     --text-main: #1e293b;
     --text-muted: #64748b;
-    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 body {
     margin: 0;
     padding: 0;
     background-color: var(--bg-color);
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', system-ui, sans-serif;
     color: var(--text-main);
     display: flex;
     justify-content: center;
@@ -24,16 +24,17 @@ body {
     background: white;
     position: relative;
     box-shadow: var(--shadow);
+    padding-bottom: 80px; /* Naviqasiya üçün boşluq */
 }
 
-/* Header */
+/* --- HEADER --- */
 .app-header {
     background: var(--glass-bg);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
     position: sticky;
     top: 0;
     z-index: 100;
-    padding: 15px 20px;
+    padding: 12px 20px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -52,26 +53,36 @@ body {
     margin: 0;
 }
 
-/* Stories */
+/* --- STORIES --- */
 .story-container {
     display: flex;
+    padding: 15px;
     gap: 15px;
-    padding: 20px;
     overflow-x: auto;
+    background: white;
     scrollbar-width: none;
+    border-bottom: 1px solid #f1f1f1;
 }
 
 .story-container::-webkit-scrollbar { display: none; }
 
+.story-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 75px;
+}
+
 .story-circle {
-    width: 68px;
-    height: 68px;
+    width: 66px;
+    height: 66px;
     border-radius: 50%;
     padding: 3px;
     background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 5px;
 }
 
 .story-circle img, .story-circle i {
@@ -82,146 +93,85 @@ body {
     border: 3px solid white;
 }
 
-/* Posts */
-/* Postun ümumi konteyneri */
+.story-card.add-btn .story-circle {
+    background: #efefef;
+}
+
+.story-card span {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* --- POSTS (Standart Kvadrat Sistem) --- */
 .post-card {
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto 20px auto;
+    margin: 15px;
     background: white;
-    border: 1px solid #dbdbdb;
-}
-
-/* Şəkil üçün standart kvadrat çərçivə */
-.post-img-container {
-    width: 100%;
-    aspect-ratio: 1 / 1; /* Kvadrat nisbəti (1:1) */
-    overflow: hidden; /* Artıq qalan hissələri kəs */
-    background-color: #fafafa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.post-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Şəkli deformasiya etmədən çərçivəyə sığdırır */
-    display: block;
-}
-.post-card {
-    margin: 0 15px 25px;
-    border-radius: 20px;
+    border-radius: 15px;
+    border: 1px solid #efefef;
     overflow: hidden;
-    background: white;
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
 }
 
 .post-header {
-    padding: 12px 15px;
+    padding: 12px;
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 600;
 }
 
-.post-img {
+.post-img-container {
     width: 100%;
-    aspect-ratio: 1/1;
-    object-fit: cover;
-    display: block;
+    aspect-ratio: 1 / 1; /* Mütləq kvadrat */
+    overflow: hidden;
+    background-color: #f8f8f8;
 }
 
-/* Bottom Nav */
+.post-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Deformasiya olmur */
+}
+
+.post-info {
+    padding: 12px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 15px;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+/* --- BOTTOM NAV --- */
 .bottom-nav {
     position: fixed;
     bottom: 20px;
     width: calc(100% - 40px);
     max-width: 460px;
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(10px);
-    border-radius: 25px;
+    border-radius: 20px;
     display: flex;
     justify-content: space-around;
-    padding: 12px 0;
+    align-items: center;
+    padding: 10px 0;
     color: white;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 1000;
 }
 
 .main-add {
     background: linear-gradient(45deg, #4f46e5, #ec4899);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    margin-top: -30px;
-    border: 4px solid var(--bg-color);
-}
-/* Story Ana Konteyneri */
-.story-container {
-    display: flex;
-    padding: 15px;
-    gap: 15px;
-    overflow-x: auto;
-    background: white;
-    scrollbar-width: none; /* Skrollu gizlət */
-}
-
-.story-container::-webkit-scrollbar { display: none; }
-
-/* Hər bir Story Kartı */
-.story-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 75px;
     cursor: pointer;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
 }
-
-/* Rəngli Halqa */
-.story-circle {
-    width: 66px;
-    height: 66px;
-    border-radius: 50%;
-    padding: 3px;
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); /* Instagram rəngləri */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 5px;
-    transition: transform 0.2s;
-}
-
-.story-circle:active {
-    transform: scale(0.9);
-}
-
-.story-circle img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid white; /* Şəkillə halqa arasındakı boşluq */
-}
-
-/* Paylaş Düyməsi (Xüsusi Stil) */
-.story-card.add-btn .story-circle {
-    background: #efefef;
-    color: #333;
-    font-size: 24px;
-}
-
-.story-card span {
-    font-size: 11px;
-    color: #262626;
-    max-width: 70px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-

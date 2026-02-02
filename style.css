@@ -1,165 +1,48 @@
-:root {
-    /* Canlı rəng palitrası */
-    --main-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    --bg-dark: #0f0f0f;
-    --card-bg: #1a1a1a;
-    --text-color: #ffffff;
-    --accent-color: #0095f6;
-    --border-color: #333333;
-}
-
+/* Ana fonun qara olması */
 body {
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+    font-family: sans-serif;
     margin: 0;
-    background-color: var(--bg-dark);
-    color: var(--text-color);
+    padding-bottom: 70px;
 }
 
-#app {
-    max-width: 500px;
-    margin: 0 auto;
-    min-height: 100vh;
-}
-
-/* Header - Gradient Logo ilə */
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: rgba(15, 15, 15, 0.95);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    backdrop-filter: blur(10px);
-}
-
-.logo {
-    font-size: 26px;
-    font-weight: 800;
-    background: var(--main-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-family: 'Billabong', cursive;
-}
-
-.header-icons {
-    display: flex;
-    gap: 20px;
-    font-size: 22px;
-}
-
-.header-icons i {
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.header-icons i:hover {
-    color: #e6683c;
-}
-
-/* Post Kartları - Daha dərin və estetik */
-.post-feed {
-    padding: 10px;
-    padding-bottom: 80px;
-}
-
-.post-card {
-    background: var(--card-bg);
-    border-radius: 15px;
-    margin-bottom: 25px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border: 1px solid var(--border-color);
-}
-
-.post-header {
-    padding: 12px;
+/* Profil şəkli hissəsindəki o sürüşməni düzəldən hissə */
+.avatar-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%; /* Tam dairə olması üçün */
+    overflow: hidden; /* Kənara çıxan hissələri gizlədir */
+    background: #262626;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
-.username {
-    font-weight: 600;
-    font-size: 15px;
-}
-
-/* Mütləq 1:1 Kvadrat */
-.post-img-container {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-}
-
-.post-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.post-actions {
-    padding: 15px;
-    display: flex;
-    gap: 18px;
-    font-size: 24px;
-}
-
-.fa-heart.liked {
-    color: #ff3040;
-    animation: heartBeat 0.3s linear;
-}
-
-@keyframes heartBeat {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-}
-
-.post-info {
-    padding: 0 15px 15px 15px;
-}
-
-.likes-count {
-    font-weight: 700;
-    color: #efefef;
-}
-
-/* Alt Naviqasiya - Neon toxunuşu ilə */
+/* Şəkildəki menyu rəngləri */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
     width: 100%;
-    max-width: 500px;
-    height: 65px;
-    background: rgba(26, 26, 26, 0.98);
+    height: 55px;
+    background: #000;
+    border-top: 1px solid #262626;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border-top: 1px solid var(--border-color);
 }
 
-.bottom-nav i {
-    font-size: 22px;
-    color: #888;
-    transition: 0.3s;
-}
-
-.bottom-nav i:hover, .bottom-nav i.active {
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
-}
-
-.add-post-btn {
-    background: var(--main-gradient);
+.nav-plus-btn {
     width: 45px;
     height: 45px;
+    background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); /* Qradiyent */
     border-radius: 50%;
     display: flex;
-    justify-content: center;
     align-items: center;
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+    justify-content: center;
+}
+
+.nav-item i {
+    font-size: 24px;
+    color: #fff;
 }

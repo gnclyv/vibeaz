@@ -1,49 +1,97 @@
-<div class="profile-page">
-    <header class="instagram-header">
-        <div class="avatar-container">
-            <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar">
-        </div>
-        <div class="stats-container">
-            <div class="stat-box">
-                <span id="post-count">0</span>
-                <p>gönderi</p>
-            </div>
-            <div class="stat-box">
-                <span>645</span>
-                <p>takipçi</p>
-            </div>
-            <div class="stat-box">
-                <span>424</span>
-                <p>takip</p>
-            </div>
-        </div>
-    </header>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil - VibeAz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
 
-    <section class="user-bio">
-        <h3 id="profile-username">Yüklənir...</h3>
-        <p id="profile-email" class="email-info"></p>
-        <p class="bio-text">Xoş gəlmisiniz!</p>
-    </section>
+    <div class="profile-container">
+        <div class="top-username">
+            <h2 id="header-username">yüklənir...</h2>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
 
-    <div class="profile-actions">
-        <button id="edit-profile-btn">Profili düzenle</button>
-        <button class="secondary-btn">Arşivi gör</button>
+        <header class="profile-header">
+            <div class="avatar-box">
+                <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar">
+                <div class="story-ring"></div>
+            </div>
+            
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span id="post-count">0</span>
+                    <p>gönderi</p>
+                </div>
+                <div class="stat-item">
+                    <span>645</span>
+                    <p>takipçi</p>
+                </div>
+                <div class="stat-item">
+                    <span>424</span>
+                    <p>takip</p>
+                </div>
+            </div>
+        </header>
+
+        <section class="user-details">
+            <h3 id="profile-display-name">Ad Soyad</h3>
+            <p id="profile-email" class="user-email"></p>
+            <p class="bio-text">VibeAz-a xoş gəlmisiniz! ✨</p>
+        </section>
+
+        <div class="action-buttons">
+            <button id="edit-profile-btn">Profili düzenle</button>
+            <button class="btn-secondary">Arşivi gör</button>
+            <button id="logout-btn" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+
+        <div class="highlights">
+            <div class="highlight-item">
+                <div class="add-circle"><i class="fa-solid fa-plus"></i></div>
+                <span>Yeni</span>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <div class="tab active"><i class="fa-solid fa-table-cells"></i></div>
+            <div class="tab"><i class="fa-solid fa-clapperboard"></i></div>
+            <div class="tab"><i class="fa-solid fa-user-tag"></i></div>
+        </div>
+
+        <div id="user-posts-grid" class="posts-grid">
+            </div>
     </div>
 
-    <div class="grid-tabs">
-        <div class="tab-icon active"><i class="fa-solid fa-table-cells"></i></div>
-        <div class="tab-icon"><i class="fa-solid fa-clapperboard"></i></div>
-        <div class="tab-icon"><i class="fa-solid fa-user-tag"></i></div>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-play"></i></a>
+        <a href="#" class="nav-item"><i class="fa-solid fa-plus-square"></i></a>
+        <a href="profile.html" class="nav-item active">
+            <img id="nav-avatar" src="https://ui-avatars.com/api/?name=User" class="mini-avatar">
+        </a>
+    </nav>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Profili Redaktə Et</h3>
+            <div class="modal-avatar">
+                <img id="preview-img" src="">
+                <input type="file" id="new-avatar-input" hidden>
+                <label for="new-avatar-input">Şəkli dəyiş</label>
+            </div>
+            <input type="text" id="new-name-input" placeholder="Yeni ad">
+            <div class="modal-actions">
+                <button id="save-profile-btn" class="save-btn">Yadda Saxla</button>
+                <button id="close-modal-btn" class="cancel-btn">Ləğv et</button>
+            </div>
+        </div>
     </div>
 
-    <div id="user-posts-grid" class="instagram-grid">
-        </div>
-</div>
-<link rel="stylesheet" href="profile.css">
-<nav class="bottom-nav">
-    <a href="index.html"><i class="fa-solid fa-house"></i></a>
-    <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
-    <a href="#"><i class="fa-solid fa-play"></i></a>
-    <a href="#"><i class="fa-solid fa-bag-shopping"></i></a>
-    <a href="profile.html" class="active"><img id="mini-avatar" src="" style="width:24px; border-radius:50%;"></a>
-</nav>
+    <script type="module" src="profile.js"></script>
+</body>
+</html>

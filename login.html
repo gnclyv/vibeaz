@@ -1,42 +1,12 @@
-<!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeAz - Giriş</title>
-    <link rel="stylesheet" href="login.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <h1 class="logo">VIBEAZ</h1>
-            
-            <div id="login-step-1">
-                <p class="subtitle">Davam etmək üçün məlumatlarınızı daxil edin</p>
-                <div class="input-group">
-                    <i class="fa-regular fa-user"></i>
-                    <input type="text" id="username" placeholder="İstifadəçi adı">
-                </div>
-                <div class="input-group">
-                    <i class="fa-solid fa-phone"></i>
-                    <input type="tel" id="phoneNumber" value="+994" placeholder="+994XXXXXXXXX">
-                </div>
-                <button id="send-sms-btn" class="main-btn">Kod Göndər</button>
-            </div>
-
-            <div id="login-step-2" class="hidden">
-                <p class="subtitle">Telefona gələn 6 rəqəmli kodu yazın</p>
-                <div class="input-group">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <input type="text" id="smsCode" placeholder="000000">
-                </div>
-                <button id="verify-sms-btn" class="main-btn">Təsdiqlə</button>
-            </div>
-
-            <div id="recaptcha-container"></div>
-        </div>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1 class="logo">VIBEAZ</h1>
+        <p class="subtitle">Email və şifrə ilə daxil olun</p>
+        
+        <input type="email" id="email" placeholder="Gmail ünvanınız">
+        <input type="password" id="password" placeholder="Şifrəniz">
+        
+        <button id="login-btn" class="main-btn">Daxil Ol</button>
+        <button id="register-btn" class="secondary-btn">Qeydiyyatdan Keç</button>
     </div>
-    <script type="module" src="login.js"></script>
-</body>
-</html>
+</div>

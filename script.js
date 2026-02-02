@@ -2,35 +2,36 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+// Sənin yeni və düzgün konfiqurasiyan
 const firebaseConfig = {
-    apiKey: "AIzaSyAs_F94p_TfI3m1fK69WwMog6C2v8",
-    authDomain: "vibeaz-e866a.firebaseapp.com",
-    projectId: "vibeaz-e866a",
-    storageBucket: "vibeaz-e866a.appspot.com",
-    messagingSenderId: "847253906231",
-    appId: "1:847253906231:web:5c1a7686561334005b820a"
+  apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
+  authDomain: "vibeaz-1e98a.firebaseapp.com",
+  databaseURL: "https://vibeaz-1e98a-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "vibeaz-1e98a",
+  storageBucket: "vibeaz-1e98a.firebasestorage.app",
+  messagingSenderId: "953434260285",
+  appId: "1:953434260285:web:6263b4372487ba6d673b54",
+  measurementId: "G-2928WJCY1B"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 1. ReCAPTCHA-nı (Robot yoxlaması) görünməz şəkildə işə salırıq
+// ReCAPTCHA qurulur
 window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
     'size': 'invisible'
 }, auth);
 
-// 2. Avtomatik Giriş Yoxlaması
+// Giriş yoxlaması
 onAuthStateChanged(auth, async (user) => {
     const authScreen = document.getElementById('auth-screen');
     const appScreen = document.getElementById('app');
-
     if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
             authScreen.classList.add('hidden');
             appScreen.classList.remove('hidden');
-            console.log("Giriş uğurludur:", userDoc.data().username);
         }
     } else {
         authScreen.classList.remove('hidden');
@@ -38,13 +39,13 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// 3. SMS Göndərmə
+// SMS Göndərmə
 document.getElementById('send-sms-btn').onclick = () => {
     const username = document.getElementById('username').value;
     const number = document.getElementById('phoneNumber').value;
 
     if (!username || !number.startsWith('+')) {
-        alert("Zəhmət olmasa ad daxil edin və nömrəni +994 formatında yazın!");
+        alert("Adı daxil edin və nömrəni +994 formatında yazın!");
         return;
     }
 
@@ -53,34 +54,27 @@ document.getElementById('send-sms-btn').onclick = () => {
             window.confirmationResult = confirmationResult;
             document.getElementById('reg-form').classList.add('hidden');
             document.getElementById('verification-area').classList.remove('hidden');
-            alert("Real SMS göndərildi! (Günlük limit: 10)");
         }).catch((error) => {
             alert("Xəta: " + error.message);
         });
 };
 
-// 4. Kodu Təsdiqləmə və Firestore-a Qeyd
+// Təsdiqləmə
 document.getElementById('verify-sms-btn').onclick = () => {
     const code = document.getElementById('smsCode').value;
     const username = document.getElementById('username').value;
 
     window.confirmationResult.confirm(code).then(async (result) => {
-        // İstifadəçini bazaya yazırıq ki, birdə qeydiyyat istəməsin
         await setDoc(doc(db, "users", result.user.uid), {
             username: username,
             phoneNumber: result.user.phoneNumber,
             createdAt: new Date()
         });
-        
         location.reload();
-    }).catch(() => {
-        alert("Kod səhvdir!");
-    });
+    }).catch(() => alert("Kod səhvdir!"));
 };
 
-// 5. Çıxış
+// Çıxış
 document.getElementById('logout-btn').onclick = () => {
     signOut(auth).then(() => location.reload());
 };
-
-

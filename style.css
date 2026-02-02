@@ -1,22 +1,16 @@
-/* 1. Ümumi Tənzimləmələr */
-* {
-    box-sizing: border-box;
-}
-
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #fafafa;
-    color: #262626;
 }
 
-/* 2. Header (Üst Panel) */
+/* Üst Panel */
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 15px;
     background: white;
     border-bottom: 1px solid #dbdbdb;
     position: sticky;
@@ -24,102 +18,64 @@ body {
     z-index: 1000;
 }
 
-.app-header h1 {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    font-size: 22px;
-    margin: 0;
-    font-weight: bold;
-}
+#logout-btn { background: none; border: none; cursor: pointer; font-size: 18px; }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-}
-
-.header-actions i {
-    font-size: 20px;
-    margin-left: 15px;
-    cursor: pointer;
-}
-
-/* 3. Post Feed (Postlar Hissəsi) */
+/* Postlar və Şəkillərin Kvadrat Ölçüsü */
 .post-feed {
     max-width: 500px;
-    margin: 0 auto 80px; /* Alt panelə yer saxlamaq üçün */
-    padding: 10px;
+    margin: 0 auto 70px; /* Aşağıda menyu üçün boşluq */
 }
 
 .post-card {
     background: white;
-    border: 1px solid #dbdbdb;
-    margin-bottom: 20px;
-    border-radius: 8px;
+    border-bottom: 1px solid #dbdbdb;
+    margin-bottom: 15px;
+}
+
+.post-img-container {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Mükəmməl kvadrat */
     overflow: hidden;
 }
 
-/* Şəkilləri kvadrat edən və dağılmaqdan qoruyan hissə */
-.post-img-container {
-    width: 100% !important;
-    aspect-ratio: 1 / 1 !important; /* Mütləq kvadrat ölçü */
-    overflow: hidden !important;
-    background-color: #efefef;
-}
-
 .post-img-container img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important; /* Şəkli dartmır, kvadratın içine sığdırır */
-    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Şəkli dartmadan sığdırır */
 }
 
-.post-info {
-    padding: 12px;
-}
-
-.post-actions {
-    display: flex;
-    gap: 15px;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.post-actions i {
-    cursor: pointer;
-}
-
-/* 4. Alt Naviqasiya (İkonlar üçün mütləq dizayn) */
+/* ALT MENYU - İSTƏDİYİN DİZAYN */
 .bottom-nav {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    height: 60px !important;
-    background: white !important;
-    border-top: 1px solid #dbdbdb !important;
-    display: flex !important;
-    justify-content: space-around !important;
-    align-items: center !important;
-    z-index: 9999 !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: white;
+    border-top: 1px solid #dbdbdb;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 2000;
 }
 
 .bottom-nav i {
-    font-size: 24px !important;
-    color: #262626 !important;
-    cursor: pointer !important;
+    font-size: 24px;
+    color: #262626;
+    cursor: pointer;
 }
 
-/* Paylaşma (Göy "+" düyməsi) */
+/* Paylaşma Düyməsi (Göy dairə) */
 .main-add {
-    background-color: #0095f6 !important;
-    color: white !important;
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 12px !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    font-size: 20px !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3) !important;
+    background: #0095f6;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
 }

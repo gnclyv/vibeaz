@@ -44,38 +44,3 @@ body {
     object-fit: cover; /* Şəkli dartmadan sığdırır */
 }
 
-/* ALT MENYU - İSTƏDİYİN DİZAYN */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: white;
-    border-top: 1px solid #dbdbdb;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 2000;
-}
-
-.bottom-nav i {
-    font-size: 24px;
-    color: #262626;
-    cursor: pointer;
-}
-
-/* Paylaşma Düyməsi (Göy dairə) */
-.main-add {
-    background: #0095f6;
-    color: white;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
-}

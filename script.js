@@ -17,24 +17,58 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// 2. Auth Yoxlaması
+// 2. Auth Keşikçisi (Yönləndirmə Problemini Həll Edən Hissə)
 onAuthStateChanged(auth, (user) => {
     if (!user) {
-        window.location.href = "login.html"; 
+        console.log("İstifadəçi daxil olmayıb. Login-ə yönləndirilir...");
+        // Əgər hazırda index.html-dəyiksə login-ə at
+        if (!window.location.pathname.includes("login.html")) {
+            window.location.replace("login.html");
+        }
     } else {
-        console.log("Giriş uğurludur!");
-        startApp();
+        console.log("Giriş uğurludur:", user.phoneNumber);
+        initApp();
     }
 });
 
-function startApp() {
+// 3. Əsas Funksiyaların Başladılması
+function initApp() {
     loadStories();
     loadPosts();
 }
 
-// 3. Şəkil Yükləmə (Post və Story üçün mərkəzi funksiya)
+// 4. Like və Şərh Funksiyaları (HTML-dən çağırılması üçün window obyektinə bağlanır)
+window.handleLike = async (postId) => {
+    let likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
+    if (likedPosts.includes(postId)) return;
+
+    try {
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, { likes: increment(1) });
+        likedPosts.push(postId);
+        localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+    } catch (e) { console.error("Like xətası:", e); }
+};
+
+window.handleComment = async (postId) => {
+    const input = document.getElementById(`comment-input-${postId}`);
+    const text = input.value.trim();
+    if (!text) return;
+
+    try {
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, {
+            comments: arrayUnion({ text, author: "İstifadəçi", time: Date.now() })
+        });
+        input.value = "";
+    } catch (e) { console.error("Şərh xətası:", e); }
+};
+
+// 5. Şəkil Yükləmə (Post və Story üçün)
 async function handleFileUpload(type) {
     const fileInput = document.getElementById('fileInput');
+    fileInput.click();
+    
     fileInput.onchange = async () => {
         const file = fileInput.files[0];
         if (!file) return;
@@ -47,7 +81,7 @@ async function handleFileUpload(type) {
             const result = await res.json();
             
             if (result.success) {
-                const text = type === 'posts' ? prompt("Post başlığı:") : "";
+                const text = type === 'posts' ? prompt("Post başlığı yazın:") : "";
                 await addDoc(collection(db, type), {
                     url: result.data.url,
                     text: text,
@@ -55,49 +89,79 @@ async function handleFileUpload(type) {
                     comments: [],
                     timestamp: serverTimestamp()
                 });
-                alert("Paylaşıldı!");
+                alert("Uğurla paylaşıldı!");
             }
-        } catch (e) { alert("Yükləmə zamanı xəta oldu!"); }
+        } catch (e) { alert("Yükləmə xətası! Konsola baxın."); console.error(e); }
     };
-    fileInput.click();
 }
 
-// 4. Story-ləri Yükle
+// 6. Story-ləri Real-time Yüklə (ID: stories)
 function loadStories() {
-    const container = document.querySelector('.story-container');
+    const container = document.getElementById('stories');
     if (!container) return;
 
     onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
-        container.innerHTML = `<div class="story-card add-btn" id="shareBtn"><div class="story-circle"><i class="fa fa-plus"></i></div><span>Paylaş</span></div>`;
+        container.innerHTML = `
+            <div class="story-card add-btn" id="addStoryBtn">
+                <div class="story-circle"><i class="fa fa-plus"></i></div>
+                <span>Paylaş</span>
+            </div>`;
+        
         snap.forEach(d => {
-            container.innerHTML += `<div class="story-card"><div class="story-circle"><img src="${d.data().url}"></div><span>İstifadəçi</span></div>`;
+            const data = d.data();
+            container.innerHTML += `
+                <div class="story-card">
+                    <div class="story-circle"><img src="${data.url}"></div>
+                    <span>İstifadəçi</span>
+                </div>`;
         });
-        document.getElementById('shareBtn').onclick = () => handleFileUpload('stories');
+        document.getElementById('addStoryBtn').onclick = () => handleFileUpload('stories');
     });
 }
 
-// 5. Postları Yükle
+// 7. Postları Real-time Yüklə (ID: post-list)
 function loadPosts() {
-    const postList = document.getElementById('post-list');
-    if (!postList) return;
+    const list = document.getElementById('post-list');
+    if (!list) return;
 
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
-        postList.innerHTML = '';
+        list.innerHTML = '';
+        const likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
+
         snap.forEach(postDoc => {
             const data = postDoc.data();
             const id = postDoc.id;
-            postList.innerHTML += `
-                <div class="post-card">
-                    <div class="post-header"><span>İstifadəçi</span></div>
-                    <img src="${data.url}" style="width:100%">
-                    <div class="post-info">
+            const isLiked = likedPosts.includes(id);
+            const commentsHTML = (data.comments || []).map(c => 
+                `<p style="font-size:13px; margin:2px;"><strong>İstifadəçi:</strong> ${c.text}</p>`
+            ).join('');
+
+            list.innerHTML += `
+                <div class="post-card" style="background:white; border:1px solid #dbdbdb; margin-bottom:20px;">
+                    <div class="post-header" style="padding:10px;"><strong>İstifadəçi</strong></div>
+                    <img src="${data.url}" style="width:100%" ondblclick="handleLike('${id}')">
+                    <div class="post-info" style="padding:15px;">
+                        <div class="actions" style="font-size:20px; margin-bottom:10px;">
+                            <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
+                               style="color:${isLiked ? '#ed4956' : 'black'}; cursor:pointer;" 
+                               onclick="handleLike('${id}')"></i>
+                        </div>
                         <strong>${data.likes || 0} bəyənmə</strong>
-                        <p>${data.text || ""}</p>
+                        <p><strong>İstifadəçi:</strong> ${data.text || ""}</p>
+                        <div class="comments-section">${commentsHTML}</div>
+                        <div style="display:flex; margin-top:10px;">
+                            <input type="text" id="comment-input-${id}" placeholder="Şərh yaz..." style="flex:1; border:1px solid #eee; padding:5px;">
+                            <button onclick="handleComment('${id}')" style="border:none; color:#0095f6; background:none; font-weight:bold;">Paylaş</button>
+                        </div>
                     </div>
                 </div>`;
         });
     });
 }
 
-// 6. Düymə Tətikləyiciləri
-document.getElementById('mainAddBtn').onclick = () => handleFileUpload('posts');
+// 8. Naviqasiya Düymələri
+const mainAdd = document.getElementById('mainAddBtn');
+if (mainAdd) mainAdd.onclick = () => handleFileUpload('posts');
+
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) logoutBtn.onclick = () => signOut(auth).then(() => window.location.reload());

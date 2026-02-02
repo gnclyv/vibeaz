@@ -1,4 +1,4 @@
-/* 1. Dəyişənlərin Tənzimlənməsi */
+/* 1. Rəng və Stil Dəyişənləri */
 :root {
     --bg-dark: #000000;
     --card-bg: #121212;
@@ -6,11 +6,12 @@
     --border-color: #262626;
     --main-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     --accent-color: #0095f6;
+    --secondary-text: #8e8e8e;
 }
 
-/* 2. Əsas Gövdə (Qara ekran problemini həll edir) */
+/* 2. Ümumi Tənzimləmələr */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     background-color: var(--bg-dark);
     color: var(--text-color);
@@ -18,14 +19,15 @@ body {
 }
 
 #app {
-    max-width: 500px;
+    max-width: 500px; /* Mobil telefon eni */
     margin: 0 auto;
     min-height: 100vh;
-    background-color: var(--bg-dark); /* Ağ rəng silindi */
+    background-color: var(--bg-dark);
     position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
 }
 
-/* 3. Header (Logo və İkonlar) */
+/* 3. Header - Loqo və İkonlar */
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -45,16 +47,33 @@ body {
     background: var(--main-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    margin: 0;
 }
 
-/* 4. Postların Görünüşü */
+.header-icons {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-size: 22px;
+}
+
+#logout-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* 4. Post Feed və Kartlar */
 .post-feed {
-    padding: 10px 0 80px 0;
+    padding: 10px 0 80px 0; /* Menyu üçün boşluq */
 }
 
 .post-card {
-    background: var(--card-bg);
-    margin-bottom: 20px;
+    background: var(--bg-dark);
+    margin-bottom: 15px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -64,21 +83,11 @@ body {
     padding: 12px 15px;
 }
 
-/* Profil şəkli ovalığını düzəldən hissə */
-.profile-pic {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%; /* Tam dairə */
-    object-fit: cover;
-    margin-right: 12px;
-    border: 1.5px solid var(--border-color);
-}
-
 .post-img-container {
     width: 100%;
     aspect-ratio: 1 / 1;
-    overflow: hidden;
     background-color: #1a1a1a;
+    overflow: hidden;
 }
 
 .post-img-container img {
@@ -87,7 +96,7 @@ body {
     object-fit: cover;
 }
 
-/* 5. Alt Naviqasiya */
+/* 5. Aşağı Naviqasiya Menyusu (Bottom Nav) */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -95,8 +104,8 @@ body {
     transform: translateX(-50%);
     width: 100%;
     max-width: 500px;
-    height: 65px;
-    background: rgba(26, 26, 26, 0.98);
+    height: 60px;
+    background: rgba(0, 0, 0, 0.98);
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -106,28 +115,43 @@ body {
 
 .bottom-nav i {
     font-size: 22px;
-    color: #888;
-    transition: 0.3s;
-    cursor: pointer;
-}
-
-.bottom-nav i:hover, .bottom-nav i.active {
     color: #ffffff;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: 0.2s;
 }
 
+/* Ortadakı Rəngli "+" Düyməsi */
 .add-post-btn {
     background: var(--main-gradient);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white !important;
-    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3);
 }
 
+/* 6. Dinamik Profil Şəkli Dizaynı (Sənin istədiyin hissə) */
+.nav-avatar-wrapper {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%; /* Tam dairəvi edir */
+    border: 1.5px solid #fff;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Font yükləmə */
 @font-face {
     font-family: 'Billabong';
     src: url('https://raw.githubusercontent.com/srebalaji/instagram/master/assets/font/billabong.ttf') format('truetype');

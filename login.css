@@ -1,68 +1,131 @@
-/* Ümumi tənzimləmələr */
+/* Ümumi Tənzimləmələr */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 body {
     background-color: #000;
     color: #fff;
-    margin: 0;
-    padding: 0;
-    padding-bottom: 70px; /* Alt menyu üçün boşluq */
+    line-height: 1.5;
+    /* Mobil brauzerlərdə aşağı naviqasiyanın postu örtməməsi üçün boşluq */
+    padding-bottom: 70px;
 }
 
-/* Post konteyneri */
-#post-list {
-    max-width: 600px; /* Kompüterdə genişliyi məhdudlaşdırır */
+/* Header (Üst Menyu) */
+.app-header {
+    position: sticky;
+    top: 0;
+    background-color: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #262626;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-icons {
+    display: flex;
+    gap: 20px;
+    font-size: 22px;
+    align-items: center;
+}
+
+#logout-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Post Feed (Ana Səhifə Lenti) */
+.post-feed {
+    max-width: 500px; /* Kompüterlərdə postların çox geniş olmaması üçün */
     margin: 0 auto;
     width: 100%;
 }
 
-/* Post Kartı */
+/* Post Kartı Dizaynı */
 .post-card {
-    background: #000;
-    border-bottom: 1px solid #262626; /* Instagram tərzi alt xətt */
-    margin-bottom: 10px;
-    width: 100%;
+    border-bottom: 1px solid #262626;
+    padding-bottom: 10px;
 }
 
-/* Şəkil - Mobil ekranda eni 100% tutur */
-.post-card img {
-    width: 100%;
-    display: block;
-    aspect-ratio: 1 / 1; /* Şəkilləri kvadrat saxlayır */
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+}
+
+.post-header img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
     object-fit: cover;
 }
 
-/* Başlıq və İnfo hissələri */
-.post-header, .post-info {
-    padding: 12px 15px;
+.username {
+    font-weight: 600;
+    font-size: 14px;
 }
 
-/* Mobil Üçün Media Query */
+.post-img-container img {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Mütləq kvadrat format */
+    object-fit: cover;
+    display: block;
+}
+
+/* Bottom Nav (Aşağı Menyu) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid #262626;
+    z-index: 1000;
+}
+
+.bottom-nav i {
+    font-size: 22px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.add-post-btn i {
+    font-size: 26px;
+}
+
+/* Mobil Telefonlar Üçün Özəl Düzəlişlər */
 @media (max-width: 480px) {
+    .post-feed {
+        max-width: 100%;
+    }
+
     .post-card {
-        border-radius: 0; /* Mobildə kənarları itiririk ki, ekranı tam tutsun */
-        border-left: none;
-        border-right: none;
+        border-bottom: 1px solid #1a1a1a;
     }
 
-    .logo {
-        font-size: 24px;
-    }
-
-    /* Paylaşma düyməsini mobildə aşağı sağ küncə sabitleyirik */
-    #mainAddBtn {
-        position: fixed;
-        bottom: 85px;
-        right: 20px;
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
-        border: none;
-        color: white;
-        font-size: 24px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* Şəkillərin kənarlara tam yapışması üçün */
+    .post-header, .post-info {
+        padding: 10px;
     }
 }

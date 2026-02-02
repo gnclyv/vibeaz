@@ -30,13 +30,23 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // 3. Post Paylaşma Funksiyası (İstifadəçi adı ilə birgə)
+// ... (digər kodlar eynidir)
+
 async function uploadPost() {
     const fileInp = document.getElementById('fileInput');
+    // currentUser-ı funksiyanın daxilində yenidən yoxlayırıq
     const user = auth.currentUser;
 
     fileInp.onchange = async () => {
         const file = fileInp.files[0];
-        if (!file || !user) return;
+        
+        // Əgər istifadəçi daxil olmayıbsa, xəta verməməsi üçün burada dayandırırıq
+        if (!user) {
+            alert("Zəhmət olmasa əvvəlcə daxil olun!");
+            return;
+        }
+        
+        if (!file) return;
 
         const fd = new FormData();
         fd.append("image", file);
@@ -48,16 +58,23 @@ async function uploadPost() {
             if (result.success) {
                 const text = prompt("Post üçün açıqlama yazın:");
                 
-                // İstifadəçi adını email-dən və ya profilindən götürürük
-                const nameToDisplay = user.displayName || user.email.split('@')[0];
+                // TƏHLÜKƏSİZ AD GÖTÜRMƏ: null yoxlanışı əlavə edildi
+                let nameToDisplay = "Anonim";
+                if (user.displayName) {
+                    nameToDisplay = user.displayName;
+                } else if (user.email) {
+                    nameToDisplay = user.email.split('@')[0];
+                }
 
                 await addDoc(collection(db, "posts"), {
                     url: result.data.url,
                     text: text || "",
-                    userName: nameToDisplay, // Adı bazaya yazırıq
+                    userName: nameToDisplay,
                     likes: 0,
                     timestamp: serverTimestamp()
                 });
+                
+                alert("Post uğurla paylaşıldı!");
             }
         } catch (e) {
             console.error("Yükləmə xətası:", e);
@@ -66,6 +83,7 @@ async function uploadPost() {
     fileInp.click();
 }
 
+// ... (qalan kodlar eynidir)
 // 4. Like (Bəyənmə) Funksiyası
 window.handleLike = async (id) => {
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
@@ -122,3 +140,4 @@ function loadPosts() {
 // 6. Düymə Tətikləyiciləri
 document.getElementById('mainAddBtn').onclick = uploadPost;
 document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.reload());
+

@@ -13,34 +13,63 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' }, auth);
+// 1. Recaptcha-nı hazırlayırıq
+window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 
+    'size': 'invisible' 
+}, auth);
 
+// 2. "Kod Göndər" düyməsi
 document.getElementById('send-sms-btn').onclick = () => {
     const number = document.getElementById('phoneNumber').value;
-    const username = document.getElementById('usernameInput').value; // HTML-də bu ID-li input olduğundan əmin ol
+    // Sənin HTML-dəki ID 'username' olduğu üçün buranı düzəltdik:
+    const username = document.getElementById('username').value; 
 
-    if (!username || !number) {
-        alert("Ad və nömrə daxil edin!");
+    if (!username || number.length < 10) {
+        alert("Zəhmət olmasa adınızı və nömrənizi tam daxil edin!");
         return;
     }
 
-    signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, number, appVerifier)
         .then(res => {
             window.confirmationResult = res;
-            window.tempUsername = username;
-            document.getElementById('login-step-1').classList.add('hidden');
+            window.tempUsername = username; // Adı keçici olaraq yadda saxla
+            
+            document.getElementById('login-step-1').style.display = 'none';
             document.getElementById('login-step-2').classList.remove('hidden');
-        }).catch(err => alert("Xəta: " + err.message));
+            document.getElementById('login-step-2').style.display = 'block';
+            console.log("SMS göndərildi!");
+        }).catch(err => {
+            alert("Xəta: " + err.message);
+            // Xəta olarsa recaptcha-nı yenilə
+            window.recaptchaVerifier.render().then(widgetId => {
+                grecaptcha.reset(widgetId);
+            });
+        });
 };
 
+// 3. "Təsdiqlə" düyməsi
 document.getElementById('verify-sms-btn').onclick = () => {
     const code = document.getElementById('smsCode').value;
+    
     window.confirmationResult.confirm(code).then(async (result) => {
-        // Profil adını yeniləyirik
-        await updateProfile(result.user, {
-            displayName: window.tempUsername
-        });
-        await result.user.reload(); // Adın yadda qaldığına əmin oluruq
-        window.location.href = "index.html"; 
+        const user = result.user;
+        
+        try {
+            // Profil adını qeyd edirik
+            await updateProfile(user, {
+                displayName: window.tempUsername
+            });
+            
+            // Məlumatların oturuşması üçün yeniləyirik
+            await user.reload(); 
+            
+            console.log("Giriş uğurlu! Ad:", auth.currentUser.displayName);
+            window.location.href = "index.html"; 
+        } catch (error) {
+            console.error("Profil yeniləmə xətası:", error);
+            window.location.href = "index.html";
+        }
     }).catch(() => alert("Kod yanlışdır!"));
 };

@@ -3,69 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VİBEAZ</title>
+    <title>VibeAz</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* SMS axını üçün vacib stillər */
-        .hidden { display: none !important; }
-        .limit-note { font-size: 11px; color: #856404; background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 15px; text-align: center; }
-        #recaptcha-container { margin: 10px 0; }
-        .auth-inputs input { margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <div id="auth-screen" class="auth-overlay">
-        <div class="auth-card">
-            <h1>VİBEAZ</h1>
-            <p>Qeydiyyatdan keç və paylaşmağa başla</p>
-
-            <div class="limit-note">
-                ⚠️ Yeni layihə üçün günlük limit: 10 real SMS
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h1 class="auth-logo">VIBEAZ</h1>
+            
+            <div id="reg-form">
+                <input type="text" id="username" placeholder="İstifadəçi adı">
+                <input type="tel" id="phoneNumber" placeholder="+994XXXXXXXXX" value="+994">
+                <button id="send-sms-btn">Kod Göndər</button>
             </div>
 
-            <div id="reg-form" class="auth-inputs">
-                <input type="text" id="username" placeholder="İstifadəçi adı">
-                <input type="tel" id="phoneNumber" placeholder="+994 50 123 45 67">
-                <button id="send-sms-btn" class="btn-primary">Kod Göndər</button>
+            <div id="verification-area" class="hidden">
+                <p>Telefona gələn kodu yazın:</p>
+                <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
+                <button id="verify-sms-btn">Təsdiqlə</button>
             </div>
 
             <div id="recaptcha-container"></div>
-
-            <div id="verification-area" class="auth-inputs hidden">
-                <p style="color: #28a745; font-size: 13px;">Kod göndərildi!</p>
-                <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
-                <button id="verify-sms-btn" class="btn-primary" style="background-color: #28a745;">Təsdiqlə və Giriş Et</button>
-            </div>
-
-            <div id="auth-error" class="error-msg"></div>
         </div>
     </div>
 
-    <div id="app" class="hidden">
+    <div id="app" style="display: none;">
         <header class="app-header">
-            <div class="header-content">
-                <h1>VİBEAZ</h1>
-                <div class="header-icons">
-                    <i class="fa-regular fa-heart"></i>
-                    <i class="fa-solid fa-paper-plane" id="logout-btn" title="Çıxış"></i>
-                </div>
+            <h1>VIBEAZ</h1>
+            <div class="header-icons">
+                <i class="fa-regular fa-paper-plane"></i>
+                <button id="logout-btn" style="background:none; border:none; cursor:pointer; font-size:18px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </header>
 
-        <main id="post-list"></main>
+        <div class="story-container">
+            <div class="story-card add-btn" id="shareBtn">
+                <div class="story-circle"><i class="fa fa-plus"></i></div>
+                <span>Paylaş</span>
+            </div>
+        </div>
+
+        <input type="file" id="fileInput" hidden accept="image/*">
+
+        <div id="post-list" class="post-feed">
+            </div>
 
         <nav class="bottom-nav">
-            <i class="fa-solid fa-house"></i>
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <div class="main-add" id="mainAddBtn"><i class="fa-solid fa-plus"></i></div>
-            <i class="fa-regular fa-compass"></i>
+            <i class="fa fa-home"></i>
+            <i class="fa fa-search"></i>
+            <div class="main-add" id="mainAddBtn">+</div>
+            <i class="fa-regular fa-heart"></i>
             <i class="fa-regular fa-user"></i>
         </nav>
     </div>
-
-    <input type="file" id="fileInput" hidden accept="image/*">
 
     <script type="module" src="script.js"></script>
 </body>

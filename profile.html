@@ -2,65 +2,66 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Profil - VibeAz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="profile.css">
 </head>
 <body>
 
-    <div class="profile-container">
+    <div class="profile-wrapper">
         <header class="profile-header">
-            <div class="avatar-wrapper">
+            <div class="avatar-container">
                 <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar">
-                <div class="avatar-ring"></div>
             </div>
             
-            <div class="profile-info">
-                <div class="username-section">
-                    <h2 id="profile-username">Yüklənir...</h2>
-                    <button id="edit-profile-btn" class="btn-modern secondary">Profili Redaktə Et</button>
-                    <button id="logout-btn" class="icon-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
-                </div>
-                
-                <div class="stats-section">
-                    <span><strong id="post-count">0</strong> post</span>
-                </div>
-                
-                <div class="bio-section">
-                    <p id="profile-email" class="user-email"></p>
-                    <p id="profile-bio" class="user-bio">Xoş gəlmisiniz!</p>
+            <div class="profile-meta">
+                <h2 id="profile-username">Yüklənir...</h2>
+                <div class="profile-actions">
+                    <button id="edit-profile-btn" class="action-btn">Profili Redaktə Et</button>
+                    <button id="logout-btn" class="logout-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
                 </div>
             </div>
         </header>
 
-        <div class="profile-tabs">
-            <div class="tab-item active"><i class="fa-solid fa-table-cells"></i> POSTLAR</div>
+        <div class="profile-stats-bar">
+            <div class="stat-item">
+                <span id="post-count">0</span>
+                <label>paylaşım</label>
+            </div>
+        </div>
+
+        <div class="bio-container">
+            <p id="profile-email"></p>
+        </div>
+
+        <div class="tab-divider">
+            <i class="fa-solid fa-table-cells"></i>
         </div>
 
         <div id="user-posts-grid" class="posts-grid">
             </div>
     </div>
 
-    <nav class="bottom-bar">
-        <a href="index.html"><i class="fa-solid fa-house"></i></a>
-        <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
-        <a href="#"><i class="fa-solid fa-plus-square"></i></a>
-        <a href="profile.html" class="active"><i class="fa-solid fa-user"></i></a>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i></a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-plus-square"></i></a>
+        <a href="profile.html" class="nav-link active"><i class="fa-solid fa-user"></i></a>
     </nav>
 
-    <div id="edit-modal" class="modal-backdrop">
-        <div class="modal-card">
-            <h3>Profili Yenilə</h3>
-            <div class="upload-circle">
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3>Məlumatları Yenilə</h3>
+            <div class="preview-wrapper">
                 <img id="preview-img" src="">
-                <input type="file" id="new-avatar-input" hidden accept="image/*">
-                <label for="new-avatar-input"><i class="fa-solid fa-camera"></i></label>
+                <input type="file" id="new-avatar-input" hidden>
+                <label for="new-avatar-input" class="change-photo-btn">Şəkli dəyiş</label>
             </div>
             <input type="text" id="new-name-input" placeholder="Yeni ad">
-            <div class="modal-actions">
-                <button id="save-profile-btn" class="btn-modern primary">Yadda Saxla</button>
-                <button id="close-modal-btn" class="btn-modern text">Ləğv Et</button>
+            <div class="modal-btns">
+                <button id="save-profile-btn" class="save-btn">Yadda Saxla</button>
+                <button id="close-modal-btn" class="close-btn">Ləğv Et</button>
             </div>
         </div>
     </div>

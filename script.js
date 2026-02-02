@@ -46,7 +46,7 @@ async function setupNotifications(user) {
             if (permission === 'granted') {
                 // Token al (VAPID Key-i Firebase-dən alıb bura yapışdır)
                 const token = await getToken(messaging, { 
-                    vapidKey: 'BURAYA_SENIN_VAPID_KEYIN' 
+                    vapidKey: 'BErWSc6Tr3YhkpIjersOOPPZuthPFnJZgeNOHVY2xiD05T3aMDUTUGhWsG4FOz87cWq5F6OghIPzE1EVoPJPONc' 
                 });
                 
                 if (token) {
@@ -178,3 +178,4 @@ window.handleLike = async (id) => {
 };
 
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
+

@@ -5,21 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeAz - Giriş</title>
     <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="auth-box">
-        <h1 class="logo">VIBEAZ</h1>
-        <div id="login-step-1">
-            <input type="text" id="username" placeholder="İstifadəçi adı">
-            <input type="tel" id="phoneNumber" placeholder="+994XXXXXXXXX" value="+994">
-            <button id="send-sms-btn">Kod Göndər</button>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="logo">VIBEAZ</h1>
+            
+            <div id="login-step-1">
+                <p class="subtitle">Davam etmək üçün məlumatlarınızı daxil edin</p>
+                <div class="input-group">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="username" placeholder="İstifadəçi adı">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-phone"></i>
+                    <input type="tel" id="phoneNumber" value="+994" placeholder="+994XXXXXXXXX">
+                </div>
+                <button id="send-sms-btn" class="main-btn">Kod Göndər</button>
+            </div>
+
+            <div id="login-step-2" class="hidden">
+                <p class="subtitle">Telefona gələn 6 rəqəmli kodu yazın</p>
+                <div class="input-group">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <input type="text" id="smsCode" placeholder="000000">
+                </div>
+                <button id="verify-sms-btn" class="main-btn">Təsdiqlə</button>
+            </div>
+
+            <div id="recaptcha-container"></div>
         </div>
-        <div id="login-step-2" class="hidden">
-            <p>Telefona gələn kodu yazın:</p>
-            <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
-            <button id="verify-sms-btn">Təsdiqlə</button>
-        </div>
-        <div id="recaptcha-container"></div>
     </div>
     <script type="module" src="login.js"></script>
 </body>

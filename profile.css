@@ -1,124 +1,69 @@
-:root {
-    --bg-color: #000;
-    --card-bg: #121212;
-    --border-color: #262626;
-    --accent-color: #0095f6;
-    --text-main: #ffffff;
-    --text-dim: #a8a8a8;
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { background: #000; color: #fff; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+
+.profile-wrapper { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+
+/* Profil Header Mobil üçün */
+.profile-header { display: flex; align-items: center; padding: 20px 15px; gap: 20px; }
+
+.avatar-container img {
+    width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 1px solid #262626;
 }
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
+.profile-meta { flex: 1; }
+.profile-meta h2 { font-size: 20px; font-weight: 500; margin-bottom: 10px; }
 
-.profile-container {
-    max-width: 935px;
-    margin: 0 auto;
-    padding: 30px 20px;
+.profile-actions { display: flex; gap: 10px; align-items: center; }
+.action-btn { 
+    flex: 1; background: #363636; color: #fff; border: none; padding: 8px; 
+    border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;
 }
+.logout-icon { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
 
-/* Header Dizaynı */
-.profile-header {
-    display: flex;
-    gap: 40px;
-    margin-bottom: 44px;
-    align-items: center;
-}
+/* Statistika və Bio */
+.profile-stats-bar { display: flex; padding: 10px 15px; border-top: 1px solid #121212; }
+.stat-item { text-align: center; }
+.stat-item span { display: block; font-weight: bold; font-size: 16px; }
+.stat-item label { font-size: 14px; color: #a8a8a8; }
 
-.avatar-wrapper {
-    position: relative;
-    width: 150px;
-    height: 150px;
-}
-
-#user-avatar {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--bg-color);
-    z-index: 2;
-    position: relative;
-}
-
-.avatar-ring {
-    position: absolute;
-    top: -5px; left: -5px; right: -5px; bottom: -5px;
-    background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
-    border-radius: 50%;
-    z-index: 1;
-}
-
-/* Düymələr */
-.btn-modern {
-    padding: 8px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: 0.2s;
-}
-
-.btn-modern.primary { background: var(--accent-color); color: white; }
-.btn-modern.secondary { background: #363636; color: white; }
-.btn-modern:hover { opacity: 0.8; }
+.bio-container { padding: 0 15px 15px; font-size: 14px; color: #efefef; }
 
 /* Grid Sistemi */
-.posts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
+.tab-divider { 
+    display: flex; justify-content: center; padding: 12px; 
+    border-top: 1px solid #262626; font-size: 20px; color: #fff;
 }
 
-.grid-item {
-    aspect-ratio: 1/1;
-    overflow: hidden;
-    cursor: pointer;
-    position: relative;
+.posts-grid { 
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; 
 }
+.grid-item { aspect-ratio: 1/1; background: #121212; }
+.grid-item img { width: 100%; height: 100%; object-fit: cover; }
 
-.grid-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: 0.3s;
+/* ANA MENYU (Ana səhifə ilə eyni) */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 50px;
+    background: #000; border-top: 1px solid #262626;
+    display: flex; justify-content: space-around; align-items: center; z-index: 1000;
 }
+.nav-link { color: #8e8e8e; font-size: 22px; text-decoration: none; }
+.nav-link.active { color: #fff; }
 
-.grid-item:hover img {
-    filter: brightness(0.7);
+/* Modal Dizaynı */
+.modal { 
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; 
 }
-
-/* Bottom Nav */
-.bottom-bar {
-    position: fixed;
-    bottom: 0; width: 100%;
-    background: var(--bg-color);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-around;
-    padding: 15px 0;
+.modal-content { 
+    background: #262626; width: 90%; max-width: 350px; padding: 20px; 
+    border-radius: 15px; text-align: center; 
 }
-
-.bottom-bar a { color: var(--text-dim); font-size: 22px; }
-.bottom-bar a.active { color: white; }
-
-/* Modal */
-.modal-backdrop {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(5px);
-    z-index: 1000;
-    justify-content: center; align-items: center;
+.preview-wrapper img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; }
+.change-photo-btn { display: block; color: #0095f6; font-weight: bold; margin-bottom: 20px; cursor: pointer; }
+.modal-content input { 
+    width: 100%; background: #121212; border: 1px solid #363636; 
+    padding: 10px; color: #fff; border-radius: 8px; margin-bottom: 15px;
 }
-
-.modal-card {
-    background: var(--card-bg);
-    padding: 30px;
-    border-radius: 20px;
-    width: 90%; max-width: 400px;
-    text-align: center;
-}
+.modal-btns { display: flex; flex-direction: column; gap: 10px; }
+.save-btn { background: #0095f6; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; }
+.close-btn { background: none; color: #fff; border: none; padding: 5px; font-size: 14px; }

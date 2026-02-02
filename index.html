@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=101">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-
     <div id="app" style="display: none;">
-        
         <header class="app-header">
             <h1 class="logo">VibeAz</h1>
             <div class="header-icons">
-                <i class="fa-regular fa-square-plus" id="mainAddBtn"></i>
                 <i class="fa-regular fa-heart"></i>
                 <i class="fa-regular fa-paper-plane"></i>
                 <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
@@ -23,18 +20,16 @@
 
         <main id="post-list" class="post-feed"></main>
 
-        <input type="file" id="fileInput" hidden accept="image/*">
-
         <nav class="bottom-nav">
-            <i class="fa-solid fa-house active"></i>
+            <i class="fa-solid fa-house"></i>
             <i class="fa-solid fa-magnifying-glass"></i>
+            <div class="add-post-btn" id="mainAddBtn"><i class="fa-regular fa-square-plus"></i></div>
             <i class="fa-solid fa-clapperboard"></i>
-            <i class="fa-solid fa-bag-shopping"></i>
             <i class="fa-regular fa-user"></i>
         </nav>
-
+        
+        <input type="file" id="fileInput" hidden accept="image/*">
     </div>
-
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.js?v=101"></script>
 </body>
 </html>

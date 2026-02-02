@@ -16,16 +16,12 @@ body {
     z-index: 1000;
 }
 
-.app-header h1 {
-    font-family: 'Comic Sans MS', cursive;
-    margin: 0;
-    font-size: 24px;
-}
+.app-header h1 { font-family: 'Comic Sans MS', cursive; margin: 0; font-size: 24px; }
 
-/* Postların dizaynı */
+/* Postlar */
 .post-feed {
     max-width: 500px;
-    margin: 0 auto 80px;
+    margin: 0 auto 80px; /* Menyuya yer ayırmaq üçün */
 }
 
 .post-card {
@@ -36,37 +32,23 @@ body {
     overflow: hidden;
 }
 
-/* Şəkilləri kvadrat edən əsas hissə */
 .post-img-container {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1; /* Kvadrat şəkillər */
     overflow: hidden;
     background-color: #efefef;
 }
 
-.post-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+.post-img-container img { width: 100%; height: 100%; object-fit: cover; }
 
-.post-info {
-    padding: 12px;
-}
-
-.post-actions {
-    display: flex;
-    gap: 15px;
-    font-size: 24px;
-    margin-bottom: 8px;
-}
-
-/* Alt Naviqasiya */
+/* AŞAĞI MENYU DİZAYNI */
 .bottom-nav {
     position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
-    height: 55px;
+    height: 60px;
     background: white;
     border-top: 1px solid #dbdbdb;
     display: flex;
@@ -75,16 +57,24 @@ body {
     z-index: 1000;
 }
 
+.bottom-nav i {
+    font-size: 22px;
+    color: #262626;
+    cursor: pointer;
+}
+
+/* Paylaşma (Göy düymə) */
 .main-add {
     background: #0095f6;
     color: white;
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 20px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
+    margin-bottom: 5px; /* Bir az yuxarıda durması üçün */
 }

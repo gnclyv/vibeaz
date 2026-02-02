@@ -1,55 +1,110 @@
-body {
-    font-family: -apple-system, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #fafafa;
+/* Əsas Tənzimləmələr */
+:root {
+    --primary-text: #262626;
+    --secondary-text: #8e8e8e;
+    --border-color: #dbdbdb;
+    --background-color: #fafafa;
+    --link-color: #0095f6;
 }
-nav, .bottom-nav, .fa-house, .fa-magnifying-glass, .fa-user, .fa-heart {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        height: 0 !important;
-        width: 0 !important;
-        position: absolute !important;
-        left: -9999px !important;
-    }
-/* Üst Panel */
+
+body {
+    font-family: -apple-system, system-ui, sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--primary-text);
+}
+
+/* Ümumi konteyner */
+#app {
+    max-width: 500px; /* Telefon ekranı kimi məhdudlaşdır */
+    margin: 0 auto;
+    background-color: white; /* Saytın öz fonu */
+    min-height: 100vh;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05); /* Yumşaq kölgə */
+}
+
+/* HEADER - Yuxarı Panel */
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 15px;
     background: white;
-    border-bottom: 1px solid #dbdbdb;
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-#logout-btn { background: none; border: none; cursor: pointer; font-size: 18px; }
+.app-header .logo {
+    font-family: 'Billabong', cursive; /* Instagram fontuna bənzər */
+    font-size: 28px;
+    font-weight: normal;
+    margin: 0;
+    color: var(--primary-text);
+}
 
-/* Postlar və Şəkillərin Kvadrat Ölçüsü */
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-icons i {
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--primary-text);
+}
+
+#logout-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 20px;
+    color: var(--primary-text);
+}
+
+
+/* POSTLARIN GÖRÜNÜŞÜ */
 .post-feed {
-    max-width: 500px;
-    margin: 0 auto 70px; /* Aşağıda menyu üçün boşluq */
+    padding-bottom: 60px; /* Aşağı naviqasiya üçün yer */
 }
 
 .post-card {
     background: white;
-    border-bottom: 1px solid #dbdbdb;
-    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px; /* Postlar arasında boşluq */
 }
 
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+}
+
+.profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.username {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--primary-text);
+}
+
+/* 1:1 KVADRAT ŞƏKİL */
 .post-img-container {
     width: 100%;
-    aspect-ratio: 1 / 1; /* Mükəmməl kvadrat */
+    aspect-ratio: 1 / 1; /* Mükəmməl kvadrat ölçü */
     overflow: hidden;
+    background-color: #efefef; /* Şəkil yüklənənə qədər fon */
 }
 
 .post-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Şəkli dartmadan sığdırır */
-}
-
-
+    width: 100

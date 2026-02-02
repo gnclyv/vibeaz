@@ -1,8 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // 1. Firebase Konfiqurasiyası
 const firebaseConfig = {
@@ -13,8 +11,6 @@ const firebaseConfig = {
     messagingSenderId: "953434260285",
     appId: "1:953434260285:web:6263b4372487ba6d673b54"
 };
-const auth = getAuth();
-const db = getFirestore();
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -23,33 +19,32 @@ const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
 // 2. İstifadəçi statusunu izləmə
 onAuthStateChanged(auth, (user) => {
-    if (!user) {
+    const appElement = document.getElementById('app');
+    
+    if (user) {
+        // App-i görünən et
+        if(appElement) appElement.style.display = 'block';
+        
+        const userName = user.email.split('@')[0];
+        
+        // Header və Profil məlumatlarını doldur (Elementlər varsa)
+        if(document.getElementById('header-username')) document.getElementById('header-username').innerText = userName;
+        if(document.getElementById('profile-display-name')) document.getElementById('profile-display-name').innerText = userName;
+        if(document.getElementById('profile-email')) document.getElementById('profile-email').innerText = user.email;
+
+        // Məlumatları yüklə
+        loadPosts();
+    } else {
         if (!window.location.pathname.includes("login.html")) {
             window.location.href = "login.html";
         }
-    if (user) {
-        // 1. Ad və Email-i hər kəsə özəl yazdırırıq
-        const userName = user.email.split('@')[0];
-        document.getElementById('header-username').innerText = userName;
-        document.getElementById('profile-display-name').innerText = userName;
-        document.getElementById('profile-email').innerText = user.email;
-
-        // 2. Real zamanda postları və sayını gətiririk
-        loadMyData(userName);
-} else {
-        document.getElementById('app').style.display = 'block';
-        loadPosts();
-        window.location.href = "login.html";
-}
+    }
 });
 
-// 3. Post Paylaşma (Gmail-ə uyğun və Xətasız)
+// 3. Post Paylaşma Funksiyası
 async function uploadPost() {
     const fileInp = document.getElementById('fileInput');
-function loadMyData(userName) {
-    const grid = document.getElementById('user-posts-grid');
-    const postCountElement = document.getElementById('post-count');
-
+    
     fileInp.onchange = async () => {
         const user = auth.currentUser;
         if (!user || !fileInp.files[0]) return;
@@ -58,27 +53,17 @@ function loadMyData(userName) {
         fd.append("image", fileInp.files[0]);
 
         try {
-            // Şəkli ImgBB-yə yükləyirik
             const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
             const result = await res.json();
 
             if (result.success) {
                 const text = prompt("Post üçün açıqlama:");
-                
-                // split xətasının qarşısını alan təhlükəsiz ad məntiqi
-                let finalName = "İstifadəçi";
-                if (user.displayName) {
-                    finalName = user.displayName;
-                } else if (user.email) {
-                    // Gmail ünvanını @-dan parçalayıb ad kimi istifadə edirik
-                    finalName = user.email.split('@')[0];
-                }
+                const userName = user.email.split('@')[0];
 
-                // Sildiyin 'posts' kolleksiyası burada avtomatik yaranacaq
                 await addDoc(collection(db, "posts"), {
                     url: result.data.url,
                     text: text || "",
-                    userName: finalName,
+                    userName: userName,
                     likes: 0,
                     comments: [],
                     timestamp: serverTimestamp()
@@ -87,7 +72,6 @@ function loadMyData(userName) {
             }
         } catch (e) {
             console.error("Yükləmə xətası:", e);
-            alert("Xəta baş verdi: " + e.message);
         }
     };
     fileInp.click();
@@ -109,16 +93,15 @@ window.handleLike = async (id) => {
 window.addComment = async (postId) => {
     const user = auth.currentUser;
     const input = document.getElementById(`comment-input-${postId}`);
+    if (!input || !user) return;
+    
     const commentText = input.value.trim();
-    // Yalnız bu istifadəçinin postlarını axtarırıq
-    const q = query(collection(db, "posts"), where("userName", "==", userName));
-
-    if (!commentText || !user) return;
+    if (!commentText) return;
 
     try {
         await updateDoc(doc(db, "posts", postId), {
             comments: arrayUnion({
-                user: user.email.split('@')[0], // Şərhlərdə də email-dən ad götürürük
+                user: user.email.split('@')[0],
                 text: commentText,
                 time: Date.now()
             })
@@ -127,35 +110,33 @@ window.addComment = async (postId) => {
     } catch (e) { console.error("Şərh xətası:", e); }
 };
 
-// 6. Postları Yükləmə (Modern Dizaynla)
+// 6. Ana Səhifə Postlarını Yükləmə
 function loadPosts() {
     const list = document.getElementById('post-list');
-    onSnapshot(collection(db, "posts"), (snap) => {
-        let postsArray = [];
-        snap.forEach(d => postsArray.push({ id: d.id, ...d.data() }));
-    onSnapshot(q, (snapshot) => {
-        grid.innerHTML = "";
-        let count = 0;
+    if(!list) return;
 
-        // Yenidən köhnəyə sıralama
-        postsArray.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
 
+    onSnapshot(q, (snap) => {
         list.innerHTML = ''; 
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
 
-        postsArray.forEach(data => {
-            const id = data.id;
+        snap.forEach(d => {
+            const data = d.data();
+            const id = d.id;
             const isLiked = likedPosts.includes(id);
             const author = data.userName || "Anonim";
             const comments = data.comments || [];
 
             list.innerHTML += `
-                <div class="post-card" style="background:#111; margin-bottom:20px; border-radius:15px; overflow:hidden; border:1px solid #333;">
-                    <div style="padding:10px; display:flex; align-items:center; gap:10px;">
-                        <img src="https://ui-avatars.com/api/?name=${author}&background=random" style="width:30px; border-radius:50%;">
+                <div class="post-card">
+                    <div class="post-header" style="padding:10px; display:flex; align-items:center; gap:10px;">
+                        <img src="vibeaz_logo.png" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
                         <span style="font-weight:bold; color:white;">${author}</span>
                     </div>
-                    <img src="${data.url}" style="width:100%; display:block;" ondblclick="handleLike('${id}')">
+                    <div class="post-img-container">
+                        <img src="${data.url}" style="width:100%; display:block;" ondblclick="handleLike('${id}')">
+                    </div>
                     <div style="padding:12px;">
                         <div style="display:flex; gap:15px; margin-bottom:10px; font-size:20px; color:white;">
                             <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
@@ -174,20 +155,15 @@ function loadPosts() {
                             <button onclick="addComment('${id}')" style="background:none; border:none; color:#0095f6; font-weight:bold; cursor:pointer;">Paylaş</button>
                         </div>
                     </div>
-        snapshot.forEach((doc) => {
-            count++;
-            const data = doc.data();
-            grid.innerHTML += `
-                <div class="grid-item">
-                    <img src="${data.url}" alt="Post">
-               </div>`;
-});
-        
-        // Post sayını real zamanda yeniləyirik
-        postCountElement.innerText = count;
-});
+                </div>`;
+        });
+    });
 }
 
-// Düymələr
-document.getElementById('mainAddBtn').onclick = uploadPost;
-document.getElementById('logout-btn').onclick = () => signOut(auth);
+// Düymə hadisələri
+if(document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
+if(document.getElementById('logout-btn')) {
+    document.getElementById('logout-btn').onclick = () => {
+        signOut(auth).then(() => { window.location.href = "login.html"; });
+    };
+}

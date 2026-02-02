@@ -1,107 +1,149 @@
-/* Bütün mövcud CSS-i sil və bunu yapışdır */
+/* Ümumi sıfırlama */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     background-color: #000;
     color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
 }
 
-.profile-page {
-    max-width: 600px;
+.profile-container {
+    max-width: 600px; /* Mobil fokuslu genişlik */
     margin: 0 auto;
-    padding: 20px 15px;
+    padding-bottom: 60px; /* Alt menyu üçün boşluq */
 }
 
-/* Header: Şəkil və Statistika Yan-yana */
-.instagram-header {
+/* Üst istifadəçi adı hissəsi */
+.top-username {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    justify-content: center;
+    gap: 5px;
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    background: #000;
+    z-index: 10;
+}
+
+.top-username h2 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Header: Avatar və Statistika Yan-yana */
+.profile-header {
+    display: flex;
+    align-items: center;
+    padding: 0 15px 15px 20px;
     gap: 30px;
 }
 
-.avatar-container {
-    flex: 0 0 85px; /* Şəklin ölçüsünü sabit saxlayır */
+.avatar-box {
+    position: relative;
+    flex: 0 0 80px;
 }
 
-.avatar-container img {
-    width: 85px;
-    height: 85px;
+#user-avatar {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #262626;
+    border: 2px solid #000;
+    display: block;
 }
 
-.stats-container {
+.stats-box {
     display: flex;
     flex: 1;
     justify-content: space-around;
     text-align: center;
 }
 
-.stat-box span {
+.stat-item span {
     display: block;
     font-weight: 700;
-    font-size: 18px;
+    font-size: 17px;
 }
 
-.stat-box p {
+.stat-item p {
     font-size: 13px;
     color: #fff;
 }
 
-/* Bio və Ad */
-.user-bio {
-    margin-bottom: 20px;
+/* Ad və Bio */
+.user-details {
+    padding: 0 15px 15px;
 }
 
-.user-bio h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 4px;
+.user-details h3 {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.user-email {
+    font-size: 14px;
+    color: #a8a8a8;
 }
 
 .bio-text {
     font-size: 14px;
-    line-height: 1.4;
+    margin-top: 2px;
 }
 
-/* Düymələr: Yan-yana */
-.profile-actions {
+/* Əməliyyat Düymələri */
+.action-buttons {
     display: flex;
-    gap: 8px;
-    margin-bottom: 30px;
+    gap: 6px;
+    padding: 0 15px 20px;
 }
 
-.profile-actions button {
+.action-buttons button {
     flex: 1;
     background-color: #262626;
     color: #fff;
     border: none;
-    padding: 8px;
+    padding: 7px 0;
     border-radius: 8px;
-    font-weight: 600;
     font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
 }
 
-/* Post Grid */
-.grid-tabs {
-    display: flex;
-    justify-content: space-around;
-    border-top: 1px solid #262626;
-    padding: 12px 0;
+.btn-secondary {
+    max-width: 45px; /* Arxiv və Çıxış düymələri üçün kiçik ölçü */
 }
 
-.instagram-grid {
+/* Tab Menyu */
+.profile-tabs {
+    display: flex;
+    border-top: 1px solid #262626;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    color: #8e8e8e;
+    font-size: 20px;
+}
+
+.tab.active {
+    color: #fff;
+    border-bottom: 1px solid #fff;
+}
+
+/* Post Grid: 3 Sütunlu */
+.posts-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2px; /* Şəkillər arasındakı incə boşluq */
+    gap: 2px;
 }
 
 .grid-item {
@@ -115,22 +157,75 @@ body {
     object-fit: cover;
 }
 
-/* Alt Menyu */
+/* Alt Menyu: Sabit və Responsive */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
+    max-width: 600px;
     height: 50px;
-    background: #000;
+    background-color: #000;
     border-top: 1px solid #262626;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    z-index: 100;
+}
+
+.nav-item {
+    color: #fff;
+    font-size: 22px;
+    text-decoration: none;
+}
+
+.mini-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+}
+
+/* Redaktə Modalı */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
     z-index: 1000;
 }
 
-.bottom-nav i {
+.modal-content {
+    background: #262626;
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.modal-content h3 { margin-bottom: 20px; }
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background: #121212;
+    border: 1px solid #363636;
     color: #fff;
-    font-size: 22px;
+    border-radius: 5px;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 10px;
+    background: #0095f6;
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 5px;
+    margin-top: 10px;
 }

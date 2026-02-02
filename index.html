@@ -5,56 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeAz</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-
-    <div id="loader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; flex-direction: column; justify-content: center; align-items: center;">
-        <div class="spinner"></div>
-        <p style="margin-top:15px; font-family: sans-serif; color: #333;">Yüklənir...</p>
-    </div>
-
     <input type="file" id="fileInput" hidden accept="image/*">
 
     <div id="app">
         <header class="app-header">
-            <h1 style="text-align: center; font-family: sans-serif; letter-spacing: 2px;">VIBEAZ</h1>
+            <h1>VIBEAZ</h1>
         </header>
 
         <div class="story-container" id="stories">
             <div class="story-card add-btn" id="shareBtn">
-                <div class="story-circle"><i class="fa fa-plus"></i></div>
+                <div class="story-circle">+</div>
                 <span>Paylaş</span>
             </div>
         </div>
 
-        <div id="post-list" class="post-feed" style="padding-bottom: 70px;"></div>
+        <div id="post-list" class="post-feed"></div>
 
         <nav class="bottom-nav">
             <div class="main-add" id="mainAddBtn">+</div>
         </nav>
     </div>
 
-    <style>
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0095f2; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        body { margin: 0; font-family: sans-serif; background: #fafafa; }
-        .app-header { background: white; border-bottom: 1px solid #dbdbdb; padding: 10px; position: sticky; top: 0; z-index: 100; }
-        .story-container { display: flex; padding: 10px; background: white; border-bottom: 1px solid #dbdbdb; overflow-x: auto; gap: 15px; }
-        .story-card { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
-        .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #dbdbdb; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .story-circle.active { border-color: #e1306c; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #dbdbdb; display: flex; justify-content: center; padding: 10px 0; }
-        .main-add { width: 45px; height: 45px; background: #0095f2; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
-    </style>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // Sənin Məlumatların bərpa olundu:
         const firebaseConfig = {
-            apiKey: "9.15.0", // Sənin əvvəlki kodunda bu hissədə versiya yazılmışdı, əgər işləməsə əsl apiKey-ni bura qoyarsan
+            apiKey: "9.15.0", 
             authDomain: "vibeaz-3075c.firebaseapp.com",
             projectId: "vibeaz-3075c",
             storageBucket: "vibeaz-3075c.appspot.com",

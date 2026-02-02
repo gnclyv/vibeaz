@@ -1,41 +1,68 @@
-<div class="profile-page">
-    <header class="top-bar">
-        <h2 id="header-username">...</h2> <i class="fa-solid fa-chevron-down"></i>
-    </header>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeAz - Profil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="profile.css">
+</head>
+<body>
 
-    <div class="profile-header">
-        <div class="avatar-section">
-            <div class="avatar-ring">
-                <img src="https://i.ibb.co/G4NSB49X/Gemini-Generated-mage-q3dek6q3dek6q3de.png" alt="VibeAz"> 
+    <div class="profile-page">
+        <header class="top-bar">
+            <h2 id="header-username">...</h2>
+            <i class="fa-solid fa-chevron-down"></i>
+        </header>
+
+        <div class="profile-header">
+            <div class="avatar-section">
+                <div class="avatar-ring">
+                    <img src="vibeaz_logo.png" alt="VibeAz"> 
+                </div>
+            </div>
+            <div class="stats-section">
+                <div class="stat-item">
+                    <span id="post-count">0</span>
+                    <p>gönderi</p>
+                </div>
+                <div class="stat-item"><span>645</span><p>takipçi</p></div>
+                <div class="stat-item"><span>424</span><p>takip</p></div>
             </div>
         </div>
-        <div class="stats-section">
-            <div class="stat-item">
-                <span id="post-count">0</span> <p>gönderi</p>
-            </div>
-            <div class="stat-item"><span>645</span><p>takipçi</p></div>
-            <div class="stat-item"><span>424</span><p>takip</p></div>
+
+        <div class="bio-container">
+            <h3 id="profile-display-name">...</h3>
+            <p id="profile-email" class="email-text"></p>
+            <p class="bio-text">VibeAz istifadəçisi</p>
         </div>
-    </div>
 
-    <div class="bio-container">
-        <h3 id="profile-display-name">...</h3> <p id="profile-email" class="email-text"></p> <p class="bio-text">VibeAz istifadəçisi</p>
-    </div>
-
-    <div id="user-posts-grid" class="posts-grid">
+        <div class="action-buttons">
+            <button class="btn-main">Profili düzenle</button>
+            <button class="btn-main">Arşivi gör</button>
         </div>
-</div>
 
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i></a>
-    <a href="#" class="nav-link"><i class="fa-solid fa-magnifying-glass"></i></a>
-    <div class="nav-plus-btn">
-        <a href="#" class="nav-link plus-icon"><i class="fa-solid fa-plus"></i></a>
+        <div class="tabs">
+            <div class="tab-item active"><i class="fa-solid fa-table-cells"></i></div>
+            <div class="tab-item"><i class="fa-solid fa-clapperboard"></i></div>
+            <div class="tab-item"><i class="fa-solid fa-user-tag"></i></div>
+        </div>
+
+        <div id="user-posts-grid" class="posts-grid"></div>
     </div>
-    <a href="#" class="nav-link"><i class="fa-solid fa-clapperboard"></i></a>
-    <a href="profile.html" class="nav-link active">
-        <div class="mini-avatar-border">
-            <img src="vibeaz_logo.png" class="nav-img"> </div>
-    </a>
-</nav>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i></a>
+        <a href="#" class="nav-link"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <div class="nav-plus-btn">
+            <a href="#" class="nav-link plus-icon"><i class="fa-solid fa-plus"></i></a>
+        </div>
+        <a href="#" class="nav-link"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="profile.html" class="nav-link active">
+            <div class="mini-avatar-border"><img src="vibeaz_logo.png" class="nav-img"></div>
+        </a>
+    </nav>
+
+    <script type="module" src="profile.js"></script>
+</body>
+</html>

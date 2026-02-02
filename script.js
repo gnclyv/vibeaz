@@ -17,36 +17,11 @@ const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
 onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        if (!window.location.pathname.includes("login.html")) {
-            window.location.href = "login.html";
-        }
-    } else {
-        document.getElementById('app').style.display = 'block';
-        loadPosts();
-    }
+    if (!user) { window.location.href = "login.html"; } 
+    else { document.getElementById('app').style.display = 'block'; loadPosts(); }
 });
 
-// Like funksiyası
-window.handleLike = async (id) => {
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
-    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-    liked.push(id);
-    localStorage.setItem('vibeLikes', JSON.stringify(liked));
-};
-
-// Şərh funksiyası
-window.handleComment = async (id) => {
-    const input = document.getElementById(`cm-${id}`);
-    if (!input.value.trim()) return;
-    await updateDoc(doc(db, "posts", id), {
-        comments: arrayUnion({ text: input.value, author: "User", date: Date.now() })
-    });
-    input.value = "";
-};
-
-// Post paylaşma
+// Post paylaşma funksiyası
 async function uploadPost() {
     const fileInp = document.getElementById('fileInput');
     fileInp.onchange = async () => {
@@ -78,25 +53,14 @@ function loadPosts() {
         snap.forEach(d => {
             const data = d.data();
             const id = d.id;
-            const commentsHTML = (data.comments || []).map(c => `<p style="font-size:13px; margin:3px 0;"><b>User</b> ${c.text}</p>`).join('');
-
             list.innerHTML += `
                 <div class="post-card">
-                    <div style="padding:10px; font-weight:bold;">İstifadəçi</div>
-                    <div class="post-img-container">
-                        <img src="${data.url}" ondblclick="handleLike('${id}')">
-                    </div>
+                    <div style="padding:10px; font-weight:bold;">User</div>
+                    <div class="post-img-container"><img src="${data.url}"></div>
                     <div class="post-info">
-                        <div class="post-actions">
-                            <i class="fa-regular fa-heart" onclick="handleLike('${id}')"></i>
-                        </div>
+                        <div style="font-size:24px; margin-bottom:8px;"><i class="fa-regular fa-heart"></i></div>
                         <strong>${data.likes || 0} bəyənmə</strong>
                         <p><b>User</b> ${data.text || ""}</p>
-                        <div class="comments">${commentsHTML}</div>
-                        <div style="display:flex; margin-top:10px; border-top:1px solid #eee; padding-top:5px;">
-                            <input type="text" id="cm-${id}" placeholder="Şərh yaz..." style="flex:1; border:none; outline:none;">
-                            <button onclick="handleComment('${id}')" style="border:none; color:#0095f6; background:none; font-weight:bold; cursor:pointer;">Paylaş</button>
-                        </div>
                     </div>
                 </div>`;
         });
@@ -104,4 +68,4 @@ function loadPosts() {
 }
 
 document.getElementById('mainAddBtn').onclick = uploadPost;
-document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.reload());
+document.getElementById('logout-btn').onclick = () => signOut(auth);

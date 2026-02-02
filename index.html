@@ -12,19 +12,16 @@
     <div id="auth-screen">
         <div class="auth-box">
             <h1 class="auth-logo">VIBEAZ</h1>
-            
             <div id="reg-form">
                 <input type="text" id="username" placeholder="İstifadəçi adı">
                 <input type="tel" id="phoneNumber" placeholder="+994XXXXXXXXX" value="+994">
                 <button id="send-sms-btn">Kod Göndər</button>
             </div>
-
             <div id="verification-area" class="hidden">
                 <p>Telefona gələn kodu yazın:</p>
                 <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
                 <button id="verify-sms-btn">Təsdiqlə</button>
             </div>
-
             <div id="recaptcha-container"></div>
         </div>
     </div>
@@ -34,23 +31,20 @@
             <h1>VIBEAZ</h1>
             <div class="header-icons">
                 <i class="fa-regular fa-paper-plane"></i>
-                <button id="logout-btn" style="background:none; border:none; cursor:pointer; font-size:18px;">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
+                <button id="logout-btn" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </header>
 
-        <div class="story-container">
-            <div class="story-card add-btn" id="shareBtn">
+        <div class="story-container" id="stories-container">
+            <div class="story-card add-btn" id="shareStoryBtn">
                 <div class="story-circle"><i class="fa fa-plus"></i></div>
                 <span>Paylaş</span>
             </div>
         </div>
 
         <input type="file" id="fileInput" hidden accept="image/*">
-
-        <div id="post-list" class="post-feed">
-            </div>
+        
+        <div id="post-list" class="post-feed"></div>
 
         <nav class="bottom-nav">
             <i class="fa fa-home"></i>

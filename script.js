@@ -1,159 +1,185 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, increment, arrayUnion, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { updateDoc, doc, increment } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { updateDoc, doc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// 1. FİREBASE KONFİQURASİYAN (Buranı öz məlumatlarınla doldur)
-const firebaseConfig = {
-    apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
-    authDomain: "vibeaz-1e98a.firebaseapp.com",
-    projectId: "vibeaz-1e98a",
-    storageBucket: "vibeaz-1e98a.firebasestorage.app",
-    messagingSenderId: "953434260285",
-    appId: "1:953434260285:web:6263b4372487ba6d673b54"
-};
+const db = window.db;
+const firebaseCollection = window.firebaseCollection || window.collection;
+@@ -10,107 +10,107 @@ const firebaseServerTimestamp = window.firebaseServerTimestamp || window.serverT
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- SMS GİRİŞ SİSTEMİ ---
-window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' }, auth);
-
-// SMS Göndər
-document.getElementById('send-sms-btn').onclick = () => {
-    const number = document.getElementById('phoneNumber').value;
-    const username = document.getElementById('username').value;
-    if(!username) return alert("İstifadəçi adı yazın");
-
-    signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
-        .then(result => {
-            window.confirmationResult = result;
-            document.getElementById('reg-form').classList.add('hidden');
-            document.getElementById('verification-area').classList.remove('hidden');
-        }).catch(err => alert("Xəta: " + err.message));
-};
-
-// Kodu Təsdiqlə
-document.getElementById('verify-sms-btn').onclick = () => {
-    const code = document.getElementById('smsCode').value;
-    const username = document.getElementById('username').value;
-    window.confirmationResult.confirm(code).then(async (result) => {
-        await setDoc(doc(db, "users", result.user.uid), { username: username });
-        location.reload();
-    }).catch(() => alert("Kod səhvdir!"));
-};
-
-// --- ANA SƏHİFƏ FUNKSİYALARI ---
-
-// Like Funksiyası
-window.handleLike = async (postId) => {
-    let likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
+// 1. Like Funksiyası (Limitli)
+// LIKE FUNKSİYASI
+async function handleLike(postId) {
+    // Brauzer yaddaşını yoxlayırıq
+let likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
     if (likedPosts.includes(postId)) return;
-    try {
-        await updateDoc(doc(db, "posts", postId), { likes: increment(1) });
-        likedPosts.push(postId);
-        localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
-    } catch (e) { console.error(e); }
-};
 
-// Şərh Funksiyası
-window.handleComment = async (postId) => {
+    if (likedPosts.includes(postId)) {
+        alert("Siz artıq bu postu bəyənmisiniz! ❤️");
+        return;
+    }
+
+    const postRef = doc(db, "posts", postId);
+try {
+        await updateDoc(postRef, {
+            likes: increment(1)
+        });
+        
+        // Yaddaşa əlavə edirik ki, bir daha like ata bilməsin
+        await updateDoc(doc(db, "posts", postId), { likes: increment(1) });
+likedPosts.push(postId);
+localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+        
+        // Səhifəni yeniləmədən ikonun rəngini dəyişmək üçün (Snapshot onsuz da işləyir)
+    } catch (error) {
+        console.error("Like xətası:", error);
+    }
+    } catch (e) { console.error(e); }
+}
+
+// 2. Fayl Yükləmə
+// ŞƏRH FUNKSİYASI
+async function handleComment(postId) {
     const input = document.getElementById(`comment-input-${postId}`);
     const text = input.value.trim();
     if (!text) return;
+
     try {
         await updateDoc(doc(db, "posts", postId), {
             comments: arrayUnion({ text, author: "İstifadəçi", time: Date.now() })
         });
         input.value = "";
     } catch (e) { console.error(e); }
-};
+}
 
-// Şəkil Yükləmə (Post və ya Story)
+// YÜKLƏMƏ FUNKSİYASI
 async function handleFileUpload(type) {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
+const fileInput = document.getElementById('fileInput');
+    fileInput.value = ""; 
+    fileInput.click(); 
+
     fileInput.click();
-    fileInput.onchange = async () => {
-        const file = fileInput.files[0];
-        if (!file) return;
+fileInput.onchange = async () => {
+const file = fileInput.files[0];
+if (!file) return;
+
+        alert("Paylaşılır...");
         
-        const formData = new FormData();
-        formData.append("image", file);
+const formData = new FormData();
+formData.append("image", file);
         
         const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
         const result = await res.json();
         const url = result.data.url;
 
+        try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                method: "POST",
+                body: formData
+            });
+            const result = await response.json();
+            const imageUrl = result.data.url;
+
+            let userText = "";
+            if (type === 'posts') {
+                userText = prompt("Başlıq:") || "";
+            }
+
+            await firebaseAddDoc(firebaseCollection(db, type), {
+                url: imageUrl,
+                text: userText,
+                author: "İstifadəçi",
+                likes: 0,
+                timestamp: firebaseServerTimestamp()
+            });
+
+            alert("Uğurla paylaşıldı!");
+        } catch (error) {
+            alert("Xəta!");
+        }
         let text = type === 'posts' ? prompt("Başlıq yazın:") : "";
         
-        await addDoc(collection(db, type), {
-            url, text, likes: 0, comments: [], timestamp: serverTimestamp()
+        await firebaseAddDoc(firebaseCollection(db, type), {
+            url, text, likes: 0, comments: [], timestamp: firebaseServerTimestamp()
         });
-        alert("Paylaşıldı!");
-    };
+};
 }
 
-// Məzmunu Yüklə (Girişdən sonra)
-function loadContent() {
-    // Story-ləri Yüklə
-    onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
-        const container = document.getElementById('stories-container');
-        container.innerHTML = `<div class="story-item" id="addStoryBtn"><div class="story-circle">+</div><p>Paylaş</p></div>`;
-        snap.forEach(doc => {
-            const data = doc.data();
-            container.innerHTML += `
-                <div class="story-item">
-                    <img src="${data.url}" class="story-circle">
-                    <p>İstifadəçi</p>
-                </div>`;
-        });
-        document.getElementById('addStoryBtn').onclick = () => handleFileUpload('stories');
+// 3. Postları Göstərmək
+firebaseOnSnapshot(firebaseQuery(firebaseCollection(db, "posts"), firebaseOrderBy("timestamp", "desc")), (snapshot) => {
+    const postList = document.getElementById('post-list');
+    postList.innerHTML = '';
+    
+    // Yaddaşdakı bəyənilmiş postları alırıq
+// STORY DİNAMİKASI
+firebaseOnSnapshot(firebaseQuery(firebaseCollection(db, "stories"), firebaseOrderBy("timestamp", "desc")), (snap) => {
+    const container = document.getElementById('stories');
+    container.innerHTML = `<div class="story-card" id="addStory"><div class="story-circle"><i class="fa fa-plus"></i></div><span>Paylaş</span></div>`;
+    snap.forEach(doc => {
+        const data = doc.data();
+        container.innerHTML += `<div class="story-card"><div class="story-circle"><img src="${data.url}"></div><span>İstifadəçi</span></div>`;
     });
-
-    // Postları Yüklə
-    onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
-        const list = document.getElementById('post-list');
-        list.innerHTML = '';
-        const likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
-
-        snap.forEach(postDoc => {
-            const data = postDoc.data();
-            const id = postDoc.id;
-            const isLiked = likedPosts.includes(id);
-            const commentsHTML = (data.comments || []).map(c => `<p><strong>${c.author}</strong> ${c.text}</p>`).join('');
-
-            list.innerHTML += `
-                <div class="post-card">
-                    <div class="post-header"><span>İstifadəçi</span></div>
-                    <img src="${data.url}" ondblclick="handleLike('${id}')">
-                    <div class="post-info">
-                        <button onclick="handleLike('${id}')">${isLiked ? '❤️' : '🤍'}</button>
-                        <strong>${data.likes || 0} bəyənmə</strong>
-                        <p>${data.text || ""}</p>
-                        <div class="comments-box">${commentsHTML}</div>
-                        <input type="text" id="comment-input-${id}" placeholder="Şərh...">
-                        <button onclick="handleComment('${id}')">Paylaş</button>
-                    </div>
-                </div>`;
-        });
-    });
-}
-
-// --- AUTH MÜŞAHİDƏÇİSİ ---
-onAuthStateChanged(auth, (user) => {
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app');
-    if (user) {
-        authScreen.classList.add('hidden');
-        appScreen.classList.remove('hidden');
-        loadContent();
-    } else {
-        authScreen.classList.remove('hidden');
-        appScreen.classList.add('hidden');
-    }
+    document.getElementById('addStory').onclick = () => handleFileUpload('stories');
 });
 
-document.getElementById('logout-btn').onclick = () => signOut(auth);
+// POSTLARIN GÖSTƏRİLMƏSİ
+firebaseOnSnapshot(firebaseQuery(firebaseCollection(db, "posts"), firebaseOrderBy("timestamp", "desc")), (snap) => {
+    const list = document.getElementById('post-list');
+    list.innerHTML = '';
+const likedPosts = JSON.parse(localStorage.getItem('likedPosts')) || [];
+
+    snapshot.forEach(postDoc => {
+    snap.forEach(postDoc => {
+const data = postDoc.data();
+        const postId = postDoc.id;
+        const isLiked = likedPosts.includes(postId);
+        const id = postDoc.id;
+        const isLiked = likedPosts.includes(id);
+        const comments = data.comments || [];
+
+        let commentsHTML = comments.map(c => `<p style="margin:2px 0; font-size:13px;"><strong>${c.author}</strong> ${c.text}</p>`).join('');
+
+        postList.innerHTML += `
+            <div class="post-card" style="margin-bottom:20px; background:white; border-radius:10px; border:1px solid #dbdbdb; overflow:hidden;">
+                <div style="padding: 10px; font-weight:bold;">İstifadəçi</div>
+                
+                <img src="${data.url}" style="width:100%; display:block;" ondblclick="handleLike('${postId}')">
+                
+                <div style="padding:12px;">
+                    <div style="display:flex; gap:15px; font-size:24px; margin-bottom:5px;">
+        list.innerHTML += `
+            <div class="post-card">
+                <div class="post-header">
+                    <div style="width:30px; height:30px; border-radius:50%; background:#eee;"></div>
+                    <span>İstifadəçi</span>
+                </div>
+                <div class="post-img-container">
+                    <img src="${data.url}" ondblclick="handleLike('${id}')">
+                </div>
+                <div class="post-info">
+                    <div class="post-actions">
+                       <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
+                           style="cursor:pointer; color: ${isLiked ? '#ed4956' : 'black'};" 
+                           onclick="handleLike('${postId}')"></i>
+                        <i class="fa-regular fa-comment"></i>
+                           style="color:${isLiked ? '#ed4956' : 'black'}; cursor:pointer;" onclick="handleLike('${id}')"></i>
+                        <i class="fa-regular fa-comment" onclick="document.getElementById('comment-input-${id}').focus()"></i>
+                    </div>
+                    <strong>${data.likes || 0} bəyənmə</strong>
+                    <p style="margin:5px 0;"><strong>İstifadəçi</strong> ${data.text || ""}</p>
+                    <div id="comments-${id}">${commentsHTML}</div>
+                    <div class="comment-input-area">
+                        <input type="text" id="comment-input-${id}" placeholder="Şərh yaz...">
+                        <button onclick="handleComment('${id}')" style="background:none; border:none; color:#0095f6; font-weight:bold; cursor:pointer;">Paylaş</button>
+                   </div>
+                    <p style="margin:0 0 5px 0; font-weight:bold;">${data.likes || 0} bəyənmə</p>
+                    <p style="margin:0;"><strong>İstifadəçi</strong> ${data.text || ""}</p>
+               </div>
+           </div>`;
+});
+});
+
+document.getElementById('shareBtn').onclick = () => handleFileUpload('stories');
 document.getElementById('mainAddBtn').onclick = () => handleFileUpload('posts');
+window.handleLike = handleLike;
+window.handleComment = handleComment;

@@ -3,64 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeAz - Realtime</title>
+    <title>VİBEAZ</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+
+    <div id="auth-screen" class="auth-overlay">
+        <div class="auth-card">
+            <h1>VİBEAZ</h1>
+            <p>Daxil ol və paylaşmağa başla</p>
+            <div class="auth-inputs">
+                <input type="email" id="auth-email" placeholder="Email ünvanı">
+                <input type="password" id="auth-password" placeholder="Şifrə">
+            </div>
+            <button id="login-btn" class="btn-primary">Giriş Et</button>
+            <button id="register-btn" class="btn-secondary">Hesabın yoxdur? Qeydiyyatdan keç</button>
+            <div id="auth-error" class="error-msg"></div>
+        </div>
+    </div>
+
     <div id="app">
         <header class="app-header">
-            <h1>VIBEAZ</h1>
+            <div class="header-content">
+                <h1>VİBEAZ</h1>
+                <div class="header-icons">
+                    <i class="fa-regular fa-heart"></i>
+                    <i class="fa-solid fa-paper-plane" id="logout-btn" title="Çıxış"></i>
+                </div>
+            </div>
         </header>
 
-        <div class="story-container">
-            <div class="story-card add-btn" id="shareBtn">
-                <div class="story-circle"><i class="fa fa-plus"></i></div>
-                <span>Paylaş</span>
-            </div>
-        </div>
-         <input type="file" id="fileInput" hidden accept="image/*">
-        <div id="post-list" class="post-feed"></div>
+        <main id="post-list"></main>
 
         <nav class="bottom-nav">
-            <i class="fa fa-home"></i>
-            <i class="fa fa-search"></i>
-            <div class="main-add" id="mainAddBtn">+</div>
-            <i class="fa-regular fa-heart"></i>
+            <i class="fa-solid fa-house"></i>
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <div class="main-add" id="mainAddBtn"><i class="fa-solid fa-plus"></i></div>
+            <i class="fa-regular fa-compass"></i>
             <i class="fa-regular fa-user"></i>
         </nav>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+    <input type="file" id="fileInput" hidden accept="image/*">
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
-            authDomain: "vibeaz-1e98a.firebaseapp.com",
-            projectId: "vibeaz-1e98a",
-            storageBucket: "vibeaz-1e98a.firebasestorage.app",
-            messagingSenderId: "953434260285",
-            appId: "1:953434260285:web:6263b4372487ba6d673b54",
-            measurementId: "G-2928WJCY1B"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Funksiyaları script.js üçün global edirik
-        window.db = db;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.onSnapshot = onSnapshot;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.serverTimestamp = serverTimestamp;
-        
-        console.log("Firebase hazır!");
-    </script>
-    <script src="script.js" type="module"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
-
-

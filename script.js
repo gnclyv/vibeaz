@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+// Sənin real Firebase məlumatların
 const firebaseConfig = {
     apiKey: "AIzaSyAs_F94p_TfI3m1fK69WwMog6C2v8",
     authDomain: "vibeaz-e866a.firebaseapp.com",
@@ -14,24 +15,71 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-const authScreen = document.getElementById('auth-screen');
-const appScreen = document.getElementById('app');
+// 1. ReCAPTCHA-nı (Robot yoxlaması) görünməz şəkildə işə salırıq
+window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+    'size': 'invisible'
+}, auth);
 
-// İstifadəçi statusunu yoxla
-onAuthStateChanged(auth, (user) => {
+// 2. Avtomatik Giriş Yoxlaması
+onAuthStateChanged(auth, async (user) => {
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app');
+
     if (user) {
-        authScreen.style.display = 'none';
-        appScreen.style.display = 'block';
-        loadPosts();
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            console.log("Giriş uğurludur:", userDoc.data().username);
+        }
     } else {
-        authScreen.style.display = 'flex';
-        appScreen.style.display = 'none';
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
     }
 });
 
-// Qeydiyyat
-document.getElementById('register-btn').onclick = async () => {
-    const email = document.getElementById('auth-email').value;
-    const pass = document.getElementById
+// 3. SMS Göndərmə
+document.getElementById('send-sms-btn').onclick = () => {
+    const username = document.getElementById('username').value;
+    const number = document.getElementById('phoneNumber').value;
+
+    if (!username || !number.startsWith('+')) {
+        alert("Zəhmət olmasa ad daxil edin və nömrəni +994 formatında yazın!");
+        return;
+    }
+
+    signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            document.getElementById('reg-form').classList.add('hidden');
+            document.getElementById('verification-area').classList.remove('hidden');
+            alert("Real SMS göndərildi! (Günlük limit: 10)");
+        }).catch((error) => {
+            alert("Xəta: " + error.message);
+        });
+};
+
+// 4. Kodu Təsdiqləmə və Firestore-a Qeyd
+document.getElementById('verify-sms-btn').onclick = () => {
+    const code = document.getElementById('smsCode').value;
+    const username = document.getElementById('username').value;
+
+    window.confirmationResult.confirm(code).then(async (result) => {
+        // İstifadəçini bazaya yazırıq ki, birdə qeydiyyat istəməsin
+        await setDoc(doc(db, "users", result.user.uid), {
+            username: username,
+            phoneNumber: result.user.phoneNumber,
+            createdAt: new Date()
+        });
+        
+        location.reload();
+    }).catch(() => {
+        alert("Kod səhvdir!");
+    });
+};
+
+// 5. Çıxış
+document.getElementById('logout-btn').onclick = () => {
+    signOut(auth).then(() => location.reload());
+};

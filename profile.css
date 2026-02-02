@@ -1,55 +1,217 @@
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; }
-
-.profile-page { max-width: 500px; margin: 0 auto; padding-bottom: 70px; }
-
-/* Üst Başlıq */
-.top-bar { display: flex; align-items: center; padding: 15px; gap: 8px; }
-.top-bar h2 { font-size: 16px; font-weight: 700; }
-
-/* Header */
-.profile-header { display: flex; align-items: center; padding: 10px 20px; gap: 30px; }
-.avatar-section { text-align: left; }
-.avatar-section img { width: 77px; height: 77px; border-radius: 50%; object-fit: cover; border: 2px solid #000; }
-.avatar-ring { padding: 2px; border: 1.5px solid #262626; border-radius: 50%; }
-.avatar-section h3 { font-size: 14px; margin-top: 10px; font-weight: 600; }
-
-.stats-section { display: flex; flex: 1; justify-content: space-around; text-align: center; }
-.stat-item span { display: block; font-weight: 700; font-size: 18px; }
-.stat-item p { font-size: 13px; }
-
-/* Bio və Düymələr */
-.bio-container { padding: 0 20px 20px; font-size: 14px; }
-.email-text { color: #a8a8a8; }
-
-.action-buttons { display: flex; gap: 8px; padding: 0 20px 20px; }
-.btn-main { flex: 1; background: #262626; color: #fff; border: none; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; }
-
-/* Grid */
-.tabs { display: flex; border-top: 1px solid #262626; }
-.tab-item { flex: 1; text-align: center; padding: 12px; color: #8e8e8e; font-size: 20px; }
-.tab-item.active { color: #fff; border-bottom: 1px solid #fff; }
-
-.posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-.grid-item { aspect-ratio: 1/1; background: #121212; overflow: hidden; }
-.grid-item img { width: 100%; height: 100%; object-fit: cover; }
-
-/* ANA MENYU RƏNGLƏRİ VƏ STİLİ */
-.bottom-nav { 
-    position: fixed; bottom: 0; left: 0; width: 100%; height: 50px; 
-    background: #000; border-top: 1px solid #262626; 
-    display: flex; justify-content: space-around; align-items: center; z-index: 1000; 
+/* 1. Ümumi Sıfırlama və Fontlar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
-.nav-link { color: #fff; font-size: 24px; text-decoration: none; }
 
-/* Ortadakı qradiyent Paylaş düyməsi */
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: 60px; /* Alt menyu üçün boşluq */
+}
+
+.profile-page {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* 2. Üst Header (Username hissəsi) */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    gap: 5px;
+    position: sticky;
+    top: 0;
+    background: #000;
+    z-index: 100;
+}
+
+.top-bar h2 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* 3. Profil Header: Logo və Statistikalar */
+.profile-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    gap: 30px;
+}
+
+.avatar-section {
+    flex: 0 0 85px;
+}
+
+.avatar-ring {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    border: 1.5px solid #262626; /* Sabit loqo ətrafındakı halqa */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+.avatar-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.stats-section {
+    display: flex;
+    flex: 1;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.stat-item span {
+    display: block;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.stat-item p {
+    font-size: 13px;
+    color: #fff;
+}
+
+/* 4. Bio və İstifadəçi Məlumatları */
+.bio-container {
+    padding: 5px 20px 15px;
+}
+
+.bio-container h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.email-text {
+    font-size: 14px;
+    color: #a8a8a8;
+}
+
+.bio-text {
+    font-size: 14px;
+    margin-top: 3px;
+}
+
+/* 5. Düymələr: Yan-yana */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 20px;
+}
+
+.btn-main {
+    flex: 1;
+    background-color: #262626; /* Instagram boz rəngi */
+    color: #fff;
+    border: none;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* 6. Post Tabları */
+.tabs {
+    display: flex;
+    border-top: 1px solid #262626;
+}
+
+.tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    color: #8e8e8e;
+    font-size: 20px;
+}
+
+.tab-item.active {
+    color: #fff;
+    border-bottom: 1px solid #fff;
+}
+
+/* 7. Real Zamanlı Post Grid */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px; /* Şəkillər arasındakı incə Instagram boşluğu */
+}
+
+.grid-item {
+    aspect-ratio: 1 / 1;
+    background-color: #121212;
+    overflow: hidden;
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 8. ANA SƏHİFƏ İLƏ EYNİ ALT MENYU */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #000;
+    border-top: 1px solid #262626;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-link {
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+}
+
+/* Qradiyent Paylaş Düyməsi */
 .nav-plus-btn {
-    width: 40px; height: 40px; 
+    width: 42px;
+    height: 42px;
     background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border-radius: 12px; /* Sənin ana səhifəndəki formaya uyğun */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.plus-icon { font-size: 18px !important; }
 
-.mini-avatar-border { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; border: 1.5px solid transparent; }
-.nav-link.active .mini-avatar-border { border-color: #fff; }
-.nav-img { width: 100%; height: 100%; object-fit: cover; }
+.plus-icon {
+    font-size: 18px !important;
+}
+
+.mini-avatar-border {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid transparent;
+}
+
+.nav-link.active .mini-avatar-border {
+    border-color: #fff;
+}
+
+.nav-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

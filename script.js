@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // 1. Firebase Konfiqurasiyası
 const firebaseConfig = {
@@ -17,51 +17,61 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// 2. İstifadəçi Statusu Yoxlanışı
-onAuthStateChanged(auth, async (user) => {
+// 2. İstifadəçi statusunu izləmə
+onAuthStateChanged(auth, (user) => {
     if (!user) {
         if (!window.location.pathname.includes("login.html")) {
             window.location.href = "login.html";
         }
     } else {
-        await user.reload(); // Profil adının dərhal tanınması üçün
         document.getElementById('app').style.display = 'block';
         loadPosts();
     }
 });
 
-// 3. Post Paylaşma (Ad ilə birgə)
+// 3. Post Paylaşma (Gmail-ə uyğun və Xətasız)
 async function uploadPost() {
     const fileInp = document.getElementById('fileInput');
-    const user = auth.currentUser;
-
+    
     fileInp.onchange = async () => {
-        const file = fileInp.files[0];
-        if (!file || !user) return;
+        const user = auth.currentUser;
+        if (!user || !fileInp.files[0]) return;
 
         const fd = new FormData();
-        fd.append("image", file);
+        fd.append("image", fileInp.files[0]);
 
         try {
+            // Şəkli ImgBB-yə yükləyirik
             const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
             const result = await res.json();
 
             if (result.success) {
-                const text = prompt("Post üçün açıqlama yazın:");
-                // Ad yoxdursa nömrəni, o da yoxdursa "İstifadəçi" yazırıq
-                const nameToDisplay = user.displayName || user.phoneNumber || "İstifadəçi";
+                const text = prompt("Post üçün açıqlama:");
+                
+                // split xətasının qarşısını alan təhlükəsiz ad məntiqi
+                let finalName = "İstifadəçi";
+                if (user.displayName) {
+                    finalName = user.displayName;
+                } else if (user.email) {
+                    // Gmail ünvanını @-dan parçalayıb ad kimi istifadə edirik
+                    finalName = user.email.split('@')[0];
+                }
 
+                // Sildiyin 'posts' kolleksiyası burada avtomatik yaranacaq
                 await addDoc(collection(db, "posts"), {
                     url: result.data.url,
                     text: text || "",
-                    userName: nameToDisplay,
+                    userName: finalName,
                     likes: 0,
-                    comments: [], // Şərhlər üçün boş massiv
+                    comments: [],
                     timestamp: serverTimestamp()
                 });
                 alert("Paylaşıldı!");
             }
-        } catch (e) { console.error("Yükləmə xətası:", e); }
+        } catch (e) {
+            console.error("Yükləmə xətası:", e);
+            alert("Xəta baş verdi: " + e.message);
+        }
     };
     fileInp.click();
 }
@@ -75,7 +85,7 @@ window.handleLike = async (id) => {
         await updateDoc(doc(db, "posts", id), { likes: increment(1) });
         liked.push(id);
         localStorage.setItem('vibeLikes', JSON.stringify(liked));
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Like xətası:", e); }
 };
 
 // 5. Şərh Yazmaq Funksiyası
@@ -89,7 +99,7 @@ window.addComment = async (postId) => {
     try {
         await updateDoc(doc(db, "posts", postId), {
             comments: arrayUnion({
-                user: user.displayName || "İstifadəçi",
+                user: user.email.split('@')[0], // Şərhlərdə də email-dən ad götürürük
                 text: commentText,
                 time: Date.now()
             })
@@ -98,13 +108,14 @@ window.addComment = async (postId) => {
     } catch (e) { console.error("Şərh xətası:", e); }
 };
 
-// 6. Postları Ekrana Çıxarma
+// 6. Postları Yükləmə (Modern Dizaynla)
 function loadPosts() {
     const list = document.getElementById('post-list');
     onSnapshot(collection(db, "posts"), (snap) => {
         let postsArray = [];
         snap.forEach(d => postsArray.push({ id: d.id, ...d.data() }));
-        // Tarixə görə sıralama
+        
+        // Yenidən köhnəyə sıralama
         postsArray.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
         list.innerHTML = ''; 
@@ -117,30 +128,28 @@ function loadPosts() {
             const comments = data.comments || [];
 
             list.innerHTML += `
-                <div class="post-card" style="background:#1a1a1a; margin-bottom:25px; border-radius:15px; border:1px solid #333; overflow:hidden;">
-                    <div class="post-header" style="display:flex; align-items:center; padding:12px;">
-                        <img src="https://ui-avatars.com/api/?name=${author}&background=random" style="width:32px; height:32px; border-radius:50%; margin-right:10px;">
-                        <span style="font-weight:600; color:white;">${author}</span>
+                <div class="post-card" style="background:#111; margin-bottom:20px; border-radius:15px; overflow:hidden; border:1px solid #333;">
+                    <div style="padding:10px; display:flex; align-items:center; gap:10px;">
+                        <img src="https://ui-avatars.com/api/?name=${author}&background=random" style="width:30px; border-radius:50%;">
+                        <span style="font-weight:bold; color:white;">${author}</span>
                     </div>
-                    <img src="${data.url}" style="width:100%; aspect-ratio:1/1; object-fit:cover;" ondblclick="handleLike('${id}')">
-                    
-                    <div style="padding:15px; color:white;">
-                        <div style="display:flex; gap:15px; margin-bottom:10px; font-size:22px;">
+                    <img src="${data.url}" style="width:100%; display:block;" ondblclick="handleLike('${id}')">
+                    <div style="padding:12px;">
+                        <div style="display:flex; gap:15px; margin-bottom:10px; font-size:20px; color:white;">
                             <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
                                onclick="handleLike('${id}')" style="cursor:pointer; color:${isLiked ? '#ff3040' : 'white'}"></i>
-                            <i class="fa-regular fa-comment" onclick="document.getElementById('comment-input-${id}').focus()" style="cursor:pointer;"></i>
                         </div>
-                        <div style="font-weight:700; margin-bottom:5px;">${data.likes || 0} bəyənmə</div>
-                        <div style="margin-bottom:10px;"><b>${author}</b> ${data.text || ""}</div>
+                        <div style="color:white; font-size:14px; margin-bottom:5px;"><b>${data.likes || 0} bəyənmə</b></div>
+                        <div style="color:white; font-size:14px;"><b>${author}</b> ${data.text || ""}</div>
                         
-                        <div id="comments-${id}" style="font-size:13px; color:#aaa; max-height:80px; overflow-y:auto; margin-bottom:10px;">
-                            ${comments.map(c => `<div style="margin-bottom:3px;"><b style="color:white;">${c.user}</b> ${c.text}</div>`).join('')}
+                        <div id="comments-${id}" style="font-size:13px; color:#888; margin-top:10px;">
+                            ${comments.slice(-2).map(c => `<div><b>${c.user}</b> ${c.text}</div>`).join('')}
                         </div>
 
-                        <div style="display:flex; border-top:1px solid #333; padding-top:10px;">
+                        <div style="display:flex; margin-top:10px; border-top:1px solid #222; padding-top:8px;">
                             <input type="text" id="comment-input-${id}" placeholder="Şərh yaz..." 
-                                   style="background:none; border:none; color:white; flex:1; outline:none; font-size:14px;">
-                            <button onclick="addComment('${id}')" style="background:none; border:none; color:#0095f6; font-weight:600; cursor:pointer;">Paylaş</button>
+                                   style="background:none; border:none; color:white; flex:1; outline:none; font-size:13px;">
+                            <button onclick="addComment('${id}')" style="background:none; border:none; color:#0095f6; font-weight:bold; cursor:pointer;">Paylaş</button>
                         </div>
                     </div>
                 </div>`;
@@ -148,5 +157,6 @@ function loadPosts() {
     });
 }
 
+// Düymələr
 document.getElementById('mainAddBtn').onclick = uploadPost;
-document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.reload());
+document.getElementById('logout-btn').onclick = () => signOut(auth);

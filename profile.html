@@ -5,31 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil - VibeAz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="profile.css?v=1.5">
+    <link rel="stylesheet" href="profile.css">
 </head>
-<body style="background: #000; color: white; font-family: -apple-system, sans-serif;">
+<body>
 
-    <div class="profile-wrapper">
+    <div class="profile-container">
         <header class="profile-header">
-            <div class="avatar-section">
+            <div class="avatar-wrapper">
                 <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar">
+                <div class="avatar-ring"></div>
             </div>
-            <div class="details-section">
-                <div class="username-row">
+            
+            <div class="profile-info">
+                <div class="username-section">
                     <h2 id="profile-username">Yüklənir...</h2>
-                    <button id="edit-profile-btn" class="edit-btn">Profili Redaktə Et</button>
+                    <button id="edit-profile-btn" class="btn-modern secondary">Profili Redaktə Et</button>
+                    <button id="logout-btn" class="icon-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
-                <div class="stats-row">
-                    <span><b id="post-count">0</b> paylaşım</span>
+                
+                <div class="stats-section">
+                    <span><strong id="post-count">0</strong> post</span>
                 </div>
-                <div class="bio-row">
-                    <p id="profile-email" style="color: #8e8e8e; font-size: 14px;"></p>
+                
+                <div class="bio-section">
+                    <p id="profile-email" class="user-email"></p>
+                    <p id="profile-bio" class="user-bio">Xoş gəlmisiniz!</p>
                 </div>
             </div>
         </header>
 
-        <div class="tabs">
-            <div class="tab active"><i class="fa-solid fa-table-cells"></i></div>
+        <div class="profile-tabs">
+            <div class="tab-item active"><i class="fa-solid fa-table-cells"></i> POSTLAR</div>
         </div>
-        
+
         <div id="user-posts-grid" class="posts-grid">
+            </div>
+    </div>
+
+    <nav class="bottom-bar">
+        <a href="index.html"><i class="fa-solid fa-house"></i></a>
+        <a href="#"><i class="fa-solid fa-magnifying-glass"></i></a>
+        <a href="#"><i class="fa-solid fa-plus-square"></i></a>
+        <a href="profile.html" class="active"><i class="fa-solid fa-user"></i></a>
+    </nav>
+
+    <div id="edit-modal" class="modal-backdrop">
+        <div class="modal-card">
+            <h3>Profili Yenilə</h3>
+            <div class="upload-circle">
+                <img id="preview-img" src="">
+                <input type="file" id="new-avatar-input" hidden accept="image/*">
+                <label for="new-avatar-input"><i class="fa-solid fa-camera"></i></label>
+            </div>
+            <input type="text" id="new-name-input" placeholder="Yeni ad">
+            <div class="modal-actions">
+                <button id="save-profile-btn" class="btn-modern primary">Yadda Saxla</button>
+                <button id="close-modal-btn" class="btn-modern text">Ləğv Et</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="profile.js"></script>
+</body>
+</html>

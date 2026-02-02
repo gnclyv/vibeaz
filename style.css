@@ -4,7 +4,15 @@ body {
     padding: 0;
     background-color: #fafafa;
 }
-
+nav, .bottom-nav, .fa-house, .fa-magnifying-glass, .fa-user, .fa-heart {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+    }
 /* Üst Panel */
 .app-header {
     display: flex;
@@ -43,4 +51,5 @@ body {
     height: 100%;
     object-fit: cover; /* Şəkli dartmadan sığdırır */
 }
+
 

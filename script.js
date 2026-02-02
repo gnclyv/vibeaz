@@ -2,9 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// Sənin real Firebase məlumatların
 const firebaseConfig = {
-    apiKey: "BURADA_TAM_API_KEY_OLMALIDIR", // Console-dan kopyaladığın tam kod
+    apiKey: "AIzaSyAs_F94p_TfI3m1fK69WwMog6C2v8",
     authDomain: "vibeaz-e866a.firebaseapp.com",
     projectId: "vibeaz-e866a",
     storageBucket: "vibeaz-e866a.appspot.com",
@@ -83,4 +82,5 @@ document.getElementById('verify-sms-btn').onclick = () => {
 document.getElementById('logout-btn').onclick = () => {
     signOut(auth).then(() => location.reload());
 };
+
 

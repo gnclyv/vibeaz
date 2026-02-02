@@ -5,20 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeAz</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <input type="file" id="fileInput" hidden accept="image/*">
 
     <div id="app">
         <header class="app-header">
-            <div class="header-content">
-                <h1>VIBEAZ</h1>
-                <div class="header-icons">
-                    <i class="fa-regular fa-heart"></i>
-                    <i class="fa-regular fa-paper-plane"></i>
-                </div>
-            </div>
+            <h1>VIBEAZ</h1>
         </header>
 
         <div class="story-container" id="stories">
@@ -31,11 +24,7 @@
         <div id="post-list" class="post-feed"></div>
 
         <nav class="bottom-nav">
-            <i class="fa-solid fa-house"></i>
-            <i class="fa-solid fa-magnifying-glass"></i>
             <div class="main-add" id="mainAddBtn">+</div>
-            <i class="fa-solid fa-clapperboard"></i>
-            <i class="fa-solid fa-user"></i>
         </nav>
     </div>
 
@@ -44,25 +33,22 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            authDomain: "vibeaz-3075c.firebaseapp.com",
-            projectId: "vibeaz-3075c",
-            storageBucket: "vibeaz-3075c.appspot.com",
-            messagingSenderId: "367232231637",
-            appId: "1:367232231637:web:653e0d88981f33f1f1d932"
+            // BURAYA ÖZ FİREBASE CONFİG-İNİ YAPIŞDIR
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Xətanın qarşısını almaq üçün funksiyaları window-a ötürürük
+        // Global dəyişənlər
         window.db = db;
-        window.firebaseCollection = collection;
-        window.firebaseAddDoc = addDoc;
-        window.firebaseOnSnapshot = onSnapshot;
-        window.firebaseQuery = query;
-        window.firebaseOrderBy = orderBy;
-        window.firebaseServerTimestamp = serverTimestamp;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.onSnapshot = onSnapshot;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.serverTimestamp = serverTimestamp;
     </script>
+    
     <script src="script.js"></script>
 </body>
 </html>

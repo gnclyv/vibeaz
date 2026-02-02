@@ -1,21 +1,38 @@
-// Paylaş düyməsinə basanda işləyən funksiya
-async function sharePost() {
-    const imageUrl = prompt("Paylaşmaq istədiyiniz şəklin linkini (URL) bura yapışdırın:");
-    
+// Paylaş düyməsini tapırıq
+const addBtn = document.querySelector('.add-btn');
+
+addBtn.onclick = async () => {
+    // İstifadəçidən link istəyirik
+    const imageUrl = prompt("Şəkil linkini (URL) bura yapışdırın:");
+
     if (imageUrl) {
         try {
-            // Məlumatı birbaşa Firestore-a yazırıq (Storage-ə ehtiyac yoxdur)
+            // Firestore-a (posts kolleksiyasına) yazırıq
             await window.addDoc(window.collection(window.db, "posts"), {
                 url: imageUrl,
                 timestamp: window.serverTimestamp()
             });
-            alert("Uğurla paylaşıldı! ✨");
+            alert("Paylaşıldı! ✨");
+            location.reload(); // Səhifəni yeniləyirik ki, yeni şəkil görünsün
         } catch (error) {
             console.error("Xəta:", error);
-            alert("Paylaşım alınmadı. Firestore Rules-u yoxlayın.");
+            alert("Xəta baş verdi! Firestore Rules-u (if true) yoxlayın.");
         }
     }
-}
+};
 
-// HTML-dəki Paylaş düyməsini bu funksiyaya bağla
-document.querySelector('.add-btn').onclick = sharePost;
+// Postları ekranda göstərmək üçün kod
+const q = window.query(window.collection(window.db, "posts"), window.orderBy("timestamp", "desc"));
+window.onSnapshot(q, (snapshot) => {
+    const postList = document.getElementById('post-list');
+    postList.innerHTML = '';
+    snapshot.forEach((doc) => {
+        const post = doc.data();
+        postList.innerHTML += `
+            <div class="post-card">
+                <img src="${post.url}" style="width:100%; border-radius:10px; margin-bottom:10px;">
+                <p>Yeni paylaşım</p>
+            </div>
+        `;
+    });
+});

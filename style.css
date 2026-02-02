@@ -1,4 +1,93 @@
-/* Menyunun tam aşağıda sabit qalması üçün */
+/* 1. Ümumi Tənzimləmələr */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fafafa;
+    color: #262626;
+}
+
+/* 2. Header (Üst Panel) */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: white;
+    border-bottom: 1px solid #dbdbdb;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.app-header h1 {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 22px;
+    margin: 0;
+    font-weight: bold;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.header-actions i {
+    font-size: 20px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+
+/* 3. Post Feed (Postlar Hissəsi) */
+.post-feed {
+    max-width: 500px;
+    margin: 0 auto 80px; /* Alt panelə yer saxlamaq üçün */
+    padding: 10px;
+}
+
+.post-card {
+    background: white;
+    border: 1px solid #dbdbdb;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Şəkilləri kvadrat edən və dağılmaqdan qoruyan hissə */
+.post-img-container {
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important; /* Mütləq kvadrat ölçü */
+    overflow: hidden !important;
+    background-color: #efefef;
+}
+
+.post-img-container img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Şəkli dartmır, kvadratın içine sığdırır */
+    display: block;
+}
+
+.post-info {
+    padding: 12px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 15px;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.post-actions i {
+    cursor: pointer;
+}
+
+/* 4. Alt Naviqasiya (İkonlar üçün mütləq dizayn) */
 .bottom-nav {
     position: fixed !important;
     bottom: 0 !important;
@@ -6,7 +95,7 @@
     right: 0 !important;
     width: 100% !important;
     height: 60px !important;
-    background-color: white !important;
+    background: white !important;
     border-top: 1px solid #dbdbdb !important;
     display: flex !important;
     justify-content: space-around !important;
@@ -14,34 +103,23 @@
     z-index: 9999 !important;
 }
 
-/* İkonların ölçüsü */
 .bottom-nav i {
     font-size: 24px !important;
     color: #262626 !important;
     cursor: pointer !important;
 }
 
-/* Paylaşma (Göy "+") düyməsi */
+/* Paylaşma (Göy "+" düyməsi) */
 .main-add {
     background-color: #0095f6 !important;
+    color: white !important;
     width: 44px !important;
     height: 44px !important;
     border-radius: 12px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    color: white !important;
-}
-
-/* Şəkillərin böyük olub dağılmaması üçün */
-.post-img-container {
-    width: 100% !important;
-    aspect-ratio: 1 / 1 !important;
-    overflow: hidden !important;
-}
-
-.post-img-container img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+    font-size: 20px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3) !important;
 }

@@ -1,102 +1,82 @@
-/* login.css */
-html, body {
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100%;
+/* Bütün boşluqları sıfırlayırıq */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, system-ui, sans-serif;
 }
 
-body {
-    background: #000 !important; /* Fonun tam qara olması üçün */
-    display: flex !important;
-    align-items: center !important;    /* Şaquli mərkəzləmə */
-    justify-content: center !important; /* Üfüqi mərkəzləmə */
-}
-
-.auth-card {
-    background: #111;
-    border: 1px solid #333;
-    padding: 40px;
-    border-radius: 20px;
-    width: 350px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,1);
-    z-index: 100; /* Digər elementlərin üstündə olması üçün */
-}
-
-/* Əgər loqo küncdə qalırsa bunu düzəlt */
-.logo {
-    display: block;
-    margin: 0 auto 20px auto;
-    text-align: center;
-}
-
-/* Ekranı mərkəzləyən əsas konteyner */
+/* Ekranın tam mərkəzinə gətirən konteyner */
 .auth-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #000; /* Tam qara fon */
+    background-color: #000; /* Tam qara fon */
     padding: 20px;
 }
 
-/* Modern Kart Dizaynı */
+/* Modern Giriş Kartı */
 .auth-card {
     background: #121212;
     border: 1px solid #282828;
     padding: 40px 30px;
     border-radius: 24px;
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
     display: flex;
-    flex-direction: column; /* Elementləri alt-alta düzür */
-    gap: 25px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    flex-direction: column; /* Elementləri mütləq alt-alta düzür */
+    gap: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+}
+
+/* Loqo və Başlıq */
+.brand {
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 .logo {
     font-size: 42px;
     font-weight: 900;
-    text-align: center;
-    background: linear-gradient(to right, #f09433, #dc2743, #bc1888);
+    background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 5px;
+    letter-spacing: 2px;
 }
 
 .subtitle {
-    color: #a8a8a8;
+    color: #888;
     font-size: 14px;
-    text-align: center;
+    margin-top: 8px;
 }
 
-/* İnputların alt-alta və səliqəli olması */
+/* İnputların düzülüşü */
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
 }
 
 input {
     width: 100%;
-    height: 55px;
-    padding: 0 20px;
+    height: 52px;
+    padding: 0 16px;
     background: #1a1a1a;
     border: 1px solid #333;
     border-radius: 12px;
     color: white;
     font-size: 16px;
-    transition: 0.3s ease;
+    outline: none;
+    transition: 0.3s;
 }
 
 input:focus {
     border-color: #0095f6;
     background: #222;
-    outline: none;
 }
 
-/* Düymə Stilləri */
+/* Düymələr */
 .main-btn {
     width: 100%;
     height: 50px;
@@ -107,12 +87,12 @@ input:focus {
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: 0.2s;
 }
 
 .main-btn:hover {
     background: #1877f2;
-    transform: scale(1.02);
+    transform: scale(1.01);
 }
 
 .secondary-btn {
@@ -122,25 +102,27 @@ input:focus {
     border: none;
     font-weight: 600;
     cursor: pointer;
+    font-size: 14px;
     padding: 10px;
 }
 
-/* Ara kəsici xətt */
+/* "Və ya" bölməsi */
 .divider {
     display: flex;
     align-items: center;
     text-align: center;
-    color: #555;
-    margin: 10px 0;
+    color: #444;
+    margin: 5px 0;
 }
 
 .divider::before, .divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #222;
 }
 
 .divider span {
     padding: 0 10px;
     font-size: 12px;
+    text-transform: uppercase;
 }

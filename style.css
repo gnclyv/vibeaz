@@ -1,109 +1,45 @@
-/* 1. Ümumi Tənzimləmələr */
-:root {
-    --insta-blue: #0095f6;
-    --insta-red: #ed4956;
-    --border-color: #dbdbdb;
-    --bg-color: #fafafa;
-}
-
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: var(--bg-color);
-    color: #262626;
+    background-color: #fafafa;
 }
 
-/* 2. Header (Üst Panel) */
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     background: white;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #dbdbdb;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
 .app-header h1 {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    font-size: 22px;
+    font-family: 'Comic Sans MS', cursive;
     margin: 0;
-    font-weight: bold;
+    font-size: 24px;
 }
 
-.header-actions i {
-    font-size: 20px;
-    margin-left: 15px;
-    cursor: pointer;
-}
-
-/* 3. Story Bölməsi */
-.story-container {
-    display: flex;
-    padding: 15px;
-    gap: 15px;
-    overflow-x: auto;
-    background: white;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.story-container::-webkit-scrollbar { display: none; }
-
-.story-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 75px;
-    font-size: 12px;
-}
-
-.story-circle {
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    padding: 2px;
-    border: 2px solid #e1306c;
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.story-circle img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* 4. Post Feed (Postlar Hissəsi) */
+/* Postların dizaynı */
 .post-feed {
     max-width: 500px;
-    margin: 0 auto 70px; /* Alt panelə yer saxlamaq üçün */
+    margin: 0 auto 80px;
 }
 
 .post-card {
     background: white;
-    border: 1px solid var(--border-color);
+    border: 1px solid #dbdbdb;
     margin-top: 15px;
     border-radius: 8px;
     overflow: hidden;
 }
 
-.post-header {
-    padding: 12px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
 /* Şəkilləri kvadrat edən əsas hissə */
 .post-img-container {
     width: 100%;
-    aspect-ratio: 1 / 1; /* Mütləq kvadrat ölçü */
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     background-color: #efefef;
 }
@@ -111,7 +47,7 @@ body {
 .post-img-container img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Şəkli dartmır, kvadratın içinə sığdırır */
+    object-fit: cover;
 }
 
 .post-info {
@@ -122,34 +58,25 @@ body {
     display: flex;
     gap: 15px;
     font-size: 24px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
-.post-actions i { cursor: pointer; }
-
-/* 5. Alt Naviqasiya (Göy düymə ilə) */
+/* Alt Naviqasiya */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
+    width: 100%;
     height: 55px;
     background: white;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid #dbdbdb;
     display: flex;
     justify-content: space-around;
     align-items: center;
     z-index: 1000;
 }
 
-.bottom-nav i {
-    font-size: 22px;
-    color: #262626;
-    cursor: pointer;
-}
-
 .main-add {
-    background: var(--insta-blue);
+    background: #0095f6;
     color: white;
     width: 42px;
     height: 42px;
@@ -160,9 +87,4 @@ body {
     font-size: 20px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3);
-    transition: transform 0.2s;
-}
-
-.main-add:active {
-    transform: scale(0.9);
 }

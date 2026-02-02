@@ -1,150 +1,78 @@
-:root {
-    --insta-blue: #0095f6;
-    --insta-red: #ed4956;
-    --bg-color: #fafafa;
-    --border-color: #dbdbdb;
-    --text-main: #262626;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-}
-
-/* Header - Daha təmiz və sabit */
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.98);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    backdrop-filter: blur(10px);
-}
-
-.app-header h1 {
-    font-family: 'Instagram Sans', 'Comic Sans MS', cursive;
-    font-size: 24px;
-    margin: 0;
-    letter-spacing: -1px;
-}
-
-/* Story Hissəsi - Yumşaq keçidlər */
-.story-container {
-    display: flex;
-    padding: 15px;
-    gap: 15px;
-    overflow-x: auto;
-    background: white;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.story-container::-webkit-scrollbar { display: none; }
-
-.story-circle {
-    width: 66px;
-    height: 66px;
-    border-radius: 50%;
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    padding: 2px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s;
-}
-
-.story-circle:active { transform: scale(0.9); }
-
-.story-circle img {
+/* Post Şəkillərinin Sabit Ölçüsü */
+.post-img-container {
     width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
-}
-
-/* Post Kartları - Müasir kölgə və kənarlar */
-.post-feed {
-    max-width: 500px;
-    margin: 10px auto 80px;
-}
-
-.post-card {
-    background: white;
-    border: 1px solid var(--border-color);
-    margin-bottom: 25px;
-    border-radius: 12px;
+    aspect-ratio: 1 / 1; /* Şəkilləri kvadrat (1:1) edir, Instagram kimi */
     overflow: hidden;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.post-header {
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-    font-size: 14px;
+    background-color: #efefef;
 }
 
 .post-img-container img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover; /* Şəkli deformasiya etmədən sahəyə uyğunlaşdırır */
     display: block;
 }
 
-.post-info { padding: 12px; }
+/* Post Kartının Daha Səliqəli Dizaynı */
+.post-card {
+    background: white;
+    border: 1px solid #dbdbdb;
+    margin-bottom: 25px;
+    border-radius: 8px; /* Kənarları bir az yumşaldılmış */
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03); /* Çox yüngül kölgə */
+}
+
+.post-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* İstifadəçi Avatarı (Postun başında kiçik dairə) */
+.post-header::before {
+    content: "";
+    width: 32px;
+    height: 32px;
+    background: #ddd;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.post-info {
+    padding: 12px 16px;
+}
 
 .post-actions {
     display: flex;
-    gap: 16px;
-    font-size: 24px;
-    margin-bottom: 10px;
-}
-
-.post-actions i { transition: 0.1s; }
-.post-actions i:active { transform: scale(1.2); }
-
-/* Alt Naviqasiya - Daha qəşəng */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.95);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    backdrop-filter: blur(15px);
-}
-
-.main-add {
-    background: var(--insta-blue);
-    color: white;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    gap: 15px;
     font-size: 22px;
-    box-shadow: 0 4px 15px rgba(0, 149, 246, 0.4);
-    transition: 0.3s;
+    margin-bottom: 8px;
 }
 
-.main-add:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0, 149, 246, 0.5); }
+.post-actions i:hover {
+    opacity: 0.7;
+    cursor: pointer;
+}
 
-/* Şərh sahəsi */
+/* Şərhlər Bölməsi */
+.comments-area {
+    margin-top: 10px;
+    border-top: 1px solid #fafafa;
+    padding-top: 8px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
 .comment-input-area {
     display: flex;
+    align-items: center;
     border-top: 1px solid #efefef;
-    padding-top: 10px;
     margin-top: 10px;
+    padding: 10px 0 0 0;
 }
 
 .comment-input-area input {
@@ -152,12 +80,14 @@ body {
     border: none;
     outline: none;
     font-size: 14px;
+    background: transparent;
 }
 
 .comment-input-area button {
+    color: #0095f6;
+    font-weight: 600;
     border: none;
     background: none;
-    color: var(--insta-blue);
-    font-weight: 600;
     cursor: pointer;
+    font-size: 14px;
 }

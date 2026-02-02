@@ -14,8 +14,8 @@
             <i class="fa-regular fa-paper-plane"></i>
         </header>
 
-        <div class="story-container" id="stories">
-            <div class="story-card add-btn" onclick="document.getElementById('fileInput').click()">
+        <div class="story-container">
+            <div class="story-card add-btn" id="shareBtn">
                 <div class="story-circle"><i class="fa fa-plus"></i></div>
                 <span>Paylaş</span>
             </div>
@@ -26,23 +26,16 @@
         <nav class="bottom-nav">
             <i class="fa fa-home"></i>
             <i class="fa fa-search"></i>
-            <div class="main-add" onclick="document.getElementById('fileInput').click()">+</div>
+            <div class="main-add" id="mainAddBtn">+</div>
             <i class="fa-regular fa-heart"></i>
             <i class="fa-regular fa-user"></i>
         </nav>
-
-    </div>
-
-    <div id="story-overlay" class="overlay" onclick="this.style.display='none'">
-        <img id="story-img" src="">
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
-        // Şəkillərdən götürülmüş real Firebase məlumatların
         const firebaseConfig = {
             apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
             authDomain: "vibeaz-1e98a.firebaseapp.com",
@@ -55,24 +48,18 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        // Global istifadə üçün funksiyaları pəncərəyə bağlayırıq
+        // Funksiyaları script.js üçün global edirik
         window.db = db;
-        window.storage = storage;
-        window.addDoc = addDoc;
         window.collection = collection;
-        window.ref = ref;
-        window.uploadBytes = uploadBytes;
-        window.getDownloadURL = getDownloadURL;
+        window.addDoc = addDoc;
         window.onSnapshot = onSnapshot;
         window.query = query;
         window.orderBy = orderBy;
         window.serverTimestamp = serverTimestamp;
         
-        console.log("Firebase VibeAz layihəsinə uğurla bağlandı! 🚀");
+        console.log("Firebase hazır!");
     </script>
     <script src="script.js" type="module"></script>
 </body>
 </html>
-

@@ -1,1 +1,26 @@
-
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeAz - Giriş</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="auth-box">
+        <h1 class="logo">VIBEAZ</h1>
+        <div id="login-step-1">
+            <input type="text" id="username" placeholder="İstifadəçi adı">
+            <input type="tel" id="phoneNumber" placeholder="+994XXXXXXXXX" value="+994">
+            <button id="send-sms-btn">Kod Göndər</button>
+        </div>
+        <div id="login-step-2" class="hidden">
+            <p>Telefona gələn kodu yazın:</p>
+            <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
+            <button id="verify-sms-btn">Təsdiqlə</button>
+        </div>
+        <div id="recaptcha-container"></div>
+    </div>
+    <script type="module" src="login.js"></script>
+</body>
+</html>

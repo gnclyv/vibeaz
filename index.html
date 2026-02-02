@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=99">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -12,20 +12,17 @@
         <header class="app-header">
             <h1>VIBEAZ</h1>
             <div class="header-actions">
-                <i class="fa-regular fa-paper-plane"></i>
-                <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <i class="fa-regular fa-square-plus" id="mainAddBtn" style="font-size: 24px; cursor: pointer;"></i>
+                <button id="logout-btn" style="background:none; border:none; margin-left:15px; cursor:pointer;">
+                    <i class="fa-solid fa-right-from-bracket" style="font-size: 20px;"></i>
+                </button>
             </div>
         </header>
 
         <div id="post-list" class="post-feed"></div>
-
-        <nav class="bottom-nav">
-       
-        </nav>
-        
         <input type="file" id="fileInput" hidden accept="image/*">
-    </div>
-    <script type="module" src="script.js"></script>
+        
+        </div>
+    <script type="module" src="script.js?v=99"></script>
 </body>
 </html>
-

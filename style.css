@@ -1,57 +1,51 @@
-:root {
-    --insta-blue: #0095f6;
-    --border: #dbdbdb;
-}
+/* Əsas tənzimləmələr */
+body { font-family: -apple-system, sans-serif; margin: 0; background-color: #fafafa; }
 
-body { font-family: sans-serif; margin: 0; background: #fafafa; color: #262626; }
-
-/* Header */
+/* Header Dizaynı */
 .app-header {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 20px; background: #fff; border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
+    padding: 10px 20px; background: white; border-bottom: 1px solid #dbdbdb;
+    position: sticky; top: 0; z-index: 1000;
 }
-.app-header h1 { font-family: cursive; margin: 0; font-size: 24px; }
+.app-header h1 { font-family: 'Comic Sans MS', cursive; margin: 0; font-size: 24px; }
 
-/* Story hissəsi */
+/* Story Dizaynı */
 .story-container {
     display: flex; padding: 15px; gap: 15px; overflow-x: auto;
-    background: #fff; border-bottom: 1px solid var(--border);
+    background: white; border-bottom: 1px solid #dbdbdb;
 }
-.story-circle {
+.story-card { display: flex; flex-direction: column; align-items: center; min-width: 75px; }
+.story-circle { 
     width: 65px; height: 65px; border-radius: 50%; padding: 2px;
-    border: 2px solid #e1306c; background: #fff; cursor: pointer;
+    border: 2px solid #e1306c; background: white; cursor: pointer;
 }
 .story-circle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
-/* POSTLAR - Əsas dizayn və şəkil ölçüsü */
+/* POSTLARIN EYNI ÖLÇÜDƏ OLMASI */
 .post-feed { max-width: 500px; margin: 0 auto 80px; }
-.post-card { background: #fff; border: 1px solid var(--border); margin-top: 15px; border-radius: 8px; overflow: hidden; }
+.post-card { background: white; border: 1px solid #dbdbdb; margin-top: 15px; border-radius: 8px; overflow: hidden; }
 
-/* Şəkilləri eyni boyda (kvadrat) edən hissə */
 .post-img-container {
     width: 100%;
-    aspect-ratio: 1 / 1; /* Mütləq kvadrat edir */
+    aspect-ratio: 1 / 1; /* Şəkilləri mütləq kvadrat edir */
+    background-color: #f0f0f0;
     overflow: hidden;
-    background: #f0f0f0;
 }
+
 .post-img-container img {
-    width: 100%; height: 100%;
-    object-fit: cover; /* Şəkli dartmır, sahəyə sığdırır */
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Şəkli dartmadan sığdırır */
 }
 
-.post-info { padding: 12px; }
-.post-actions { font-size: 24px; margin-bottom: 10px; display: flex; gap: 15px; }
-
-/* Alt Naviqasiya */
+/* Alt Naviqasiya (Göy düymə ilə) */
 .bottom-nav {
-    position: fixed; bottom: 0; width: 100%; height: 60px;
-    background: #fff; border-top: 1px solid var(--border);
+    position: fixed; bottom: 0; width: 100%; height: 50px;
+    background: white; border-top: 1px solid #dbdbdb;
     display: flex; justify-content: space-around; align-items: center;
 }
 .main-add {
-    background: var(--insta-blue); color: #fff;
-    width: 45px; height: 45px; border-radius: 12px;
-    display: flex; justify-content: center; align-items: center;
+    background: #0095f6; color: white; width: 40px; height: 40px;
+    border-radius: 12px; display: flex; justify-content: center; align-items: center;
     font-size: 22px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,149,246,0.3);
 }

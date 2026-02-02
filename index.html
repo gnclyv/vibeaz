@@ -1,60 +1,32 @@
-<!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
+<div id="app">
+<header class="app-header">
+<h1>VIBEAZ</h1>
+            <i class="fa-regular fa-paper-plane"></i>
+</header>
 
-    <div id="auth-screen">
-        <div class="auth-box">
-            <h1 class="auth-logo">VIBEAZ</h1>
-            <div id="reg-form">
-                <input type="text" id="username" placeholder="İstifadəçi adı">
-                <input type="tel" id="phoneNumber" placeholder="+994XXXXXXXXX" value="+994">
-                <button id="send-sms-btn">Kod Göndər</button>
-            </div>
-            <div id="verification-area" class="hidden">
-                <p>Telefona gələn kodu yazın:</p>
-                <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
-                <button id="verify-sms-btn">Təsdiqlə</button>
-            </div>
-            <div id="recaptcha-container"></div>
-        </div>
-    </div>
+<div class="story-container">
+<div class="story-card add-btn" id="shareBtn">
+<div class="story-circle"><i class="fa fa-plus"></i></div>
+<span>Paylaş</span>
+</div>
+</div>
+<input type="file" id="fileInput" hidden accept="image/*">
+<div id="post-list" class="post-feed"></div>
 
-    <div id="app" style="display: none;">
-        <header class="app-header">
-            <h1>VIBEAZ</h1>
-            <div class="header-icons">
-                <i class="fa-regular fa-paper-plane"></i>
-                <button id="logout-btn" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-right-from-bracket"></i></button>
-            </div>
-        </header>
+<nav class="bottom-nav">
+<i class="fa fa-home"></i>
+<i class="fa fa-search"></i>
+<div class="main-add" id="mainAddBtn">+</div>
+<i class="fa-regular fa-heart"></i>
+<i class="fa-regular fa-user"></i>
+</nav>
+</div>
 
-        <div class="story-container" id="stories-container">
-            <div class="story-card add-btn" id="shareStoryBtn">
-                <div class="story-circle"><i class="fa fa-plus"></i></div>
-                <span>Paylaş</span>
-            </div>
-        </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        <input type="file" id="fileInput" hidden accept="image/*">
-        
-        <div id="post-list" class="post-feed"></div>
-
-        <nav class="bottom-nav">
-            <i class="fa fa-home"></i>
-            <i class="fa fa-search"></i>
-            <div class="main-add" id="mainAddBtn">+</div>
-            <i class="fa-regular fa-heart"></i>
-            <i class="fa-regular fa-user"></i>
-        </nav>
-    </div>
-
-    <script type="module" src="script.js"></script>
+@@ -64,3 +63,4 @@
 </body>
 </html>
+

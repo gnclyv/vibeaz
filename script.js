@@ -1,37 +1,37 @@
-// Paylaş düyməsini tapırıq
-const addBtn = document.querySelector('.add-btn');
-
-addBtn.onclick = async () => {
-    // İstifadəçidən link istəyirik
+// Paylaşma funksiyası
+async function startSharing() {
     const imageUrl = prompt("Şəkil linkini (URL) bura yapışdırın:");
-
-    if (imageUrl) {
+    
+    if (imageUrl && imageUrl.trim() !== "") {
         try {
-            // Firestore-a (posts kolleksiyasına) yazırıq
             await window.addDoc(window.collection(window.db, "posts"), {
                 url: imageUrl,
                 timestamp: window.serverTimestamp()
             });
-            alert("Paylaşıldı! ✨");
-            location.reload(); // Səhifəni yeniləyirik ki, yeni şəkil görünsün
+            alert("Uğurla paylaşıldı! ✨");
         } catch (error) {
             console.error("Xəta:", error);
-            alert("Xəta baş verdi! Firestore Rules-u (if true) yoxlayın.");
+            alert("Xəta: Firestore Rules-u yoxlayın!");
         }
     }
-};
+}
 
-// Postları ekranda göstərmək üçün kod
+// Düymələrə klik hadisəsini bağlayırıq
+document.getElementById('shareBtn').onclick = startSharing;
+document.getElementById('mainAddBtn').onclick = startSharing;
+
+// Postları canlı göstərmək
+const postList = document.getElementById('post-list');
 const q = window.query(window.collection(window.db, "posts"), window.orderBy("timestamp", "desc"));
+
 window.onSnapshot(q, (snapshot) => {
-    const postList = document.getElementById('post-list');
     postList.innerHTML = '';
     snapshot.forEach((doc) => {
         const post = doc.data();
         postList.innerHTML += `
-            <div class="post-card">
-                <img src="${post.url}" style="width:100%; border-radius:10px; margin-bottom:10px;">
-                <p>Yeni paylaşım</p>
+            <div class="post-card" style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                <img src="${post.url}" style="width:100%; border-radius:10px; display: block;">
+                <p style="padding: 10px 0;">Yeni Vibe ⚡</p>
             </div>
         `;
     });

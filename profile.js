@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+// Firebase Konfiqurasiyası
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
     authDomain: "vibeaz-1e98a.firebaseapp.com",
@@ -15,62 +16,60 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// İstifadəçi vəziyyətini izləyirik
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // 1. İstifadəçi adını email-dən təmizləyirik
+        // 1. İstifadəçi adını email-dən təmizləyirik (Emailin @-ə qədər olan hissəsi)
         const cleanName = user.email.split('@')[0]; 
         
-        // 2. Header-dəki adları yeniləyirik
+        // 2. HTML-dəki adları və email-i yeniləyirik
         document.getElementById('header-username').innerText = cleanName;
+        document.getElementById('profile-display-name').innerText = cleanName;
         document.getElementById('profile-email').innerText = user.email;
 
-        // 3. Profil şəkli və xüsusi adı Firestore-dan çəkirik
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            document.getElementById('profile-display-name').innerText = userData.displayName || cleanName;
-            document.getElementById('user-avatar').src = userData.photoURL;
-            document.getElementById('nav-avatar').src = userData.photoURL;
-        } else {
-            document.getElementById('profile-display-name').innerText = cleanName;
-            document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${cleanName}`;
-            document.getElementById('nav-avatar').src = `https://ui-avatars.com/api/?name=${cleanName}`;
-        }
-
-        // 4. POSTLARI YÜKLƏYƏN FUNKSİYANI ÇAĞIRIRIQ
+        // 3. Postları real zamanda yükləyirik
         loadUserPosts(cleanName);
     } else {
+        // Giriş edilməyibsə login səhifəsinə yönləndir
         window.location.href = "login.html";
     }
 });
 
+/**
+ * Postları Firestore-dan "userName" sahəsinə görə filtrləyib gətirir
+ */
 function loadUserPosts(userNameToFind) {
     const grid = document.getElementById('user-posts-grid');
+    const postCountText = document.getElementById('post-count');
     
-    // Firestore-da "posts" kolleksiyasında "userName" sahəsini yoxlayırıq
-    // DİQQƏT: Bu filtr bazadakı adla eyni olmalıdır!
+    // Yalnız bu istifadəçiyə aid postları tapırıq
     const q = query(collection(db, "posts"), where("userName", "==", userNameToFind));
 
-    onSnapshot(q, (snap) => {
-        grid.innerHTML = "";
-        let totalPosts = 0;
+    // Real-time izləmə (Snapshot)
+    onSnapshot(q, (snapshot) => {
+        grid.innerHTML = ""; // Köhnə postları təmizlə
+        let count = 0;
         
-        snap.forEach((doc) => {
-            totalPosts++;
+        snapshot.forEach((doc) => {
+            count++;
             const postData = doc.data();
+            
+            // Postu Grid-ə əlavə edirik
             grid.innerHTML += `
                 <div class="grid-item">
-                    <img src="${postData.url}" alt="Post">
+                    <img src="${postData.url}" alt="VibeAz Post">
                 </div>`;
         });
         
-        document.getElementById('post-count').innerText = totalPosts;
+        // Post sayını yeniləyirik
+        postCountText.innerText = count;
 
-        // Əgər post yoxdursa konsolda yoxlamaq üçün mesaj
-        if(totalPosts === 0) {
-            console.log("Post tapılmadı. Axtarılan ad: " + userNameToFind);
+        // Konsolda yoxlama üçün mesaj
+        if (count === 0) {
+            console.log("Post tapılmadı. Axtarılan userName: " + userNameToFind);
         }
     }, (error) => {
-        console.error("Firebase xətası: ", error);
+        console.error("Postlar yüklənərkən xəta baş verdi: ", error);
+        // Əgər burada 'index' xətası alırsansa, konsoldakı linkə klikləməlisən
     });
 }

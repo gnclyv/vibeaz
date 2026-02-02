@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -15,20 +15,42 @@ const auth = getAuth(app);
 
 window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' }, auth);
 
+// 1. SMS göndərmə
 document.getElementById('send-sms-btn').onclick = () => {
     const number = document.getElementById('phoneNumber').value;
+    const username = document.getElementById('usernameInput').value; // HTML-də ad üçün input olmalıdır
+
+    if (!username) {
+        alert("Zəhmət olmasa istifadəçi adınızı daxil edin!");
+        return;
+    }
+
     signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
         .then(res => {
             window.confirmationResult = res;
+            window.tempUsername = username; // Adı müvəqqəti yadda saxlayırıq
             document.getElementById('login-step-1').classList.add('hidden');
             document.getElementById('login-step-2').classList.remove('hidden');
         }).catch(err => alert("Xəta: " + err.message));
 };
 
+// 2. Kodu təsdiqləmə və Profil Yeniləmə
 document.getElementById('verify-sms-btn').onclick = () => {
     const code = document.getElementById('smsCode').value;
-    window.confirmationResult.confirm(code).then(() => {
-        // Giriş uğurlu olduqda ana səhifəyə yönləndir
-        window.location.href = "index.html"; 
+    
+    window.confirmationResult.confirm(code).then(async (result) => {
+        // Giriş uğurludur, indi adı profilə yazaq
+        const user = result.user;
+        
+        try {
+            await updateProfile(user, {
+                displayName: window.tempUsername
+            });
+            console.log("İstifadəçi adı təyin olundu: " + window.tempUsername);
+            window.location.href = "index.html"; 
+        } catch (error) {
+            console.error("Ad təyin edilərkən xəta:", error);
+            window.location.href = "index.html"; // Xəta olsa belə ana səhifəyə keçsin
+        }
     }).catch(() => alert("Kod yanlışdır!"));
 };

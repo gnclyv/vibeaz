@@ -6,24 +6,44 @@
     <title>VİBEAZ</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* SMS axını üçün vacib stillər */
+        .hidden { display: none !important; }
+        .limit-note { font-size: 11px; color: #856404; background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 15px; text-align: center; }
+        #recaptcha-container { margin: 10px 0; }
+        .auth-inputs input { margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+    </style>
 </head>
 <body>
 
     <div id="auth-screen" class="auth-overlay">
         <div class="auth-card">
             <h1>VİBEAZ</h1>
-            <p>Daxil ol və paylaşmağa başla</p>
-            <div class="auth-inputs">
-                <input type="email" id="auth-email" placeholder="Email ünvanı">
-                <input type="password" id="auth-password" placeholder="Şifrə">
+            <p>Qeydiyyatdan keç və paylaşmağa başla</p>
+
+            <div class="limit-note">
+                ⚠️ Yeni layihə üçün günlük limit: 10 real SMS
             </div>
-            <button id="login-btn" class="btn-primary">Giriş Et</button>
-            <button id="register-btn" class="btn-secondary">Hesabın yoxdur? Qeydiyyatdan keç</button>
+
+            <div id="reg-form" class="auth-inputs">
+                <input type="text" id="username" placeholder="İstifadəçi adı">
+                <input type="tel" id="phoneNumber" placeholder="+994 50 123 45 67">
+                <button id="send-sms-btn" class="btn-primary">Kod Göndər</button>
+            </div>
+
+            <div id="recaptcha-container"></div>
+
+            <div id="verification-area" class="auth-inputs hidden">
+                <p style="color: #28a745; font-size: 13px;">Kod göndərildi!</p>
+                <input type="text" id="smsCode" placeholder="6 rəqəmli kod">
+                <button id="verify-sms-btn" class="btn-primary" style="background-color: #28a745;">Təsdiqlə və Giriş Et</button>
+            </div>
+
             <div id="auth-error" class="error-msg"></div>
         </div>
     </div>
 
-    <div id="app">
+    <div id="app" class="hidden">
         <header class="app-header">
             <div class="header-content">
                 <h1>VİBEAZ</h1>

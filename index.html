@@ -3,9 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css">
+    <title>VibeAz - Final Fix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* CSS-i bura yerləşdirirəm ki, mütləq işləsin */
+        body {
+            font-family: -apple-system, sans-serif;
+            margin: 0;
+            background-color: #fafafa;
+            padding-bottom: 70px; /* Menyuya yer ayırır */
+        }
+
+        .app-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 20px; background: white; border-bottom: 1px solid #dbdbdb;
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .app-header h1 { font-family: 'Comic Sans MS', cursive; margin: 0; font-size: 24px; }
+
+        .post-feed { max-width: 500px; margin: 0 auto; padding: 10px; }
+
+        .post-card { background: white; border: 1px solid #dbdbdb; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
+
+        /* Şəkilləri kvadrat edən kod */
+        .post-img-container {
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+            overflow: hidden !important;
+        }
+
+        .post-img-container img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block;
+        }
+
+        .post-info { padding: 12px; }
+
+        /* AŞAĞI MENYU - DAĞILMAZ DİZAYN */
+        .bottom-nav {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            height: 60px !important;
+            background: white !important;
+            border-top: 1px solid #dbdbdb !important;
+            display: flex !important;
+            justify-content: space-around !important;
+            align-items: center !important;
+            z-index: 9999 !important;
+        }
+
+        .bottom-nav i {
+            font-size: 24px !important;
+            color: #262626 !important;
+            cursor: pointer !important;
+        }
+
+        /* Paylaşma (Göy "+") düyməsi */
+        .main-add {
+            background-color: #0095f6 !important;
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 12px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            color: white !important;
+            box-shadow: 0 4px 10px rgba(0, 149, 246, 0.3) !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -26,15 +98,13 @@
         <input type="file" id="fileInput" hidden accept="image/*">
 
         <nav class="bottom-nav">
-            <i class="fa-solid fa-house" title="Ana Səhifə"></i>
-            <i class="fa-solid fa-magnifying-glass" title="Axtarış"></i>
-            
+            <i class="fa-solid fa-house"></i>
+            <i class="fa-solid fa-magnifying-glass"></i>
             <div class="main-add" id="mainAddBtn">
                 <i class="fa fa-plus"></i>
             </div>
-            
-            <i class="fa-regular fa-heart" title="Bəyənmələr"></i>
-            <i class="fa-regular fa-user" title="Profil"></i>
+            <i class="fa-regular fa-heart"></i>
+            <i class="fa-regular fa-user"></i>
         </nav>
 
     </div>

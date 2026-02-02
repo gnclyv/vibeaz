@@ -1,8 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
-// 1. Firebase Konfiqurasiyası
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
     authDomain: "vibeaz-1e98a.firebaseapp.com",
@@ -14,130 +12,35 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// 2. İstifadəçi Statusu və Giriş Yoxlanışı
-onAuthStateChanged(auth, (user) => {
-    if (!user) {
-        if (!window.location.pathname.includes("login.html")) {
-            window.location.href = "login.html";
-        }
-    } else {
-        document.getElementById('app').style.display = 'block';
-        loadPosts();
+window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' }, auth);
+
+document.getElementById('send-sms-btn').onclick = () => {
+    const number = document.getElementById('phoneNumber').value;
+    const username = document.getElementById('usernameInput').value; // HTML-də bu ID-li input olduğundan əmin ol
+
+    if (!username || !number) {
+        alert("Ad və nömrə daxil edin!");
+        return;
     }
-});
 
-// 3. Post Paylaşma Funksiyası (İstifadəçi adı ilə birgə)
-// ... (digər kodlar eynidir)
-
-async function uploadPost() {
-    const fileInp = document.getElementById('fileInput');
-    // currentUser-ı funksiyanın daxilində yenidən yoxlayırıq
-    const user = auth.currentUser;
-
-    fileInp.onchange = async () => {
-        const file = fileInp.files[0];
-        
-        // Əgər istifadəçi daxil olmayıbsa, xəta verməməsi üçün burada dayandırırıq
-        if (!user) {
-            alert("Zəhmət olmasa əvvəlcə daxil olun!");
-            return;
-        }
-        
-        if (!file) return;
-
-        const fd = new FormData();
-        fd.append("image", file);
-
-        try {
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
-            const result = await res.json();
-
-            if (result.success) {
-                const text = prompt("Post üçün açıqlama yazın:");
-                
-                // TƏHLÜKƏSİZ AD GÖTÜRMƏ: null yoxlanışı əlavə edildi
-                let nameToDisplay = "Anonim";
-                if (user.displayName) {
-                    nameToDisplay = user.displayName;
-                } else if (user.email) {
-                    nameToDisplay = user.email.split('@')[0];
-                }
-
-                await addDoc(collection(db, "posts"), {
-                    url: result.data.url,
-                    text: text || "",
-                    userName: nameToDisplay,
-                    likes: 0,
-                    timestamp: serverTimestamp()
-                });
-                
-                alert("Post uğurla paylaşıldı!");
-            }
-        } catch (e) {
-            console.error("Yükləmə xətası:", e);
-        }
-    };
-    fileInp.click();
-}
-
-// ... (qalan kodlar eynidir)
-// 4. Like (Bəyənmə) Funksiyası
-window.handleLike = async (id) => {
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
-
-    try {
-        await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-        liked.push(id);
-        localStorage.setItem('vibeLikes', JSON.stringify(liked));
-    } catch (e) {
-        console.error("Like xətası:", e);
-    }
+    signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
+        .then(res => {
+            window.confirmationResult = res;
+            window.tempUsername = username;
+            document.getElementById('login-step-1').classList.add('hidden');
+            document.getElementById('login-step-2').classList.remove('hidden');
+        }).catch(err => alert("Xəta: " + err.message));
 };
 
-// 5. Postları Ekrana Çıxarma
-function loadPosts() {
-    const list = document.getElementById('post-list');
-    onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
-        list.innerHTML = ''; 
-        const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-
-        snap.forEach(d => {
-            const data = d.data();
-            const id = d.id;
-            const isLiked = likedPosts.includes(id);
-            // Əgər köhnə postlarda ad yoxdursa, "Anonim" yaz
-            const author = data.userName || "VibeAz İstifadəçisi";
-
-            list.innerHTML += `
-                <div class="post-card">
-                    <div class="post-header" style="display:flex; align-items:center; padding:12px;">
-                        <img src="https://ui-avatars.com/api/?name=${author}&background=random" 
-                             style="width:32px; height:32px; border-radius:50%; margin-right:10px;">
-                        <span class="username" style="font-weight:600;">${author}</span>
-                    </div>
-                    <div class="post-img-container">
-                        <img src="${data.url}" ondblclick="handleLike('${id}')">
-                    </div>
-                    <div class="post-actions" style="padding:15px; font-size:24px; display:flex; gap:15px;">
-                        <i class="${isLiked ? 'fa-solid fa-heart liked' : 'fa-regular fa-heart'}" 
-                           onclick="handleLike('${id}')" style="cursor:pointer; color:${isLiked ? '#ff3040' : 'inherit'}"></i>
-                        <i class="fa-regular fa-comment"></i>
-                        <i class="fa-regular fa-paper-plane"></i>
-                    </div>
-                    <div class="post-info" style="padding:0 15px 15px 15px;">
-                        <span class="likes-count" style="font-weight:700;">${data.likes || 0} bəyənmə</span>
-                        <p class="post-caption"><b>${author}</b> ${data.text || ""}</p>
-                    </div>
-                </div>`;
+document.getElementById('verify-sms-btn').onclick = () => {
+    const code = document.getElementById('smsCode').value;
+    window.confirmationResult.confirm(code).then(async (result) => {
+        // Profil adını yeniləyirik
+        await updateProfile(result.user, {
+            displayName: window.tempUsername
         });
-    });
-}
-
-// 6. Düymə Tətikləyiciləri
-document.getElementById('mainAddBtn').onclick = uploadPost;
-document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.reload());
-
+        await result.user.reload(); // Adın yadda qaldığına əmin oluruq
+        window.location.href = "index.html"; 
+    }).catch(() => alert("Kod yanlışdır!"));
+};

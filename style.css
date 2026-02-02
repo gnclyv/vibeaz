@@ -107,4 +107,124 @@ body {
 }
 
 .post-img-container img {
-    width: 100
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Şəkli dartmadan sığdırır */
+    display: block;
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 24px;
+    padding: 8px 15px 0 15px;
+}
+
+.post-actions i {
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out;
+}
+
+.post-actions i:active {
+    transform: scale(1.1);
+}
+
+.post-actions .fa-heart.liked {
+    color: #ed4956;
+}
+
+.post-info {
+    padding: 0 15px 12px 15px;
+}
+
+.likes-count {
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 4px;
+}
+
+.post-caption {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.post-caption b {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.post-comments {
+    margin-top: 10px;
+}
+
+.post-comment-item {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.post-comment-input {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #efefef;
+    padding: 10px 15px;
+    margin-top: 10px;
+}
+
+.post-comment-input input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    padding: 5px 0;
+}
+
+.post-comment-input button {
+    border: none;
+    background: none;
+    color: var(--link-color);
+    font-weight: 600;
+    cursor: pointer;
+    padding-left: 10px;
+}
+
+/* AŞAĞI NAVİQASİYA PANELİ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 500px; /* Üst konteynerlə eyni en */
+    margin: 0 auto;
+    height: 50px;
+    background: white;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.bottom-nav i {
+    font-size: 22px;
+    color: var(--primary-text);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.bottom-nav i.active {
+    color: var(--link-color); /* Aktiv ikon rəngi */
+}
+
+.bottom-nav i:hover {
+    color: var(--secondary-text);
+}
+
+/* Instagram-a bənzər "Billabong" fontunu əlavə edək */
+@font-face {
+    font-family: 'Billabong';
+    src: url('https://raw.githubusercontent.com/srebalaji/instagram/master/assets/font/billabong.ttf') format('truetype');
+}

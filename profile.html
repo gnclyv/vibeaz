@@ -4,33 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil - VibeAz</title>
-    <link rel="stylesheet" href="profile.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="profile.css?v=1.5">
 </head>
-<body>
+<body style="background: #000; color: white; font-family: -apple-system, sans-serif;">
 
-    <div class="profile-container">
+    <div class="profile-wrapper">
         <header class="profile-header">
-            <div class="profile-pic-container">
+            <div class="avatar-section">
                 <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar">
             </div>
-            <div class="user-info">
-                <h2 id="profile-username">Yüklənir...</h2>
-                <p id="profile-email">email@example.com</p>
-                <button id="edit-profile-btn" class="edit-btn">Profili Redaktə Et</button>
+            <div class="details-section">
+                <div class="username-row">
+                    <h2 id="profile-username">Yüklənir...</h2>
+                    <button id="edit-profile-btn" class="edit-btn">Profili Redaktə Et</button>
+                </div>
+                <div class="stats-row">
+                    <span><b id="post-count">0</b> paylaşım</span>
+                </div>
+                <div class="bio-row">
+                    <p id="profile-email" style="color: #8e8e8e; font-size: 14px;"></p>
+                </div>
             </div>
         </header>
 
-        <div class="profile-stats">
-            <span><b id="post-count">0</b> post</span>
+        <div class="tabs">
+            <div class="tab active"><i class="fa-solid fa-table-cells"></i></div>
         </div>
-
-        <hr class="divider">
-
+        
         <div id="user-posts-grid" class="posts-grid">
-            </div>
-    </div>
-
-    <script type="module" src="profile.js"></script>
-</body>
-</html>

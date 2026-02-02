@@ -1,7 +1,17 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VibeAz - Realtime</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
 <div id="app">
 <header class="app-header">
 <h1>VIBEAZ</h1>
-            <i class="fa-regular fa-paper-plane"></i>
+<i class="fa-regular fa-paper-plane"></i>
 </header>
 
 <div class="story-container">
@@ -10,7 +20,8 @@
 <span>Paylaş</span>
 </div>
 </div>
-<input type="file" id="fileInput" hidden accept="image/*">
+
+         <input type="file" id="fileInput" hidden accept="image/*">
 <div id="post-list" class="post-feed"></div>
 
 <nav class="bottom-nav">
@@ -26,7 +37,30 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-@@ -64,3 +63,4 @@
+const firebaseConfig = {
+apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
+authDomain: "vibeaz-1e98a.firebaseapp.com",
+projectId: "vibeaz-1e98a",
+storageBucket: "vibeaz-1e98a.firebasestorage.app",
+messagingSenderId: "953434260285",
+appId: "1:953434260285:web:6263b4372487ba6d673b54",
+measurementId: "G-2928WJCY1B"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Funksiyaları script.js üçün global edirik
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.onSnapshot = onSnapshot;
+window.query = query;
+window.orderBy = orderBy;
+window.serverTimestamp = serverTimestamp;
+
+console.log("Firebase hazır!");
+</script>
+<script src="script.js" type="module"></script>
 </body>
 </html>
-

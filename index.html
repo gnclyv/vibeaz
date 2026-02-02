@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css?v=102">
+    <link rel="stylesheet" href="style.css?v=103">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
             <div class="header-icons">
                 <i class="fa-regular fa-heart"></i>
                 <i class="fa-regular fa-paper-plane"></i>
-                <button id="logout-btn" style="background:none; border:none; color:white;">
+                <button id="logout-btn" title="Çıxış">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
@@ -23,15 +23,18 @@
         <main id="post-list" class="post-feed"></main>
 
         <nav class="bottom-nav">
-            <i class="fa-solid fa-house"></i>
+            <i class="fa-solid fa-house active"></i>
             <i class="fa-solid fa-magnifying-glass"></i>
+            
             <div class="add-post-btn" id="mainAddBtn">
                 <i class="fa-regular fa-square-plus"></i>
             </div>
+            
             <i class="fa-solid fa-clapperboard"></i>
+            
             <a href="profile.html" class="nav-profile-link">
-                <div class="mini-avatar-border">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAflBMVEX///8AAAD8/PwiIiI3Nzf5+fn29vbt7e2+vr5LS0u7u7v09PTX19fq6urc3NwEBATi4uKjo6MsLCyZmZmvr68ZGRmNjY1sbGyfn591dXUjIyPGxsYyMjJ9fX2KiooSEhJQUFBfX19BQUFlZWXOzs5XV1d6enqzs7M9PT1GRkbDpn/KAAAEVklEQVR4nO3ba5eqIBQGYLW0m1amlmmNNV2m/v8fPE1uzJpUMlI4630+nVO01kYQ2MBoGgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACjOHFlm2zF8TK8/366ioDNbDdau/d/V0/Q3+p1k0W87JpGsL/2JwDPaDkwU91n9rg05bDs0IZxNUQUvdqO2w3vf/lKPSXEVo3HbAb4r1u9qeN5uN7Psf9fP7bZDfM8w11wDl9rLsMNz7vN9uyG+59JFJ9SAi/vuOF7eqqhwR3Vu7fe3FuMN66ordaf/b/a2eU+/9lj9Fw3HJUzIhpifggI+ewJxo3EJ02NNVLw+G9J42mkwLIGOVEG/pAxb7riNRSWQw/WSHdJ+OlNxiTqnGlqlpVhXVnCFanT4+h89iEMjQQkVU+NUdT/WiE4jUYlEKeG6suCuasCVVZd30TnkfRSSsdK4k+oFGY25gwaCEmrMH3fE98LKhgaaI0fRQ1pUtWyf3q45R9GjmoPpD38N12nR6cdjEuuFNlS7hjxzwELNXrrnX4x11RxpaDHWqZ4DrCSdORsISixK76t3mai1tw3EJNY2Dfz5Dk3emregbMI08KCy4IR3ASubqc6XM/j0JMoTZSmlW4n6rLyUGSiaWmjZqqbiBWN7HSruexsrCr746MXQbCqzazAwcdipTFC8WnES2jRWsQm1LC3Su72CAqMT7QgvG41LnGzTu/N8Vd1L+/FEvew3wwab5ycXcfatwoekO9ZI+vaxGZ3bAWLZtr/k5vkD/N0+1xfH69w3B0XHGW00eLijEC3deDy1Y/fY1e/xJMrysQO9xOT+n13V8l/t/o4CD+UOScNbAyUnrioqdvrk3SL3elocPa1Tx+357HLNRLGTizCrxSLdfvEfx5ZL0uFed/xzl94U6qi3d/DW9WxvkKvexstmeWuRfarMhiJLGPToPmRz2ndDL/Tj6f0qbcg66kyRNNhib13Eu0FoJ6xPfzQwYdgdjKAopfjLYXOnEgOqrdN8/spabMyGVBWyjHOt5mCJxteHohKIhfpqUvtFs6L8yzd24/DlYZG2daTfdGMv1OvXuGJ6ffnHp3bQJZM6V/FOdZ9Ns2id6WuvD4r99KffH4hKoGndt/DCoElR7rHGrzeQpmipUHTfVg4UZL1EKH7n8TTl+52ORvurJ8ExiZXGuKr5a0oihUYkGLVC3XOWbfpzme8s7N9bXK7lH0wplw1r/pwOE2VO9f33liW0fyXzuo1qWPdeBbWhzH8kRDNa3Wvp6YFjJDQkwdiJYb1lCY1Tcm/W0Iz/uw38IqPHdk7l3hmm/OA3fzqfz11+tz8sTSTfqnk8UXud7Ne/nOoqlDvJPJJe2dWVKCXzdE+cv4cw/AI1DrzD0tPfMguZF9151nA5izrcok4QJEnQnSvQQ3MM0zQNTqZljUaqNB8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAz+AaZeKP9UuLuDAAAAAElFTkSuQmCC" style="witdh:50px;  border-radius:50%; object-fit:cover;">
+                <div id="nav-user-avatar" class="nav-avatar-wrapper">
+                    <i class="fa-solid fa-user"></i>
                 </div>
             </a>
         </nav>
@@ -39,10 +42,6 @@
         <input type="file" id="fileInput" hidden accept="image/*">
     </div>
 
-    <script type="module" src="script.js?v=102"></script>
+    <script type="module" src="script.js?v=103"></script>
 </body>
 </html>
-
-
-
-

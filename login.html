@@ -1,12 +1,33 @@
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <h1 class="logo">VIBEAZ</h1>
-        <p class="subtitle">Email və şifrə ilə daxil olun</p>
-        
-        <input type="email" id="email" placeholder="Gmail ünvanınız">
-        <input type="password" id="password" placeholder="Şifrəniz">
-        
-        <button id="login-btn" class="main-btn">Daxil Ol</button>
-        <button id="register-btn" class="secondary-btn">Qeydiyyatdan Keç</button>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeAz - Giriş</title>
+    <link rel="stylesheet" href="login.css?v=1.2">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h1 class="logo">VIBEAZ</h1>
+            <p class="subtitle">Gmail və şifrə ilə davam edin</p>
+            
+            <div class="input-container">
+                <input type="email" id="email" placeholder="Gmail ünvanınız" required>
+                <input type="password" id="password" placeholder="Şifrəniz" required>
+            </div>
+            
+            <div class="button-group">
+                <button id="login-btn" class="main-btn">Daxil Ol</button>
+                <button id="register-btn" class="secondary-btn">Hesab yarat</button>
+            </div>
+
+            <div id="recaptcha-container"></div>
+        </div>
     </div>
-</div>
+
+    <script type="module" src="login.js"></script>
+
+</body>
+</html>

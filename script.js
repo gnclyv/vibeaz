@@ -1,34 +1,21 @@
-const fileInput = document.getElementById('fileInput');
-const postList = document.getElementById('post-list');
-const storyList = document.getElementById('stories');
+// Paylaş düyməsinə basanda işləyən funksiya
+async function sharePost() {
+    const imageUrl = prompt("Paylaşmaq istədiyiniz şəklin linkini (URL) bura yapışdırın:");
+    
+    if (imageUrl) {
+        try {
+            // Məlumatı birbaşa Firestore-a yazırıq (Storage-ə ehtiyac yoxdur)
+            await window.addDoc(window.collection(window.db, "posts"), {
+                url: imageUrl,
+                timestamp: window.serverTimestamp()
+            });
+            alert("Uğurla paylaşıldı! ✨");
+        } catch (error) {
+            console.error("Xəta:", error);
+            alert("Paylaşım alınmadı. Firestore Rules-u yoxlayın.");
+        }
+    }
+}
 
-// REAL TIME DİNLƏMƏ (Postlar)
-const q = query(collection(window.db, "vibes"), orderBy("createdAt", "desc"));
-onSnapshot(q, (snapshot) => {
-    postList.innerHTML = "";
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-        postList.innerHTML += `
-            <div class="post">
-                <div class="post-user">@nihad_vibe</div>
-                <img src="${data.imageUrl}" class="post-img">
-                <div class="post-bar"><i class="fa-regular fa-heart"></i> <i class="fa-regular fa-comment"></i></div>
-            </div>
-        `;
-    });
-});
-
-// ŞƏKİL SEÇİLƏNDƏ YÜKLƏ
-fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const storageRef = ref(window.storage, 'uploads/' + Date.now());
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-
-    await addDoc(collection(window.db, "vibes"), {
-        imageUrl: url,
-        createdAt: serverTimestamp()
-    });
-});
+// HTML-dəki Paylaş düyməsini bu funksiyaya bağla
+document.querySelector('.add-btn').onclick = sharePost;

@@ -83,6 +83,32 @@ body {
 }
 
 /* Posts */
+/* Postun ümumi konteyneri */
+.post-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 20px auto;
+    background: white;
+    border: 1px solid #dbdbdb;
+}
+
+/* Şəkil üçün standart kvadrat çərçivə */
+.post-img-container {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Kvadrat nisbəti (1:1) */
+    overflow: hidden; /* Artıq qalan hissələri kəs */
+    background-color: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Şəkli deformasiya etmədən çərçivəyə sığdırır */
+    display: block;
+}
 .post-card {
     margin: 0 15px 25px;
     border-radius: 20px;
@@ -198,3 +224,4 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+

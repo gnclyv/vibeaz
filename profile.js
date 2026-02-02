@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -17,43 +17,60 @@ const db = getFirestore(app);
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        const cleanName = user.email.split('@')[0].toLowerCase();
+        // 1. İstifadəçi adını email-dən təmizləyirik
+        const cleanName = user.email.split('@')[0]; 
         
-        // Profil məlumatlarını yüklə
+        // 2. Header-dəki adları yeniləyirik
+        document.getElementById('header-username').innerText = cleanName;
+        document.getElementById('profile-email').innerText = user.email;
+
+        // 3. Profil şəkli və xüsusi adı Firestore-dan çəkirik
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
-            document.getElementById('profile-username').innerText = userDoc.data().displayName;
-            document.getElementById('user-avatar').src = userDoc.data().photoURL;
+            const userData = userDoc.data();
+            document.getElementById('profile-display-name').innerText = userData.displayName || cleanName;
+            document.getElementById('user-avatar').src = userData.photoURL;
+            document.getElementById('nav-avatar').src = userData.photoURL;
         } else {
-            document.getElementById('profile-username').innerText = cleanName;
+            document.getElementById('profile-display-name').innerText = cleanName;
+            document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${cleanName}`;
+            document.getElementById('nav-avatar').src = `https://ui-avatars.com/api/?name=${cleanName}`;
         }
-        
-        document.getElementById('profile-email').innerText = user.email;
+
+        // 4. POSTLARI YÜKLƏYƏN FUNKSİYANI ÇAĞIRIRIQ
         loadUserPosts(cleanName);
     } else {
         window.location.href = "login.html";
     }
 });
 
-function loadUserPosts(cleanName) {
+function loadUserPosts(userNameToFind) {
     const grid = document.getElementById('user-posts-grid');
-    const q = query(collection(db, "posts"), where("userName", "==", cleanName));
+    
+    // Firestore-da "posts" kolleksiyasında "userName" sahəsini yoxlayırıq
+    // DİQQƏT: Bu filtr bazadakı adla eyni olmalıdır!
+    const q = query(collection(db, "posts"), where("userName", "==", userNameToFind));
 
     onSnapshot(q, (snap) => {
         grid.innerHTML = "";
-        let count = 0;
-        snap.forEach(d => {
-            count++;
+        let totalPosts = 0;
+        
+        snap.forEach((doc) => {
+            totalPosts++;
+            const postData = doc.data();
             grid.innerHTML += `
                 <div class="grid-item">
-                    <img src="${d.data().url}">
+                    <img src="${postData.url}" alt="Post">
                 </div>`;
         });
-        document.getElementById('post-count').innerText = count;
+        
+        document.getElementById('post-count').innerText = totalPosts;
+
+        // Əgər post yoxdursa konsolda yoxlamaq üçün mesaj
+        if(totalPosts === 0) {
+            console.log("Post tapılmadı. Axtarılan ad: " + userNameToFind);
+        }
+    }, (error) => {
+        console.error("Firebase xətası: ", error);
     });
 }
-
-// Çıxış düyməsi
-document.getElementById('logout-btn').onclick = () => {
-    signOut(auth).then(() => window.location.href = "login.html");
-};

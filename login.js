@@ -15,42 +15,32 @@ const auth = getAuth(app);
 
 window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' }, auth);
 
-// 1. SMS göndərmə
 document.getElementById('send-sms-btn').onclick = () => {
     const number = document.getElementById('phoneNumber').value;
-    const username = document.getElementById('usernameInput').value; // HTML-də ad üçün input olmalıdır
+    const username = document.getElementById('usernameInput').value; // HTML-də bu ID-li input olduğundan əmin ol
 
-    if (!username) {
-        alert("Zəhmət olmasa istifadəçi adınızı daxil edin!");
+    if (!username || !number) {
+        alert("Ad və nömrə daxil edin!");
         return;
     }
 
     signInWithPhoneNumber(auth, number, window.recaptchaVerifier)
         .then(res => {
             window.confirmationResult = res;
-            window.tempUsername = username; // Adı müvəqqəti yadda saxlayırıq
+            window.tempUsername = username;
             document.getElementById('login-step-1').classList.add('hidden');
             document.getElementById('login-step-2').classList.remove('hidden');
         }).catch(err => alert("Xəta: " + err.message));
 };
 
-// 2. Kodu təsdiqləmə və Profil Yeniləmə
 document.getElementById('verify-sms-btn').onclick = () => {
     const code = document.getElementById('smsCode').value;
-    
     window.confirmationResult.confirm(code).then(async (result) => {
-        // Giriş uğurludur, indi adı profilə yazaq
-        const user = result.user;
-        
-        try {
-            await updateProfile(user, {
-                displayName: window.tempUsername
-            });
-            console.log("İstifadəçi adı təyin olundu: " + window.tempUsername);
-            window.location.href = "index.html"; 
-        } catch (error) {
-            console.error("Ad təyin edilərkən xəta:", error);
-            window.location.href = "index.html"; // Xəta olsa belə ana səhifəyə keçsin
-        }
+        // Profil adını yeniləyirik
+        await updateProfile(result.user, {
+            displayName: window.tempUsername
+        });
+        await result.user.reload(); // Adın yadda qaldığına əmin oluruq
+        window.location.href = "index.html"; 
     }).catch(() => alert("Kod yanlışdır!"));
 };

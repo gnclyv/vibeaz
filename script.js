@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -19,7 +19,57 @@ const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/demo/video/upload";
 const CLOUDINARY_UPLOAD_PRESET = "docs_upload_example_us_preset";
 
-// --- 1. POST RENDER (Şəkil və ya Video) ---
+// --- 1. STORY SİSTEMİ (HEKAYƏLƏR) ---
+window.openStoryViewer = function(url, username) {
+    const viewer = document.getElementById('story-viewer');
+    const fullImg = document.getElementById('story-full-img');
+    const viewerUser = document.getElementById('viewer-username');
+    if(!viewer || !fullImg) return;
+
+    fullImg.src = url;
+    viewerUser.innerText = username;
+    viewer.style.display = 'flex';
+    
+    const progress = document.getElementById('progress-fill');
+    if(progress) {
+        progress.style.transition = 'none';
+        progress.style.width = '0%';
+        setTimeout(() => {
+            progress.style.transition = 'width 5s linear';
+            progress.style.width = '100%';
+        }, 100);
+    }
+    clearTimeout(window.storyTimeout);
+    window.storyTimeout = setTimeout(window.closeStory, 5000);
+}
+
+window.closeStory = function() {
+    const viewer = document.getElementById('story-viewer');
+    if(viewer) viewer.style.display = 'none';
+    clearTimeout(window.storyTimeout);
+}
+
+function listenToStories() {
+    const storiesListInner = document.getElementById('stories-list');
+    if (!storiesListInner) return;
+    onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
+        const now = Date.now();
+        storiesListInner.innerHTML = '';
+        snap.forEach(d => {
+            const data = d.data();
+            // 24 saatlıq hekayə məntiqi
+            if (data.timestamp && (now - data.timestamp.toMillis() < 86400000)) {
+                storiesListInner.innerHTML += `
+                    <div class="story-item active" onclick="openStoryViewer('${data.url}', '${data.username}')">
+                        <div class="story-circle"><img src="${data.url}"></div>
+                        <span class="story-username">${data.username}</span>
+                    </div>`;
+            }
+        });
+    });
+}
+
+// --- 2. MULTIMEDIA RENDER (POSTLAR) ---
 function renderPostHTML(id, data, isLiked, isFollowing) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
@@ -66,18 +116,18 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
         </div>`;
 }
 
-// --- 2. MULTIMEDIA UPLOAD (Cloudinary + ImgBB) ---
-async function uploadMedia() {
-    const fileInp = document.getElementById('fileInput');
-    if(!fileInp) return;
-    fileInp.setAttribute("accept", "image/*,video/*");
+// --- 3. YÜKLƏMƏ MƏNTİQİ (STORY VƏ POST) ---
+async function uploadMedia(targetType = "post") {
+    const fileInp = document.createElement('input');
+    fileInp.type = 'file';
+    fileInp.accept = "image/*,video/*";
     
     fileInp.onchange = async (e) => {
         const file = e.target.files[0];
         const user = auth.currentUser;
         if (!file || !user) return;
 
-        alert("Yükləmə başladı, zəhmət olmasa gözləyin...");
+        alert(targetType === "story" ? "Story yüklənir..." : "Post yüklənir...");
 
         if (file.type.startsWith("video/")) {
             const formData = new FormData();
@@ -87,7 +137,7 @@ async function uploadMedia() {
             try {
                 const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
                 const result = await res.json();
-                if (result.secure_url) await savePostToFirestore(result.secure_url, "video");
+                if (result.secure_url) await saveToDB(result.secure_url, "video", targetType);
             } catch (err) { alert("Video yüklənmədi!"); }
         } else {
             const fd = new FormData();
@@ -95,32 +145,39 @@ async function uploadMedia() {
             try {
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
                 const result = await res.json();
-                if (result.success) await savePostToFirestore(result.data.url, "image");
+                if (result.success) await saveToDB(result.data.url, "image", targetType);
             } catch (e) { alert("Şəkil yüklənmədi!"); }
         }
     };
     fileInp.click();
 }
 
-async function savePostToFirestore(url, type) {
+async function saveToDB(url, mediaType, targetType) {
     const user = auth.currentUser;
-    const text = prompt("Açıqlama yazın:");
-    await addDoc(collection(db, "posts"), {
+    const collectionName = targetType === "story" ? "stories" : "posts";
+    const data = {
         url: url,
-        type: type,
-        text: text || "",
+        type: mediaType,
         userName: user.displayName || user.email.split('@')[0],
         userPhoto: user.photoURL || "",
         userId: user.uid,
-        likes: 0,
-        comments: [],
         timestamp: serverTimestamp()
-    });
-    alert("Uğurla paylaşıldı!");
+    };
+    
+    if(targetType === "post") {
+        data.text = prompt("Açıqlama yazın:") || "";
+        data.likes = 0;
+        data.comments = [];
+    } else {
+        data.username = user.displayName || user.email.split('@')[0];
+    }
+
+    await addDoc(collection(db, collectionName), data);
+    alert(targetType === "story" ? "Story paylaşıldı!" : "Post paylaşıldı!");
 }
 
-// --- 3. GLOBAL FUNKSİYALAR (Like, Comment, Follow) ---
-window.handleLike = async (id, postOwnerId) => {
+// --- 4. QALAN FUNKSİYALAR ---
+window.handleLike = async (id) => {
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
     if (liked.includes(id)) return;
     await updateDoc(doc(db, "posts", id), { likes: increment(1) });
@@ -128,7 +185,7 @@ window.handleLike = async (id, postOwnerId) => {
     localStorage.setItem('vibeLikes', JSON.stringify(liked));
 };
 
-window.addComment = async (postId, postOwnerId) => {
+window.addComment = async (postId) => {
     const input = document.getElementById(`input-${postId}`);
     const commentText = input.value.trim();
     if (!commentText || !auth.currentUser) return;
@@ -153,13 +210,12 @@ window.handleFollow = async (targetUserId) => {
     });
 };
 
-// --- 4. AUTH VƏ BAŞLANĞIÇ ---
+// --- 5. AUTH VƏ SNAPSHOT ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        listenToStories();
         const postList = document.getElementById('post-list');
-        const userDocRef = doc(db, "users", user.uid);
-        
-        const userDoc = await getDoc(userDocRef);
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         const following = userDoc.exists() ? (userDoc.data().following || []) : [];
 
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
@@ -178,5 +234,12 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Event Listeners
-if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadMedia;
-if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+if (document.getElementById('add-story-btn')) {
+    document.getElementById('add-story-btn').onclick = () => uploadMedia("story");
+}
+if (document.getElementById('mainAddBtn')) {
+    document.getElementById('mainAddBtn').onclick = () => uploadMedia("post");
+}
+if (document.getElementById('logout-btn')) {
+    document.getElementById('logout-btn').onclick = () => signOut(auth);
+}

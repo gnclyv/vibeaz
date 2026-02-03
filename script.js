@@ -193,3 +193,4 @@ document.addEventListener('click', (e) => {
     if (e.target.id === 'add-story-btn') uploadMedia('story');
     if (e.target.id === 'logout-btn') signOut(auth);
 });
+

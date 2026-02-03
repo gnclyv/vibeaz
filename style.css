@@ -1,10 +1,12 @@
 /* 1. Rəng və Stil Dəyişənləri */
 :root {
-    --bg-dark: #000000;
-    --border-color: #262626;
-    --main-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    --accent-color: #0095f6;
-    --text-color: #ffffff;
+    --bg-main: #000000;         /* Tam qara arxa fon */
+    --bg-card: #121212;         /* Postlar üçün tünd boz (qabarıqlıq yaradır) */
+    --border-soft: #262626;     /* İncə ayırıcı xətlər */
+    --text-primary: #ffffff;    /* Əsas yazılar */
+    --text-secondary: #a8a8a8;  /* Şərhlər və tarixlər üçün solğun rəng */
+    --vibe-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    --accent-blue: #0095f6;     /* İzlə düyməsi üçün klassik mavi */
 }
 
 /* 2. Ümumi Tənzimləmələr */
@@ -175,5 +177,6 @@ body {
     border-radius: 10px;
     display: flex; justify-content: center; align-items: center;
 }
+
 
 

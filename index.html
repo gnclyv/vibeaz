@@ -8,47 +8,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-    <div class="header-left">
-        <div class="notif-wrapper" id="notif-btn">
-            <i class="fa-regular fa-heart"></i>
-            <span id="notif-dot" class="notification-dot" style="display:none;"></span>
+   <div id="app">
+    <header class="app-header">
+        <div class="header-side-space"></div>
+        <div class="logo-container">
+            <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" class="main-logo" alt="VibeAz">
         </div>
-    </div>
+        <div class="header-side-space"></div>
+    </header>
 
-    <div class="logo-container">
-        <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" class="main-logo" alt="VibeAz">
-    </div>
-
-    <div class="header-right">
-        <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
-    </div>
-</header>
-
-        <main id="post-list" class="post-feed"></main>
-
-        <nav class="bottom-nav">
-            <i class="fa-solid fa-house active"></i>
-            <i class="fa-solid fa-magnifying-glass"></i>
-            
-            <div class="add-post-btn" id="mainAddBtn">
-                <i class="fa-regular fa-square-plus"></i>
+    <div class="stories-container" id="stories-wrapper">
+        <div class="story-item add-story" id="add-story-btn">
+            <div class="story-circle">
+                <i class="fa-solid fa-plus"></i>
             </div>
-            
-            <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
-            
-            <a href="profile.html" class="nav-profile-link">
-                <div id="nav-user-avatar" class="nav-avatar-wrapper">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-            </a>
-        </nav>
-
-        <input type="file" id="fileInput" hidden accept="image/*">
+            <span class="story-username">Sənin storyn</span>
+        </div>
+        <div id="stories-list" class="stories-list-inner"></div>
     </div>
 
-    <script type="module" src="script.js?v=104"></script>
+    <main id="post-list" class="post-feed"></main>
+
+    <nav class="bottom-nav">
+        <i class="fa-solid fa-house active"></i>
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <div class="add-post-btn" id="mainAddBtn">
+            <i class="fa-regular fa-square-plus"></i>
+        </div>
+        <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
+        <a href="profile.html" class="nav-profile-link">
+            <div id="nav-user-avatar" class="nav-avatar-wrapper">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </a>
+    </nav>
+
+    <div id="story-viewer" class="story-viewer">
+        <div class="story-viewer-header">
+            <div class="story-viewer-user">
+                <img id="viewer-avatar" src="" alt="">
+                <span id="viewer-username"></span>
+            </div>
+            <span class="close-story" onclick="closeStory()">&times;</span>
+        </div>
+        <img id="story-full-img" src="" alt="">
+        <div class="story-progress-bar"><div id="progress-fill"></div></div>
+    </div>
+
+    <input type="file" id="fileInput" hidden accept="image/*">
+    <input type="file" id="storyInput" hidden accept="image/*">
+</div>
 </body>
 </html>
+
 
 

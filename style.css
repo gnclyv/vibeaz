@@ -57,7 +57,7 @@ body {
 }
 
 .main-logo {
-    height: 30px; /* Köhnə VibeAz yazısının hündürlüyü ilə eynidir */
+    height: auto; /* Köhnə VibeAz yazısının hündürlüyü ilə eynidir */
     width: auto;
     object-fit: contain;
 }
@@ -295,4 +295,5 @@ body {
     width: 28px;
     height: 28px;
 }
+
 

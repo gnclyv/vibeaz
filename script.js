@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, getDoc, where, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -14,74 +14,29 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/demo/video/upload";
-const CLOUDINARY_UPLOAD_PRESET = "docs_upload_example_us_preset";
 
-// --- 1. STORY SİSTEMİ (HEKAYƏLƏR) ---
-window.openStoryViewer = function(url, username) {
-    const viewer = document.getElementById('story-viewer');
-    const fullImg = document.getElementById('story-full-img');
-    const viewerUser = document.getElementById('viewer-username');
-    if(!viewer || !fullImg) return;
+// --- STREAMABLE MƏLUMATLARI (VİDEO ÜÇÜN) ---
+const STREAMABLE_EMAIL = "bigbass535@gmail.com"; 
+const STREAMABLE_PASS = "Nihad_123";
 
-    fullImg.src = url;
-    viewerUser.innerText = username;
-    viewer.style.display = 'flex';
-    
-    const progress = document.getElementById('progress-fill');
-    if(progress) {
-        progress.style.transition = 'none';
-        progress.style.width = '0%';
-        setTimeout(() => {
-            progress.style.transition = 'width 5s linear';
-            progress.style.width = '100%';
-        }, 100);
+// --- 1. MEDIA RENDER (Video və Şəkil üçün tam dəstək) ---
+function renderMedia(url, type) {
+    if (type === 'video' || url.includes('streamable.com')) {
+        const embedUrl = url.replace("streamable.com/", "streamable.com/e/");
+        return `<iframe src="${embedUrl}" class="post-video" frameborder="0" allowfullscreen style="width:100%; aspect-ratio:16/9; background:#000;"></iframe>`;
     }
-    clearTimeout(window.storyTimeout);
-    window.storyTimeout = setTimeout(window.closeStory, 5000);
+    return `<img src="${url}" loading="lazy" style="width:100%; display:block;">`;
 }
 
-window.closeStory = function() {
-    const viewer = document.getElementById('story-viewer');
-    if(viewer) viewer.style.display = 'none';
-    clearTimeout(window.storyTimeout);
-}
-
-function listenToStories() {
-    const storiesListInner = document.getElementById('stories-list');
-    if (!storiesListInner) return;
-    onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
-        const now = Date.now();
-        storiesListInner.innerHTML = '';
-        snap.forEach(d => {
-            const data = d.data();
-            // 24 saatlıq hekayə məntiqi
-            if (data.timestamp && (now - data.timestamp.toMillis() < 86400000)) {
-                storiesListInner.innerHTML += `
-                    <div class="story-item active" onclick="openStoryViewer('${data.url}', '${data.username}')">
-                        <div class="story-circle"><img src="${data.url}"></div>
-                        <span class="story-username">${data.username}</span>
-                    </div>`;
-            }
-        });
-    });
-}
-
-// --- 2. MULTIMEDIA RENDER (POSTLAR) ---
+// --- 2. ANA SƏHİFƏ POST HTML (Like, Comment, Follow daxil) ---
 function renderPostHTML(id, data, isLiked, isFollowing) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
-    const isVideo = data.url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || data.type === 'video';
     
-    const mediaContent = isVideo 
-        ? `<video src="${data.url}" class="post-video" loop muted autoplay playsinline onclick="this.paused ? this.play() : this.pause()"></video>` 
-        : `<img src="${data.url}" loading="lazy">`;
-
     const commentsHTML = (data.comments || []).map(c => `
         <div class="modern-comment">
-            <span class="comment-user">${c.user}</span>
+            <span class="comment-user"><b>${c.user}</b></span>
             <span class="comment-text">${c.text}</span>
         </div>`).join('');
     
@@ -97,30 +52,51 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
                     <button class="${btnClass}" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">${btnText}</button>
                 </div>
             </div>
-            <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
-                ${mediaContent}
+            <div class="post-img-container" ondblclick="handleLike('${id}')">
+                ${renderMedia(data.url, data.type)}
             </div>
             <div class="post-actions">
-                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}"></i>
+                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}')" style="color:${isLiked ? '#ff3040' : 'white'}"></i>
                 <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()"></i>
             </div>
             <div class="post-info-section">
-                <div class="likes-count">${data.likes || 0} bəyənmə</div>
+                <div class="likes-count" id="likes-${id}">${data.likes || 0} bəyənmə</div>
                 <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
                 <div class="modern-comments-box">${commentsHTML}</div>
                 <div class="modern-comment-input-area">
                     <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input">
-                    <button class="modern-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
+                    <button class="modern-post-btn" onclick="addComment('${id}')">Paylaş</button>
                 </div>
             </div>
         </div>`;
 }
 
-// --- 3. YÜKLƏMƏ MƏNTİQİ (STORY VƏ POST) ---
+// --- 3. STORY SİSTEMİ (Açılma və İzlənmə) ---
+window.openStoryViewer = function(url, username) {
+    const viewer = document.getElementById('story-viewer');
+    if(!viewer) return;
+    document.getElementById('story-full-img').src = url;
+    document.getElementById('viewer-username').innerText = username;
+    viewer.style.display = 'flex';
+    
+    const progress = document.getElementById('progress-fill');
+    if(progress) {
+        progress.style.transition = 'none';
+        progress.style.width = '0%';
+        setTimeout(() => {
+            progress.style.transition = 'width 5s linear';
+            progress.style.width = '100%';
+        }, 100);
+    }
+    clearTimeout(window.storyTimeout);
+    window.storyTimeout = setTimeout(() => viewer.style.display = 'none', 5000);
+};
+
+// --- 4. YÜKLƏMƏ (Post və Story üçün Streamable dəstəyi ilə) ---
 async function uploadMedia(targetType = "post") {
     const fileInp = document.createElement('input');
     fileInp.type = 'file';
-    fileInp.accept = "image/*,video/*";
+    fileInp.accept = "image/*,video/*"; 
     
     fileInp.onchange = async (e) => {
         const file = e.target.files[0];
@@ -128,55 +104,53 @@ async function uploadMedia(targetType = "post") {
         if (!file || !user) return;
 
         alert(targetType === "story" ? "Story yüklənir..." : "Post yüklənir...");
+        let finalUrl = "";
+        let mediaType = file.type.startsWith("video/") ? "video" : "image";
 
-        if (file.type.startsWith("video/")) {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-            try {
-                const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
-                const result = await res.json();
-                if (result.secure_url) await saveToDB(result.secure_url, "video", targetType);
-            } catch (err) { alert("Video yüklənmədi!"); }
-        } else {
-            const fd = new FormData();
-            fd.append("image", file);
-            try {
+        try {
+            if (mediaType === "video") {
+                const authHeader = btoa(`${STREAMABLE_EMAIL}:${STREAMABLE_PASS}`);
+                const fd = new FormData();
+                fd.append("file", file);
+                const res = await fetch("https://api.streamable.com/upload", {
+                    method: "POST",
+                    headers: { "Authorization": `Basic ${authHeader}` },
+                    body: fd
+                });
+                const data = await res.json();
+                if (data.shortcode) finalUrl = `https://streamable.com/${data.shortcode}`;
+            } else {
+                const fd = new FormData();
+                fd.append("image", file);
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
-                const result = await res.json();
-                if (result.success) await saveToDB(result.data.url, "image", targetType);
-            } catch (e) { alert("Şəkil yüklənmədi!"); }
-        }
+                const data = await res.json();
+                if (data.success) finalUrl = data.data.url;
+            }
+
+            if (finalUrl) {
+                const col = targetType === "story" ? "stories" : "posts";
+                const docData = {
+                    url: finalUrl,
+                    type: mediaType,
+                    userName: user.displayName || user.email.split('@')[0],
+                    userPhoto: user.photoURL || "",
+                    userId: user.uid,
+                    timestamp: serverTimestamp()
+                };
+                if (targetType === "post") {
+                    docData.text = prompt("Açıqlama:") || "";
+                    docData.likes = 0;
+                    docData.comments = [];
+                }
+                await addDoc(collection(db, col), docData);
+                alert("Uğurla paylaşıldı!");
+            }
+        } catch (err) { alert("Xəta: " + err.message); }
     };
     fileInp.click();
 }
 
-async function saveToDB(url, mediaType, targetType) {
-    const user = auth.currentUser;
-    const collectionName = targetType === "story" ? "stories" : "posts";
-    const data = {
-        url: url,
-        type: mediaType,
-        userName: user.displayName || user.email.split('@')[0],
-        userPhoto: user.photoURL || "",
-        userId: user.uid,
-        timestamp: serverTimestamp()
-    };
-    
-    if(targetType === "post") {
-        data.text = prompt("Açıqlama yazın:") || "";
-        data.likes = 0;
-        data.comments = [];
-    } else {
-        data.username = user.displayName || user.email.split('@')[0];
-    }
-
-    await addDoc(collection(db, collectionName), data);
-    alert(targetType === "story" ? "Story paylaşıldı!" : "Post paylaşıldı!");
-}
-
-// --- 4. QALAN FUNKSİYALAR ---
+// --- 5. LİKE, COMMENT, FOLLOW ---
 window.handleLike = async (id) => {
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
     if (liked.includes(id)) return;
@@ -210,10 +184,25 @@ window.handleFollow = async (targetUserId) => {
     });
 };
 
-// --- 5. AUTH VƏ SNAPSHOT ---
+// --- 6. BAŞLANĞIÇ VƏ REALTİME ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        listenToStories();
+        // Story-lər
+        onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
+            const list = document.getElementById('stories-list');
+            if(list) {
+                list.innerHTML = '';
+                snap.forEach(d => {
+                    const s = d.data();
+                    list.innerHTML += `<div class="story-item" onclick="openStoryViewer('${s.url}', '${s.userName}')">
+                        <div class="story-circle"><img src="${s.url}"></div>
+                        <span class="story-username">${s.userName}</span>
+                    </div>`;
+                });
+            }
+        });
+
+        // Postlar
         const postList = document.getElementById('post-list');
         const userDoc = await getDoc(doc(db, "users", user.uid));
         const following = userDoc.exists() ? (userDoc.data().following || []) : [];
@@ -221,10 +210,12 @@ onAuthStateChanged(auth, async (user) => {
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
             if (postList) {
                 postList.innerHTML = '';
+                const liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
                 snap.forEach(d => {
                     const data = d.data();
                     const isFollowing = following.includes(data.userId);
-                    postList.innerHTML += renderPostHTML(d.id, data, false, isFollowing);
+                    const isLiked = liked.includes(d.id);
+                    postList.innerHTML += renderPostHTML(d.id, data, isLiked, isFollowing);
                 });
             }
         });
@@ -234,12 +225,8 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Event Listeners
-if (document.getElementById('add-story-btn')) {
-    document.getElementById('add-story-btn').onclick = () => uploadMedia("story");
-}
-if (document.getElementById('mainAddBtn')) {
-    document.getElementById('mainAddBtn').onclick = () => uploadMedia("post");
-}
-if (document.getElementById('logout-btn')) {
-    document.getElementById('logout-btn').onclick = () => signOut(auth);
-}
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'mainAddBtn') uploadMedia('post');
+    if (e.target.id === 'add-story-btn') uploadMedia('story');
+    if (e.target.id === 'logout-btn') signOut(auth);
+});

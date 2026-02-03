@@ -29,8 +29,9 @@ body {
 }
 
 /* 3. HEADER (MƏRKƏZİ LOQO) */
+/* HEADER KONTEYNERİ */
 .app-header {
-    height: 48px;
+    height: 60px; /* Hündürlüyü sabitlədik */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,24 +40,31 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-}
-
-.header-side-space {
-    flex: 1;
+    overflow: hidden; /* Loqonun kənara çıxmaması üçün */
 }
 
 .logo-container {
-    flex: 2;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .main-logo {
-    height: 180px; /* Sənin təyin etdiyin ölçü */
+    /* Şəkildəki loqo çox hündür olduğu üçün hündürlüyü azaltdıq */
+    height: 45px; 
     width: auto;
     object-fit: contain;
-    margin-top: -33px; /* Sənin təyin etdiyin mövqe */
+    /* Mənfi marginləri tamamilə sildik */
+    margin: 0; 
+    padding: 5px 0;
+    transition: transform 0.3s ease;
+}
+
+/* STORY BAR İLƏ MƏSAFƏ */
+.stories-container {
+    margin-top: 5px; /* Header ilə story-lər arasında kiçik nəfəslik */
 }
 
 /* İkonları gizlətmək üçün (lazım olanda aktiv edərsən) */
@@ -304,3 +312,4 @@ body {
     background: #fff;
     transition: width 5s linear;
 }
+

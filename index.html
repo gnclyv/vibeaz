@@ -4,62 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css?v=104">
+    <link rel="stylesheet" href="style.css?v=105">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-   <div id="app">
-    <header class="app-header">
-        <div class="header-side-space"></div>
-        <div class="logo-container">
-            <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" class="main-logo" alt="VibeAz">
-        </div>
-        <div class="header-side-space"></div>
-    </header>
-
-    <div class="stories-container" id="stories-wrapper">
-        <div class="story-item add-story" id="add-story-btn">
-            <div class="story-circle">
-                <i class="fa-solid fa-plus"></i>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-side-space"></div>
+            <div class="logo-container">
+                <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" class="main-logo" alt="VibeAz">
             </div>
-            <span class="story-username">Sənin storyn</span>
+            <div class="header-side-space"></div>
+        </header>
+
+        <div class="stories-container" id="stories-wrapper">
+            <div class="story-item add-story" id="add-story-btn">
+                <div class="story-circle">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <span class="story-username">Sənin storyn</span>
+            </div>
+            <div id="stories-list" class="stories-list-inner"></div>
         </div>
-        <div id="stories-list" class="stories-list-inner"></div>
+
+        <main id="post-list" class="post-feed"></main>
+
+        <nav class="bottom-nav">
+            <i class="fa-solid fa-house active"></i>
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <div class="add-post-btn" id="mainAddBtn">
+                <i class="fa-regular fa-square-plus"></i>
+            </div>
+            <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
+            <a href="profile.html" class="nav-profile-link">
+                <div id="nav-user-avatar" class="nav-avatar-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </a>
+        </nav>
+
+        <div id="story-viewer" class="story-viewer">
+            <div class="story-viewer-header">
+                <div class="story-viewer-user">
+                    <img id="viewer-avatar" src="" alt="">
+                    <span id="viewer-username"></span>
+                </div>
+                <span class="close-story" onclick="closeStory()">&times;</span>
+            </div>
+            <img id="story-full-img" src="" alt="">
+            <div class="story-progress-bar"><div id="progress-fill"></div></div>
+        </div>
+
+        <input type="file" id="fileInput" hidden accept="image/*">
+        <input type="file" id="storyInput" hidden accept="image/*">
     </div>
 
-    <main id="post-list" class="post-feed"></main>
-
-    <nav class="bottom-nav">
-        <i class="fa-solid fa-house active"></i>
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <div class="add-post-btn" id="mainAddBtn">
-            <i class="fa-regular fa-square-plus"></i>
-        </div>
-        <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
-        <a href="profile.html" class="nav-profile-link">
-            <div id="nav-user-avatar" class="nav-avatar-wrapper">
-                <i class="fa-solid fa-user"></i>
-            </div>
-        </a>
-    </nav>
-
-    <div id="story-viewer" class="story-viewer">
-        <div class="story-viewer-header">
-            <div class="story-viewer-user">
-                <img id="viewer-avatar" src="" alt="">
-                <span id="viewer-username"></span>
-            </div>
-            <span class="close-story" onclick="closeStory()">&times;</span>
-        </div>
-        <img id="story-full-img" src="" alt="">
-        <div class="story-progress-bar"><div id="progress-fill"></div></div>
-    </div>
-
-    <input type="file" id="fileInput" hidden accept="image/*">
-    <input type="file" id="storyInput" hidden accept="image/*">
-</div>
+    <script type="module" src="script.js?v=105"></script>
 </body>
 </html>
-
-
-

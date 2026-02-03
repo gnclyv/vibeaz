@@ -1,195 +1,320 @@
+/* 1. RƏNG PALİTRASI VƏ DEYİŞƏNLƏR */
 :root {
-    --bg-black: #000000;
-    --bg-card: #121212;
-    --border: #262626;
-    --vibe-gradient: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    --text: #ffffff;
+--bg-black: #000000;
+--bg-card: #121212;
+--border: #262626;
+--vibe-gradient: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+--text: #ffffff;
+--text-dim: #a8a8a8;
 }
 
+/* 2. ÜMUMİ RESET */
 body {
-    margin: 0;
-    padding-bottom: 70px;
-    background-color: var(--bg-black);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+margin: 0;
+background-color: var(--bg-black);
+color: var(--text);
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+-webkit-tap-highlight-color: transparent;
+overflow-x: hidden;
 }
 
-/* HEADER - Loqo tam mərkəzdə və normal ölçüdə */
+#app {
+max-width: 500px;
+margin: 0 auto;
+min-height: 100vh;
+border-left: 1px solid var(--border);
+border-right: 1px solid var(--border);
+background-color: var(--bg-black);
+position: relative;
+}
+
+/* 3. HEADER (MƏRKƏZİ LOQO) */
+/* HEADER KONTEYNERİ */
 .app-header {
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #000;
-    position: relative; /* Sürüşən olması üçün */
-    z-index: 1000;
-    border-bottom: none;
+height: 60px;
+display: flex;
+justify-content: center;
+align-items: center;
+background: #000;
+/* border-bottom: 1px solid var(--border);  <-- Bu sətri sil və ya rəngini 'transparent' et */
+border-bottom: none; /* Xətti tamamilə ləğv edir */
+position: sticky;
+top: 0;
+z-index: 1000;
+overflow: hidden;
+}
+
+.logo-container {
+width: 100%;
+height: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 .main-logo {
-    height: 42px;
-    width: auto;
-    object-fit: contain;
+/* Şəkildəki loqo çox hündür olduğu üçün hündürlüyü azaltdıq */
+height: 120px; 
+width: auto;
+object-fit: contain;
+/* Mənfi marginləri tamamilə sildik */
+margin: 0; 
+padding: 5px 0;
+transition: transform 0.3s ease;
 }
 
-/* STORY BÖLMƏSİ - Yan-yana sürüşməni təmin edir */
+/* STORY BAR İLƏ MƏSAFƏ */
 .stories-container {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 15px;
-    padding: 10px 15px;
-    overflow-x: auto !important;
-    white-space: nowrap;
-    border-bottom: 1px solid var(--border);
-    background: #000;
-    scrollbar-width: none;
+margin-top: 5px; /* Header ilə story-lər arasında kiçik nəfəslik */
+}
+
+/* İkonları gizlətmək üçün (lazım olanda aktiv edərsən) */
+.notif-wrapper, #logout-btn, .header-right, .header-left {
+display: none !important;
+}
+
+/* 4. STORY SİSTEMİ */
+.stories-container {
+display: flex;
+gap: 15px;
+padding: 15px 10px;
+background: #000;
+border-bottom: none;
+overflow-x: auto;
+scrollbar-width: none; /* Firefox üçün */
 }
 
 .stories-container::-webkit-scrollbar {
-    display: none;
+display: none; /* Chrome/Safari üçün */
+}
+
+.stories-list-inner {
+display: flex;
+gap: 15px;
 }
 
 .story-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 75px;
-    cursor: pointer;
+display: flex;
+flex-direction: column;
+align-items: center;
+min-width: 75px;
+cursor: pointer;
 }
 
 .story-circle {
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    padding: 2px;
-    background: var(--vibe-gradient);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+width: 65px;
+height: 65px;
+border-radius: 50%;
+padding: 3px;
+background: #000;
+border: 2px solid var(--border);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.story-item.active .story-circle {
+border: 2px solid transparent;
+background: var(--vibe-gradient) border-box;
 }
 
 .story-circle img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #000;
+width: 100%;
+height: 100%;
+border-radius: 50%;
+object-fit: cover;
 }
 
 .story-username {
-    font-size: 11px;
-    margin-top: 5px;
-    color: #fff;
+font-size: 11px;
+color: var(--text);
+margin-top: 5px;
+text-align: center;
+max-width: 70px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
 }
 
-/* POSTLAR */
+/* 5. POST FEED & CARDS (QABARIQ) */
+.post-feed {
+    padding: 10px 0 80px 0;
+    padding: 0px 0 80px 0;
+}
+
 .post-card {
-    background: var(--bg-black);
-    margin-bottom: 15px;
+background-color: var(--bg-card);
+margin: 16px 10px;
+border-radius: 12px;
+border: 1px solid var(--border);
+overflow: hidden;
+box-shadow: 0 8px 20px rgba(0,0,0,0.6);
 }
 
 .post-header {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
+display: flex;
+align-items: center;
+padding: 12px;
 }
 
-.nav-avatar-wrapper {
-    width: 32px;
-    height: 32px;
-}
-
-.nav-profile-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
+.nav-avatar-wrapper { 
+width: 32px;
+height: 32px;
+border-radius: 50%; 
+border: 1px solid #444;
+overflow: hidden;
+display: flex;
+align-items: center;
+justify-content: center;
 }
 
 .post-header-info {
-    margin-left: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    flex: 1; /* Ortadakı boşluğu doldurur */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+margin-left: 10px;
+flex: 1;
+font-weight: 600;
+font-size: 14px;
 }
 
-/* "İzlə" Düyməsi - Tam sağda */
-.follow-btn {
-    background-color: transparent;
-    color: #fff;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
+.post-img-container {
+width: 100%;
+background: #000;
+position: relative;
+padding-top: 100%;
 }
 
 .post-img-container img {
-    width: 100%;
-    display: block;
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
 }
 
 .post-actions {
-    padding: 12px 15px;
-    display: flex;
-    gap: 15px;
-    font-size: 24px;
+display: flex;
+gap: 18px;
+padding: 12px 12px 8px;
+font-size: 24px;
 }
 
 .post-info-section {
-    padding: 0 15px 15px;
+padding: 0 12px 12px;
 }
 
-.comment-input-wrapper {
-    display: flex;
-    margin-top: 10px;
-    gap: 10px;
+.likes-count {
+font-weight: 700;
+font-size: 14px;
+margin-bottom: 5px;
 }
 
-.comment-input-wrapper input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #fff;
-    outline: none;
+.post-description {
+font-size: 14px;
+line-height: 1.4;
 }
 
-.comment-post-btn {
-    background: transparent;
-    border: none;
-    color: #0095f6;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-/* BOTTOM NAV */
+/* 6. BOTTOM NAV */
 .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    background: #000;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid var(--border);
-    z-index: 2000;
+position: fixed;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 100%;
+max-width: 500px;
+height: 60px;
+background: #000;
+display: flex;
+justify-content: space-around;
+align-items: center;
+border-top: 1px solid var(--border);
+z-index: 1000;
 }
 
-/* STORY VIEWER */
-#story-viewer {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #000; z-index: 9999;
-    display: none; flex-direction: column;
+.bottom-nav i {
+font-size: 24px;
+color: white;
+cursor: pointer;
 }
 
-.progress-bar {
-    width: 100%; height: 2px; background: #333;
+.add-post-btn {
+background: var(--vibe-gradient);
+width: 42px;
+height: 42px;
+border-radius: 12px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+/* 7. STORY VIEWER (TAM EKRAN) */
+.story-viewer {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #000;
+z-index: 9999;
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+
+.story-viewer-header {
+position: absolute;
+top: 40px;
+width: 100%;
+padding: 0 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+z-index: 10000;
+}
+
+.story-viewer-user {
+display: flex;
+align-items: center;
+gap: 10px;
+color: white;
+}
+
+.story-viewer-user img {
+width: 35px;
+height: 35px;
+border-radius: 50%;
+border: 1.5px solid #fff;
+}
+
+.close-story {
+color: white;
+font-size: 40px;
+cursor: pointer;
+line-height: 1;
+}
+
+#story-full-img {
+width: 100%;
+height: auto;
+max-height: 85vh;
+object-fit: contain;
+}
+
+.story-progress-bar {
+position: absolute;
+top: 15px;
+width: 94%;
+height: 2px;
+background: #333;
 }
 
 #progress-fill {
-    width: 0%; height: 100%; background: #fff;
+height: 100%;
+width: 0%;
+background: #fff;
+transition: width 5s linear;
 }
+
+
+
+

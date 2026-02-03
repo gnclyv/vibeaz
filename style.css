@@ -1,63 +1,60 @@
-/* 1. Rəng və Stil Dəyişənləri */
+/* 1. RƏNG PALİTRASI (PROFESSİONAL DARK) */
 :root {
-    --bg-main: #000000;         /* Tam qara arxa fon */
-    --bg-card: #121212;         /* Postlar üçün tünd boz (qabarıqlıq yaradır) */
-    --border-soft: #262626;     /* İncə ayırıcı xətlər */
-    --text-primary: #ffffff;    /* Əsas yazılar */
-    --text-secondary: #a8a8a8;  /* Şərhlər və tarixlər üçün solğun rəng */
-    --vibe-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    --accent-blue: #0095f6;     /* İzlə düyməsi üçün klassik mavi */
+    --body-bg: #000000;       /* Əsas fon - tam qara */
+    --card-bg: #121212;       /* Post kartı - tünd boz */
+    --header-bg: rgba(0, 0, 0, 0.9);
+    --border: #262626;        /* İncə ayırıcılar */
+    --text-main: #ffffff;     /* Əsas yazı */
+    --text-dim: #a8a8a8;      /* Şərhlər və tarixlər */
+    --accent: #0095f6;        /* İzlə düyməsi */
 }
 
-/* 2. Ümumi Tənzimləmələr */
+/* 2. ÜMUMİ RESET */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
-    background-color: var(--bg-dark);
-    color: var(--text-color);
-    overflow-x: hidden;
+    padding: 0;
+    background-color: var(--body-bg);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 #app {
     max-width: 500px;
     margin: 0 auto;
     min-height: 100vh;
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    padding-bottom: 70px;
+    background-color: var(--body-bg);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    position: relative;
 }
 
-/* 3. Optimizə edilmiş Header */
+/* 3. HEADER (SƏLİQƏLİ VƏ İNCƏ) */
 .app-header {
+    height: 54px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px; /* Şaquli paddingi sildik ki, hündürlük artmasın */
-    height: 54px; /* İnstaqram tərzi incə hündürlük */
-    background: rgba(0, 0, 0, 0.9);
+    padding: 0 12px;
+    background: var(--header-bg);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 1000;
-    width: 100%;
-    box-sizing: border-box;
+    border-bottom: 1px solid var(--border);
 }
 
-/* Loqo tam solda və normal ölçüdə */
 .logo-container {
     display: flex;
     align-items: center;
-    margin-left: -5px; /* Sola tam sıxmaq üçün */
+    margin-left: -5px;
 }
 
 .main-logo {
-    height: 50px; /* 120px-dən 32px-ə endirildi */
+    height: 30px;
     width: auto;
     object-fit: contain;
 }
 
-/* İkonlar sağda və zərif */
 .header-icons {
     display: flex;
     align-items: center;
@@ -65,9 +62,9 @@ body {
 }
 
 .header-icons i {
-    font-size: 20px;
-    cursor: pointer;
+    font-size: 22px;
     color: white;
+    cursor: pointer;
 }
 
 #logout-btn {
@@ -75,108 +72,98 @@ body {
     border: none;
     color: white;
     padding: 0;
-    font-size: 18px;
     cursor: pointer;
 }
 
-/* 4. Bildiriş Paneli */
-.notif-wrapper { position: relative; display: flex; align-items: center; }
-.notification-dot {
-    position: absolute; top: -2px; right: -2px;
-    width: 8px; height: 8px;
-    background: #ff3040; border-radius: 50%;
-    border: 2px solid black;
-}
-
-.notif-panel {
-    position: absolute; top: 45px; right: -5px;
-    width: 280px; background: #121212;
-    border: 1px solid var(--border-color);
-    border-radius: 12px; z-index: 1001;
-    max-height: 400px; overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-}
-
-/* 5. Postlar (Şəkillərin örtülməməsi üçün) */
+/* 4. POSTLARIN QABARIQ DİZAYNI */
 .post-feed {
-    padding-top: 10px; /* Header-dən sonra nəfəs alma boşluğu */
-}
-.post-card {
-    background-color: #0a0a0a; /* Postun arxa fonu bir az fərqlənsin */
-    border: 1px solid var(--border-color);
-    border-radius: 12px; /* Küncləri yuvarlaqlaşdırırıq */
-    margin: 16px 12px; /* Postlar arasında yuxarı-aşağı və sağ-sol boşluq */
-    overflow: hidden; /* Şəkillərin künclərdən kənara çıxmaması üçün */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Qabarıqlıq verən kölgə */
-    transition: transform 0.2s ease; /* Kiçik toxunuş effekti */
+    padding: 10px 0 70px 0; /* Naviqasiya üçün aşağıda boşluq */
 }
 
-/* Postun üzərinə gələndə cüzi böyümə (istəyə bağlı) */
-.post-card:hover {
-    transform: translateY(-2px);
+.post-card {
+    background-color: var(--card-bg);
+    margin: 16px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
 }
+
 .post-header {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 12px;
 }
 
-.nav-avatar-wrapper {
-    width: 32px; height: 32px;
-    border-radius: 50%; overflow: hidden;
-    border: 1px solid #333;
+.post-header-info span {
+    font-weight: 600;
+    font-size: 14px;
+    margin-left: 10px;
 }
 
-.post-header-info {
-    display: flex; align-items: center;
-    flex: 1; margin-left: 10px;
-}
-
-.post-header-info span { font-weight: 600; font-size: 14px; }
-
-.follow-btn {
-    background: none; border: none;
-    color: var(--accent-color); font-weight: 700;
-    font-size: 13px; margin-left: 8px;
-}
-
-/* Kvadrat Şəkillər */
 .post-img-container {
-    width: 100%; position: relative; padding-top: 100%;
-    background: #1a1a1a;
+    width: 100%;
+    background-color: #000;
+    display: flex;
+    align-items: center;
 }
 
 .post-img-container img {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%; object-fit: cover;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.post-info-section {
+    padding: 12px;
 }
 
 .post-actions {
-    display: flex; gap: 18px; padding: 12px; font-size: 22px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+    font-size: 22px;
 }
 
-.post-info-section { padding: 0 12px 12px; }
-.likes-count { font-weight: 700; font-size: 14px; margin-bottom: 5px; }
-.post-description { font-size: 14px; line-height: 1.4; }
+.likes-count {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
 
-/* 6. Alt Naviqasiya */
+.post-description {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* 5. ALT NAVİQASİYA (SABİT) */
 .bottom-nav {
-    position: fixed; bottom: 0; left: 50%;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
     transform: translateX(-50%);
-    width: 100%; max-width: 500px;
-    height: 55px; background: #000;
-    display: flex; justify-content: space-around;
-    align-items: center; border-top: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 500px;
+    height: 55px;
+    background-color: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border);
     z-index: 1000;
 }
 
-.bottom-nav i { font-size: 20px; color: white; }
-.add-post-btn {
-    background: var(--main-gradient);
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    display: flex; justify-content: center; align-items: center;
+.bottom-nav i {
+    font-size: 22px;
+    color: white;
 }
 
-
-
+.add-post-btn {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

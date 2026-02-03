@@ -90,18 +90,23 @@ body {
     margin-left: 10px;
 }
 
+/* Şəkil konteyneri - 1:1 Kvadrat saxlayır */
 .post-img-container {
     width: 100%;
-    aspect-ratio: 1 / 1;
-    background-color: #1a1a1a;
+    aspect-ratio: 1 / 1; /* Bu, konteyneri mütləq kvadrat edir */
+    background-color: #1a1a1a; /* Şəkil yüklənənə qədər boş qalmasın */
     overflow: hidden;
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Şəklin özü - Deformasiya olmadan kvadratın içinə sığır */
 .post-img-container img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Əsas sirr buradadır: Şəkli uzatmır, kənarlarını kəsib tam otuzdurur */
+    object-position: center; /* Şəklin mərkəzini əsas götürür */
     display: block;
 }
 
@@ -268,3 +273,4 @@ body {
     z-index: 2000;
     backdrop-filter: blur(5px);
 }
+

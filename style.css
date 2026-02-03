@@ -1,42 +1,277 @@
+/* 1. Rəng və Stil Dəyişənləri */
 :root {
     --bg-dark: #000000;
     --border-color: #262626;
     --main-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     --accent-color: #0095f6;
     --text-color: #ffffff;
+    --card-bg: #000000;
 }
 
-body { font-family: -apple-system, sans-serif; margin: 0; background-color: var(--bg-dark); color: var(--text-color); }
-#app { max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
+/* 2. Ümumi Tənzimləmələr */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-dark);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
 
-.app-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; background: #000; z-index: 1000; }
-.logo { font-family: 'Billabong', cursive; font-size: 28px; background: var(--main-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+#app {
+    max-width: 500px;
+    margin: 0 auto;
+    min-height: 100vh;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    padding-bottom: 70px; /* Naviqasiya üçün yer */
+}
 
-.header-icons { display: flex; align-items: center; gap: 15px; position: relative; }
+/* 3. Header və Loqo (Şəkil Loqo üçün) */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+}
 
-/* Bildiriş Stilləri */
-.notif-wrapper { position: relative; cursor: pointer; }
-.notification-dot { position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; background: #ff3040; border-radius: 50%; border: 2px solid #000; }
-.notif-panel { position: absolute; top: 40px; right: 0; width: 280px; background: #121212; border: 1px solid var(--border-color); border-radius: 12px; z-index: 1001; max-height: 400px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-.notif-header { padding: 12px; font-weight: bold; border-bottom: 1px solid var(--border-color); }
-.notif-item { display: flex; align-items: center; padding: 10px; gap: 10px; border-bottom: 1px solid #1a1a1a; }
-.notif-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-.notif-text { font-size: 13px; }
+/* Şəkil loqo üçün stil */
+.logo-img {
+    height: 35px; /* Loqonun hündürlüyü */
+    width: auto;
+    object-fit: contain;
+    cursor: pointer;
+}
 
-/* Mövcud Post Kartı Dizaynı */
-.post-card { border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
-.post-header { display: flex; align-items: center; padding: 12px; }
-.nav-avatar-wrapper { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 1px solid #333; display: flex; justify-content: center; align-items: center; }
-.nav-profile-img { width: 100%; height: 100%; object-fit: cover; }
-.post-header-info { display: flex; align-items: center; flex: 1; margin-left: 10px; }
-.post-header-info span { font-weight: 600; font-size: 14px; }
-.follow-btn { background: none; border: none; color: var(--accent-color); font-weight: 700; cursor: pointer; font-size: 13px; margin-left: 8px; }
-.post-img-container { width: 100%; position: relative; padding-top: 100%; background: #1a1a1a; }
-.post-img-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-.post-actions { display: flex; gap: 18px; padding: 12px; font-size: 24px; }
-.post-info-section { padding: 0 12px 12px; }
-.likes-count { font-weight: 700; font-size: 14px; margin-bottom: 5px; }
-.comment-input-wrapper { display: flex; border-top: 0.5px solid var(--border-color); margin-top: 10px; padding-top: 10px; }
-.comment-input-wrapper input { flex: 1; background: none; border: none; color: white; outline: none; font-size: 14px; }
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 60px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--border-color); z-index: 1000; }
-.add-post-btn { background: var(--main-gradient); width: 42px; height: 42px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+}
+
+.header-icons i {
+    font-size: 22px;
+    cursor: pointer;
+}
+
+#logout-btn {
+    background: none;
+    border: none;
+    color: white;
+    padding: 0;
+}
+
+/* 4. Bildiriş Sistemi (Real-time Panel) */
+.notif-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 9px;
+    height: 9px;
+    background: #ff3040;
+    border-radius: 50%;
+    border: 2px solid black;
+}
+
+.notif-panel {
+    position: absolute;
+    top: 40px;
+    right: -10px;
+    width: 280px;
+    background: #121212;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    z-index: 1001;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+.notif-header {
+    padding: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notif-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 12px;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.notif-item img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.notif-text {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* 5. Post Kartı və Şəkillər (1:1 Kvadrat) */
+.post-card {
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+}
+
+.nav-avatar-wrapper {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+
+.post-header-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    margin-left: 10px;
+}
+
+.post-header-info span {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.follow-btn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+/* ŞƏKİL KONTEYNERİ - 1:1 Kvadrat saxlayır */
+.post-img-container {
+    width: 100%;
+    position: relative;
+    padding-top: 100%; /* Kvadrat üçün */
+    background: #1a1a1a;
+}
+
+.post-img-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-actions {
+    display: flex;
+    gap: 18px;
+    padding: 12px;
+    font-size: 24px;
+}
+
+.post-info-section {
+    padding: 0 12px 12px;
+}
+
+.likes-count {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.post-description {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Şərh Bölməsi */
+.comments-container {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #b0b0b0;
+}
+
+.comment-input-wrapper {
+    display: flex;
+    border-top: 1px solid #1a1a1a;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.comment-input-wrapper input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: white;
+    outline: none;
+    font-size: 14px;
+}
+
+.comment-post-btn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* 6. Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 500px;
+    height: 60px;
+    background: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    z-index: 1000;
+}
+
+.bottom-nav i {
+    font-size: 22px;
+    color: white;
+}
+
+.add-post-btn {
+    background: var(--main-gradient);
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+}
+
+/* Profile ikonunun dairəvi olması üçün */
+.nav-profile-link .nav-avatar-wrapper {
+    width: 28px;
+    height: 28px;
+}

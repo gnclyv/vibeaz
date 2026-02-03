@@ -42,7 +42,7 @@ storyInput?.addEventListener('change', async (e) => {
                 userId: user.uid,
                 username: user.displayName || user.email.split('@')[0],
                 timestamp: serverTimestamp(),
-                createdAt: Date.now() // 24 saatlıq yoxlanış üçün
+                createdAt: Date.now()
             });
         }
     } catch (e) { alert("Story yüklənərkən xəta baş verdi!"); }
@@ -58,7 +58,6 @@ function listenToStories() {
         
         snap.forEach(d => {
             const data = d.data();
-            // 24 saatdan köhnə story-ləri göstərmə (86400000 ms)
             if (now - data.createdAt < 86400000) {
                 storiesListInner.innerHTML += `
                     <div class="story-item active" onclick="openStoryViewer('${data.url}', '${data.username}')">
@@ -138,8 +137,8 @@ function renderPostHTML(id, data, isLiked) {
             <div class="post-header">
                 <div class="nav-avatar-wrapper"><img src="${avatarImg}" class="nav-profile-img"></div>
                 <div class="post-header-info">
-                    <span>${author}</span>
-                    <button class="follow-btn" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">• İzlə</button>
+                    <span class="post-username-text">${author}</span>
+                    <button class="follow-btn" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">İzlə</button>
                 </div>
             </div>
             <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
@@ -193,7 +192,10 @@ window.handleFollow = async (targetUserId) => {
     await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
     await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
     const btn = document.getElementById(`follow-${targetUserId}`);
-    if (btn) btn.innerText = "• İzlənilir";
+    if (btn) {
+        btn.innerText = "İzlənilir";
+        btn.classList.add('following');
+    }
     await sendNotification(targetUserId, "sizi izləməyə başladı.");
 };
 
@@ -225,12 +227,10 @@ async function uploadPost() {
     fileInp.click();
 }
 
-// --- 3. AUTH MUSHAHIDƏSİ ---
-
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loadPosts();
-        listenToStories(); // Firebase story-ləri dinləməyə başla
+        listenToStories();
         const displayNick = user.displayName || user.email.split('@')[0];
         updateNavAvatar(user, displayNick);
     } else if (!window.location.pathname.includes("login.html")) {

@@ -50,7 +50,7 @@ body {
 }
 
 .main-logo {
-    height: 32px; /* 120px-dən 32px-ə endirildi */
+    height: 50px; /* 120px-dən 32px-ə endirildi */
     width: auto;
     object-fit: contain;
 }
@@ -167,3 +167,4 @@ body {
     border-radius: 10px;
     display: flex; justify-content: center; align-items: center;
 }
+

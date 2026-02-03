@@ -1,33 +1,237 @@
-/* --- REDAKTƏ MODALI ÜÇÜN ƏLAVƏLƏR (HİÇBİR KOD SİLMƏDƏN) --- */
+/* 1. Ümumi Sıfırlama və Fontlar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85); /* Arxa fonu qaraldır */
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: 60px; /* Alt menyu üçün boşluq */
+}
+
+.profile-page {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* 2. Üst Header (Username hissəsi) */
+.top-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
-    backdrop-filter: blur(5px);
+    padding: 15px;
+    gap: 5px;
+    position: sticky;
+    top: 0;
+    background: #000;
+    z-index: 100;
+}
+
+.top-bar h2 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* 3. Profil Header: Logo və Statistikalar */
+.profile-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    gap: 30px;
+}
+
+.avatar-section {
+    flex: 0 0 85px;
+}
+
+.avatar-ring {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    border: 1.5px solid #262626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+.avatar-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.stats-section {
+    display: flex;
+    flex: 1;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.stat-item span {
+    display: block;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.stat-item p {
+    font-size: 13px;
+    color: #fff;
+}
+
+/* 4. Bio və İstifadəçi Məlumatları */
+.bio-container {
+    padding: 5px 20px 15px;
+}
+
+.bio-container h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.email-text {
+    font-size: 14px;
+    color: #a8a8a8;
+}
+
+.bio-text {
+    font-size: 14px;
+    margin-top: 3px;
+}
+
+/* 5. Düymələr */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 20px;
+}
+
+.btn-main {
+    flex: 1;
+    background-color: #262626;
+    color: #fff;
+    border: none;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* 6. Post Tabları */
+.tabs {
+    display: flex;
+    border-top: 1px solid #262626;
+}
+
+.tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    color: #8e8e8e;
+    font-size: 20px;
+}
+
+.tab-item.active {
+    color: #fff;
+    border-bottom: 1px solid #fff;
+}
+
+/* 7. Grid */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+.grid-item {
+    aspect-ratio: 1 / 1;
+    background-color: #121212;
+    overflow: hidden;
+}
+
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 8. Alt Menyu */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #000;
+    border-top: 1px solid #262626;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-link {
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+}
+
+.nav-plus-btn {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-avatar-border {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid transparent;
+}
+
+.nav-link.active .mini-avatar-border {
+    border-color: #fff;
+}
+
+.nav-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- 9. YENİ: REDAKTƏ MODALI (MÖVCUD DİZAYNI POZMADAN) --- */
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none; /* JS ilə 'flex' edilir */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
 }
 
 .modal-content {
-    background: #121212;
+    background: #1c1c1c;
     width: 85%;
-    max-width: 350px;
+    max-width: 360px;
     padding: 25px;
-    border-radius: 15px;
+    border-radius: 12px;
     border: 1px solid #262626;
     text-align: center;
-    animation: modalFadeIn 0.3s ease-out;
-}
-
-@keyframes modalFadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
 }
 
 .modal-avatar-section img {
@@ -35,18 +239,16 @@
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 10px;
     border: 2px solid #262626;
 }
 
 .change-photo-text {
     background: none;
     border: none;
-    color: #0095f6; /* İnstagram göyü */
+    color: #0095f6;
     font-weight: 600;
     cursor: pointer;
-    display: block;
-    margin: 0 auto 20px;
+    margin: 10px 0 20px;
     font-size: 14px;
 }
 
@@ -57,54 +259,41 @@
 
 .modal-inputs label {
     font-size: 12px;
-    color: #8e8e8e;
-    margin-left: 5px;
-    display: block;
+    color: #a8a8a8;
     margin-bottom: 5px;
+    display: block;
 }
 
 .modal-inputs input {
     width: 100%;
     background: #000;
     border: 1px solid #262626;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
     outline: none;
-    font-size: 14px;
-}
-
-.modal-inputs input:focus {
-    border-color: #333;
 }
 
 .modal-buttons {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .save-btn {
     background: #0095f6;
     color: white;
     border: none;
-    padding: 12px;
+    padding: 10px;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.save-btn:active {
-    opacity: 0.7;
 }
 
 .cancel-btn {
-    background: transparent;
-    color: white;
+    background: none;
+    color: #fff;
     border: none;
     padding: 5px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 400;
 }

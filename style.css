@@ -26,20 +26,40 @@ body {
 
 /* HEADER */
 .app-header {
-    height: 54px;
+    height: 60px; /* Loqo mərkəzdə olanda bir az daha geniş header yaxşı görünür */
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
-    background: rgba(0,0,0,0.9);
-    backdrop-filter: blur(10px);
+    background: #000;
+    border-bottom: 1px solid #262626;
     position: sticky;
     top: 0;
     z-index: 1000;
-    border-bottom: 1px solid var(--border);
 }
 
-.main-logo { height: 28px; width: auto; }
+.header-left, .header-right {
+    flex: 1; /* Hər iki tərəfə bərabər yer veririk */
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    justify-content: flex-end; /* Çıxış düyməsini sağa sıxır */
+}
+
+.logo-container {
+    flex: 2; /* Loqo üçün daha geniş yer */
+    display: flex;
+    justify-content: center; /* Loqonu mərkəzləyir */
+    align-items: center;
+}
+
+.main-logo {
+    height: 35px; /* Mərkəzdə olanda bir az daha iri (35px) daha gözəl görünür */
+    width: auto;
+}
+
 
 .header-right { display: flex; align-items: center; gap: 20px; }
 .header-right i { font-size: 22px; cursor: pointer; }
@@ -98,3 +118,4 @@ body {
     width: 9px; height: 9px; background: #ff3040;
     border-radius: 50%; border: 2px solid #000;
 }
+

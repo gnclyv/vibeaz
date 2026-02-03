@@ -16,7 +16,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- BİLDİRİŞ GÖNDƏRMƏ ---
+// 1. BİLDİRİŞ SİSTEMİ
 async function sendNotification(targetUserId, typeMessage) {
     const user = auth.currentUser;
     if (!user || user.uid === targetUserId) return;
@@ -29,72 +29,9 @@ async function sendNotification(targetUserId, typeMessage) {
             timestamp: serverTimestamp(),
             read: false
         });
-    } catch (e) { console.error("Notif Error:", e); }
+    } catch (e) { console.error("Notif error:", e); }
 }
 
-// --- ŞƏKİL PAYLAŞMA (Düzəldilmiş Versiya) ---
-async function uploadPost() {
-    const fileInp = document.getElementById('fileInput');
-    if (!fileInp) return;
-
-    fileInp.onchange = async () => {
-        const user = auth.currentUser;
-        if (!user || !fileInp.files[0]) return;
-
-        const fd = new FormData();
-        fd.append("image", fileInp.files[0]);
-
-        try {
-            // ImgBB-yə yükləmə
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { 
-                method: "POST", 
-                body: fd 
-            });
-            const result = await res.json();
-
-            if (result.success) {
-                const text = prompt("Açıqlama yazın:");
-                // Firestore-a post əlavə etmə
-                await addDoc(collection(db, "posts"), {
-                    url: result.data.url,
-                    text: text || "",
-                    userName: user.displayName || user.email.split('@')[0],
-                    userPhoto: user.photoURL || "",
-                    userId: user.uid,
-                    likes: 0,
-                    comments: [],
-                    timestamp: serverTimestamp()
-                });
-                alert("Paylaşıldı!");
-            } else {
-                alert("Şəkil yüklənərkən ImgBB xətası verdi.");
-            }
-        } catch (e) {
-            console.error("Yükləmə xətası:", e);
-            alert("Xəta baş verdi! İnternet bağlantısını və ya API key-i yoxlayın.");
-        }
-    };
-    fileInp.click();
-}
-
-// --- İSTİFADƏÇİ İZLƏMƏ ---
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const displayNick = user.displayName || user.email.split('@')[0];
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) {
-            await setDoc(userRef, { uid: user.uid, displayName: displayNick, photoURL: user.photoURL || "", followers: [], following: [] }, { merge: true });
-        }
-        updateNavAvatar(user, displayNick);
-        loadPosts();
-        setupNotifListener(user.uid);
-    } else if (!window.location.pathname.includes("login.html")) {
-        window.location.href = "login.html";
-    }
-});
-
-// --- BİLDİRİŞ DİNLƏYİCİSİ ---
 function setupNotifListener(uid) {
     const nDot = document.getElementById('notif-dot');
     const nList = document.getElementById('notif-list');
@@ -110,11 +47,51 @@ function setupNotifListener(uid) {
             nList.innerHTML += `<div class="notif-item"><img src="${data.fromUserPhoto || 'https://ui-avatars.com/api/?name='+data.fromUserName}"><div class="notif-text"><b>${data.fromUserName}</b> ${data.type}</div></div>`;
         });
         if (nDot) nDot.style.display = unread ? 'block' : 'none';
-        if (snap.empty) nList.innerHTML = "<p style='padding:10px; color:gray;'>Bildiriş yoxdur.</p>";
     });
 }
 
-// --- POSTLARI YÜKLƏMƏ ---
+// 2. POST VƏ ŞƏRH FUNKSİYALARI
+window.addComment = async (postId, postOwnerId) => {
+    const input = document.getElementById(`input-${postId}`);
+    const commentText = input.value.trim();
+    if (!commentText || !auth.currentUser) return;
+
+    try {
+        await updateDoc(doc(db, "posts", postId), {
+            comments: arrayUnion({
+                user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                text: commentText,
+                time: Date.now()
+            })
+        });
+        input.value = ""; // Girişi təmizlə
+        await sendNotification(postOwnerId, "postunuza şərh yazdı.");
+    } catch (e) {
+        console.error("Şərh xətası:", e);
+        alert("Şərh paylaşıla bilmədi.");
+    }
+};
+
+window.handleLike = async (id, postOwnerId) => {
+    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+    if (liked.includes(id)) return;
+    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+    liked.push(id);
+    localStorage.setItem('vibeLikes', JSON.stringify(liked));
+    await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+};
+
+window.handleFollow = async (targetUserId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid === targetUserId) return;
+    await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
+    await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
+    const btn = document.getElementById(`follow-${targetUserId}`);
+    if (btn) btn.innerText = "• İzlənilir";
+    await sendNotification(targetUserId, "sizi izləməyə başladı.");
+};
+
+// 3. POSTLARI YÜKLƏMƏ VƏ RENDER
 function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list) return;
@@ -126,13 +103,16 @@ function loadPosts() {
             const data = d.data();
             const id = d.id;
             const isLiked = likedPosts.includes(id);
-            list.innerHTML += renderPostHTML(id, data, isLiked, data.userName || "İstifadəçi");
+            list.innerHTML += renderPostHTML(id, data, isLiked);
         });
     });
 }
 
-function renderPostHTML(id, data, isLiked, author) {
+function renderPostHTML(id, data, isLiked) {
+    const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto ? data.userPhoto : `https://ui-avatars.com/api/?name=${author}&background=random`;
+    const commentsHTML = (data.comments || []).map(c => `<div class="comment-item"><b>${c.user}</b> ${c.text}</div>`).join('');
+    
     return `
         <div class="post-card">
             <div class="post-header">
@@ -152,6 +132,7 @@ function renderPostHTML(id, data, isLiked, author) {
             <div class="post-info-section">
                 <div class="likes-count">${data.likes || 0} bəyənmə</div>
                 <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
+                <div class="comments-container" id="comments-${id}">${commentsHTML}</div>
                 <div class="comment-input-wrapper">
                     <input type="text" id="input-${id}" placeholder="Şərh yaz...">
                     <button class="comment-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
@@ -160,40 +141,52 @@ function renderPostHTML(id, data, isLiked, author) {
         </div>`;
 }
 
-// --- DİGƏR FUNKSİYALAR ---
-window.handleLike = async (id, postOwnerId) => {
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
-    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-    liked.push(id);
-    localStorage.setItem('vibeLikes', JSON.stringify(liked));
-    await sendNotification(postOwnerId, "postunuzu bəyəndi.");
-};
+// 4. AUTH VƏ FAYL YÜKLƏMƏ
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const displayNick = user.displayName || user.email.split('@')[0];
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+            await setDoc(userRef, { uid: user.uid, displayName: displayNick, photoURL: user.photoURL || "", followers: [], following: [] }, { merge: true });
+        }
+        updateNavAvatar(user, displayNick);
+        loadPosts();
+        setupNotifListener(user.uid);
+    } else if (!window.location.pathname.includes("login.html")) {
+        window.location.href = "login.html";
+    }
+});
 
-window.addComment = async (postId, postOwnerId) => {
-    const input = document.getElementById(`input-${postId}`);
-    const commentText = input.value.trim();
-    if (!commentText || !auth.currentUser) return;
-    await updateDoc(doc(db, "posts", postId), {
-        comments: arrayUnion({
-            user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-            text: commentText,
-            time: Date.now()
-        })
-    });
-    input.value = "";
-    await sendNotification(postOwnerId, "postunuza şərh yazdı.");
-};
+async function uploadPost() {
+    const fileInp = document.getElementById('fileInput');
+    fileInp.onchange = async () => {
+        const user = auth.currentUser;
+        if (!user || !fileInp.files[0]) return;
+        const fd = new FormData();
+        fd.append("image", fileInp.files[0]);
+        try {
+            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
+            const result = await res.json();
+            if (result.success) {
+                const text = prompt("Açıqlama yazın:");
+                await addDoc(collection(db, "posts"), {
+                    url: result.data.url,
+                    text: text || "",
+                    userName: user.displayName || user.email.split('@')[0],
+                    userPhoto: user.photoURL || "",
+                    userId: user.uid,
+                    likes: 0,
+                    comments: [],
+                    timestamp: serverTimestamp()
+                });
+            }
+        } catch (e) { alert("Yükləmə xətası!"); }
+    };
+    fileInp.click();
+}
 
-window.handleFollow = async (targetUserId) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || currentUser.uid === targetUserId) return;
-    await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
-    await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
-    document.getElementById(`follow-${targetUserId}`).innerText = "• İzlənilir";
-    await sendNotification(targetUserId, "sizi izləməyə başladı.");
-};
-
+// 5. NAVİQASİYA VƏ PANEL
 function updateNavAvatar(user, nick) {
     const navAvatar = document.getElementById('nav-user-avatar');
     if (navAvatar) {
@@ -202,9 +195,8 @@ function updateNavAvatar(user, nick) {
     }
 }
 
-// UI Klikləri
-const mainAddBtn = document.getElementById('mainAddBtn');
-if (mainAddBtn) mainAddBtn.onclick = uploadPost;
+if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
+if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
 
 const nBtn = document.getElementById('notif-btn');
 if (nBtn) nBtn.onclick = (e) => {
@@ -213,6 +205,4 @@ if (nBtn) nBtn.onclick = (e) => {
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     document.getElementById('notif-dot').style.display = 'none';
 };
-
 document.onclick = () => { if(document.getElementById('notif-panel')) document.getElementById('notif-panel').style.display = 'none'; };
-if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

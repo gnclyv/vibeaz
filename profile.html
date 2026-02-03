@@ -18,7 +18,7 @@
         <div class="profile-header">
             <div class="avatar-section">
                 <div class="avatar-ring">
-                    <img src="https://i.ibb.co/G4NSB49X/Gemini-Generated-mage-q3dek6q3dek6q3de.png" alt="VibeAz"> 
+                    <img id="main-profile-img" src="https://i.ibb.co/G4NSB49X/Gemini-Generated-mage-q3dek6q3dek6q3de.png" alt="VibeAz"> 
                 </div>
             </div>
             <div class="stats-section">
@@ -38,7 +38,7 @@
         </div>
 
         <div class="action-buttons">
-            <button class="btn-main">Profili redaktə et</button>
+            <button class="btn-main" id="edit-profile-btn">Profili redaktə et</button>
         </div>
 
         <div class="tabs">
@@ -50,6 +50,25 @@
         <div id="user-posts-grid" class="posts-grid"></div>
     </div>
 
+    <div id="editProfileModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3>Profili redaktə et</h3>
+            <div class="modal-avatar-section">
+                <img id="modal-preview-img" src="https://i.ibb.co/G4NSB49X/Gemini-Generated-mage-q3dek6q3dek6q3de.png" alt="Önizləmə">
+                <button type="button" class="change-photo-text" id="change-photo-btn">Profil şəklini dəyiş</button>
+                <input type="file" id="edit-avatar-input" hidden accept="image/*">
+            </div>
+            <div class="modal-inputs">
+                <label>Yeni Ad</label>
+                <input type="text" id="edit-display-name" placeholder="Adınızı daxil edin">
+            </div>
+            <div class="modal-buttons">
+                <button id="save-profile-changes" class="save-btn">Yadda saxla</button>
+                <button id="close-modal-btn" class="cancel-btn">Ləğv et</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i></a>
         <a href="#" class="nav-link"><i class="fa-solid fa-magnifying-glass"></i></a>
@@ -58,7 +77,9 @@
         </div>
         <a href="#" class="nav-link"><i class="fa-solid fa-clapperboard"></i></a>
         <a href="profile.html" class="nav-link active">
-            <div class="mini-avatar-border"><img src="https://i.ibb.co/G4NSB49X/Gemini-Generated-mage-q3dek6q3dek6q3de.png" class="nav-img"></div>
+            <div class="mini-avatar-border">
+                <img id="nav-img" src="https://i.ibb.co/G4NSB49X/Gemini-Generated-mage-q3dek6q3dek6q3de.png" class="nav-img">
+            </div>
         </a>
     </nav>
 

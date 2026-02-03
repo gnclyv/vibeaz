@@ -279,3 +279,4 @@ storyInput?.addEventListener('change', async (e) => {
 addStoryBtn?.addEventListener('click', () => storyInput.click());
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+

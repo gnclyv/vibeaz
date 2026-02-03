@@ -20,29 +20,38 @@ const storyInput = document.getElementById('storyInput');
 const addStoryBtn = document.getElementById('add-story-btn');
 const storiesListInner = document.getElementById('stories-list');
 
-// --- 1. FIREBASE STORY SİSTEMİ ---
-addStoryBtn?.addEventListener('click', () => storyInput.click());
+// --- 1. STORY SİSTEMİ (Qlobal Funksiyalar) ---
 
-storyInput?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    const user = auth.currentUser;
-    if (!file || !user) return;
-    const fd = new FormData();
-    fd.append("image", file);
-    try {
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
-        const result = await res.json();
-        if (result.success) {
-            await addDoc(collection(db, "stories"), {
-                url: result.data.url,
-                userId: user.uid,
-                username: user.displayName || user.email.split('@')[0],
-                timestamp: serverTimestamp(),
-                createdAt: Date.now()
-            });
-        }
-    } catch (e) { alert("Story xətası!"); }
-});
+window.openStoryViewer = function(url, username) {
+    const viewer = document.getElementById('story-viewer');
+    const fullImg = document.getElementById('story-full-img');
+    const viewerUser = document.getElementById('viewer-username');
+    
+    if(!viewer || !fullImg) return;
+
+    fullImg.src = url;
+    viewerUser.innerText = username;
+    viewer.style.display = 'flex';
+    
+    const progress = document.getElementById('progress-fill');
+    if(progress) {
+        progress.style.transition = 'none';
+        progress.style.width = '0%';
+        setTimeout(() => {
+            progress.style.transition = 'width 5s linear';
+            progress.style.width = '100%';
+        }, 100);
+    }
+
+    clearTimeout(window.storyTimeout);
+    window.storyTimeout = setTimeout(window.closeStory, 5000);
+}
+
+window.closeStory = function() {
+    const viewer = document.getElementById('story-viewer');
+    if(viewer) viewer.style.display = 'none';
+    clearTimeout(window.storyTimeout);
+}
 
 function listenToStories() {
     if (!storiesListInner) return;
@@ -62,35 +71,8 @@ function listenToStories() {
     });
 }
 
-// STORY VIEWER FUNKSİYALARI (Həmişə Window obyektinə bağlı)
-window.openStoryViewer = function(url, username) {
-    const viewer = document.getElementById('story-viewer');
-    const fullImg = document.getElementById('story-full-img');
-    const viewerUser = document.getElementById('viewer-username');
-    if(!viewer || !fullImg) return;
-    fullImg.src = url;
-    viewerUser.innerText = username;
-    viewer.style.display = 'flex';
-    const progress = document.getElementById('progress-fill');
-    if(progress) {
-        progress.style.transition = 'none';
-        progress.style.width = '0%';
-        setTimeout(() => {
-            progress.style.transition = 'width 5s linear';
-            progress.style.width = '100%';
-        }, 100);
-    }
-    clearTimeout(window.storyTimeout);
-    window.storyTimeout = setTimeout(window.closeStory, 5000);
-}
-
-window.closeStory = function() {
-    const viewer = document.getElementById('story-viewer');
-    if(viewer) viewer.style.display = 'none';
-    clearTimeout(window.storyTimeout);
-}
-
 // --- 2. BİLDİRİŞ VƏ POST SİSTEMİ ---
+
 async function sendNotification(targetUserId, typeMessage) {
     const user = auth.currentUser;
     if (!user || user.uid === targetUserId) return;
@@ -109,8 +91,10 @@ async function sendNotification(targetUserId, typeMessage) {
 async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
+
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
+
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
         list.innerHTML = '';
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
@@ -127,9 +111,18 @@ async function loadPosts() {
 function renderPostHTML(id, data, isLiked, isFollowing) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
-    const commentsHTML = (data.comments || []).map(c => `<div class="comment-item"><b>${c.user}</b> ${c.text}</div>`).join('');
+    
+    // Modern Şərh Strukturu
+    const commentsHTML = (data.comments || []).map(c => `
+        <div class="modern-comment">
+            <span class="comment-user">${c.user}</span>
+            <span class="comment-text">${c.text}</span>
+        </div>
+    `).join('');
+    
     const btnText = isFollowing ? "İzlənilir" : "İzlə";
     const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
+
     return `
         <div class="post-card">
             <div class="post-header">
@@ -149,26 +142,34 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
             <div class="post-info-section">
                 <div class="likes-count">${data.likes || 0} bəyənmə</div>
                 <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
-                <div class="comments-container">${commentsHTML}</div>
-                <div class="comment-input-wrapper">
-                    <input type="text" id="input-${id}" placeholder="Şərh yaz...">
-                    <button class="comment-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
+                
+                <div class="modern-comments-box">
+                    ${commentsHTML}
+                </div>
+
+                <div class="modern-comment-input-area">
+                    <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input">
+                    <button class="modern-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
                 </div>
             </div>
         </div>`;
 }
 
-// GLOBAL FUNKSİYALAR
+// --- 3. GLOBAL QARŞILIQLI ƏLAQƏ FUNKSİYALARI ---
+
 window.handleFollow = async (targetUserId) => {
     const currentUser = auth.currentUser;
     if (!currentUser || currentUser.uid === targetUserId) return;
+    
     await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
     await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
+    
     const btns = document.querySelectorAll(`[id="follow-${targetUserId}"]`);
     btns.forEach(btn => {
         btn.innerText = "İzlənilir";
         btn.classList.add('following');
     });
+
     await sendNotification(targetUserId, "sizi izləməyə başladı.");
 };
 
@@ -185,15 +186,18 @@ window.addComment = async (postId, postOwnerId) => {
     const input = document.getElementById(`input-${postId}`);
     const commentText = input.value.trim();
     if (!commentText || !auth.currentUser) return;
-    await updateDoc(doc(db, "posts", postId), {
-        comments: arrayUnion({
-            user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-            text: commentText,
-            time: Date.now()
-        })
-    });
-    input.value = "";
-    await sendNotification(postOwnerId, "postunuza şərh yazdı.");
+    
+    try {
+        await updateDoc(doc(db, "posts", postId), {
+            comments: arrayUnion({
+                user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                text: commentText,
+                time: Date.now()
+            })
+        });
+        input.value = "";
+        await sendNotification(postOwnerId, "postunuza şərh yazdı.");
+    } catch (e) { console.error(e); }
 };
 
 async function uploadPost() {
@@ -224,14 +228,14 @@ async function uploadPost() {
     fileInp.click();
 }
 
-// --- YENİLİK MODAL SİSTEMİ (Əlavə) ---
+// --- 4. MODAL VƏ AUTH SİSTEMİ ---
+
 window.closeNewsModal = function() {
     const modal = document.getElementById('news-modal');
     if(modal) modal.style.display = 'none';
     localStorage.setItem('vibe_news_seen', 'true');
 }
 
-// --- AUTH VƏ BAŞLANĞIÇ ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loadPosts();
@@ -250,5 +254,28 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
+// Event Listeners
+storyInput?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    const user = auth.currentUser;
+    if (!file || !user) return;
+    const fd = new FormData();
+    fd.append("image", file);
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
+        const result = await res.json();
+        if (result.success) {
+            await addDoc(collection(db, "stories"), {
+                url: result.data.url,
+                userId: user.uid,
+                username: user.displayName || user.email.split('@')[0],
+                timestamp: serverTimestamp(),
+                createdAt: Date.now()
+            });
+        }
+    } catch (e) { alert("Story xətası!"); }
+});
+
+addStoryBtn?.addEventListener('click', () => storyInput.click());
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

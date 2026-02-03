@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // 1. Firebase Konfiqurasiyası
 const firebaseConfig = {
@@ -16,18 +15,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const messaging = getMessaging(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
 // 2. İstifadəçi Statusu
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Gmail əvəzinə displayName (Nickname) istifadə edirik
         const displayNick = user.displayName || user.email.split('@')[0];
         updateNavAvatar(user, displayNick);
         loadPosts();
-        setTimeout(() => setupNotifications(user), 5000);
-        listenNotifications(displayNick);
     } else {
         if (!window.location.pathname.includes("login.html")) {
             window.location.href = "login.html";
@@ -35,24 +30,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 3. Push Bildirişləri
-async function setupNotifications(user) {
-    try {
-        if (Notification.permission === 'default') {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const token = await getToken(messaging, { 
-                    vapidKey: 'BErWSc6Tr3YhkpIjersOOPPZuthPFnJZgeNOHVY2xiD05T3aMDUTUGhWsG4FOz87cWq5F6OghIPzE1EVoPJPONc' 
-                });
-                if (token) {
-                    await updateDoc(doc(db, "users", user.uid), { pushToken: token });
-                }
-            }
-        }
-    } catch (err) { console.log("Bildiriş xətası:", err); }
-}
-
-// 4. Profil Şəkli
+// 3. Profil Şəkli (Aşağı Menyu)
 function updateNavAvatar(user, nick) {
     const navAvatar = document.getElementById('nav-user-avatar');
     if (navAvatar) {
@@ -61,14 +39,16 @@ function updateNavAvatar(user, nick) {
     }
 }
 
-// 5. Post Paylaşma
+// 4. Post Paylaşma
 async function uploadPost() {
     const fileInp = document.getElementById('fileInput');
     fileInp.onchange = async () => {
         const user = auth.currentUser;
         if (!user || !fileInp.files[0]) return;
+        
         const fd = new FormData();
         fd.append("image", fileInp.files[0]);
+        
         try {
             const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
             const result = await res.json();
@@ -77,23 +57,23 @@ async function uploadPost() {
                 await addDoc(collection(db, "posts"), {
                     url: result.data.url,
                     text: text || "",
-                    userName: user.displayName || user.email.split('@')[0], // Nickname burada qeyd olunur
+                    userName: user.displayName || user.email.split('@')[0],
                     likes: 0,
                     comments: [],
                     timestamp: serverTimestamp()
                 });
-                alert("Paylaşıldı!");
             }
-        } catch (e) { alert("Xəta!"); }
+        } catch (e) { alert("Yükləmə xətası!"); }
     };
     fileInp.click();
 }
 
-// 6. Postları Yükləmə
+// 5. Postları Yükləmə
 function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list) return;
     const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+    
     onSnapshot(q, (snap) => {
         list.innerHTML = '';
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
@@ -107,41 +87,63 @@ function loadPosts() {
     });
 }
 
-// 7. HTML Render (Şərh bölməsi əlavə edildi)
+// 6. Post HTML Render (Bütün şəkillər eyni kvadrat ölçüdə)
 function renderPostHTML(id, data, isLiked, author) {
     const commentsHTML = (data.comments || []).map(c => `
-        <div style="font-size: 13px; margin-top: 5px;">
-            <b style="color: #0095f6;">${c.user}:</b> <span>${c.text}</span>
-        </div>
+        <div class="comment-item"><b>${c.user}</b> ${c.text}</div>
     `).join('');
 
     return `
-        <div class="post-card" style="margin-bottom: 20px; border-bottom: 1px solid #222;">
-            <div class="post-header" style="padding:10px; display:flex; align-items:center; gap:10px;">
-                <img src="https://ui-avatars.com/api/?name=${author}&background=random" style="width:30px; border-radius:50%;">
-                <span style="font-weight:bold;">${author}</span>
+        <div class="post-card">
+            <div class="post-header">
+                <div class="nav-avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=${author}&background=random" class="nav-profile-img">
+                </div>
+                <span>${author}</span>
             </div>
-            <img src="${data.url}" style="width:100%;" ondblclick="handleLike('${id}')">
-            <div style="padding:10px;">
+            
+            <div class="post-img-container" ondblclick="handleLike('${id}')">
+                <img src="${data.url}" loading="lazy">
+            </div>
+
+            <div class="post-actions">
                 <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
-                   onclick="handleLike('${id}')" style="font-size:20px; color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer;"></i>
-                <div style="font-weight:bold; margin-top:5px;">${data.likes || 0} bəyənmə</div>
-                <div><b>${author}</b> ${data.text || ""}</div>
+                   onclick="handleLike('${id}')" 
+                   style="color: ${isLiked ? '#ff3040' : 'white'}"></i>
                 
-                <div id="comments-${id}" style="margin-top: 10px; border-top: 1px solid #111; padding-top: 5px;">
+                <i class="fa-regular fa-comment" 
+                   onclick="document.getElementById('input-${id}').focus()"></i>
+            </div>
+
+            <div class="post-info-section">
+                <div class="likes-count">${data.likes || 0} bəyənmə</div>
+                <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
+                
+                <div class="comments-container" id="comments-${id}">
                     ${commentsHTML}
                 </div>
 
-                <div style="display: flex; margin-top: 10px; gap: 5px;">
-                    <input type="text" id="input-${id}" placeholder="Şərh yaz..." 
-                           style="flex: 1; background: transparent; border: none; border-bottom: 1px solid #333; color: white; outline: none;">
-                    <button onclick="addComment('${id}')" style="background: none; border: none; color: #0095f6; font-weight: bold; cursor: pointer;">Paylaş</button>
+                <div class="comment-input-wrapper">
+                    <input type="text" id="input-${id}" placeholder="Şərh yaz...">
+                    <button class="comment-post-btn" onclick="addComment('${id}')">Paylaş</button>
                 </div>
             </div>
         </div>`;
 }
 
-// 8. Şərh Əlavə Etmə Funksiyası
+// 7. Like Funksiyası
+window.handleLike = async (id) => {
+    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+    if (liked.includes(id)) return;
+    
+    try {
+        await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+        liked.push(id);
+        localStorage.setItem('vibeLikes', JSON.stringify(liked));
+    } catch (e) { console.error("Like xətası:", e); }
+};
+
+// 8. Şərh Əlavə Etmə
 window.addComment = async (postId) => {
     const input = document.getElementById(`input-${postId}`);
     const commentText = input.value.trim();
@@ -158,37 +160,9 @@ window.addComment = async (postId) => {
                 time: Date.now()
             })
         });
-        input.value = ""; // Xananı təmizlə
+        input.value = ""; 
     } catch (e) { console.error("Şərh xətası:", e); }
 };
 
-// ... (Bəyənmə və Bildiriş funksiyaları eyni qalır) ...
-window.handleLike = async (id) => {
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
-    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-    liked.push(id);
-    localStorage.setItem('vibeLikes', JSON.stringify(liked));
-};
-
-function listenNotifications(userName) {
-    const q = query(collection(db, "notifications"), where("to", "in", [userName, "all"]));
-    onSnapshot(q, (snap) => {
-        snap.docChanges().forEach(change => {
-            if (change.type === "added") {
-                const data = change.doc.data();
-                showToast(data.from + ": " + data.text);
-            }
-        });
-    });
-}
-
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.className = "toast-msg";
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
-}
-
+// Düymə təyinləri
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;

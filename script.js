@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-// Firebase Konfiqurasiyası
+// 1. Firebase Konfiqurasiyası
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
     authDomain: "vibeaz-1e98a.firebaseapp.com",
@@ -17,10 +17,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- BİLDİRİŞ YARATMA FUNKSİYASI (YENİ) ---
+// 2. Bildiriş Göndərmə Funksiyası
 async function sendNotification(targetUserId, typeMessage) {
     const user = auth.currentUser;
-    if (!user || user.uid === targetUserId) return;
+    // Özünə bildiriş getməməsi üçün yoxlama
+    if (!user || user.uid === targetUserId) return; 
+
     try {
         await addDoc(collection(db, "notifications"), {
             toUserId: targetUserId,
@@ -30,10 +32,12 @@ async function sendNotification(targetUserId, typeMessage) {
             timestamp: serverTimestamp(),
             read: false
         });
-    } catch (e) { console.error("Notif Error:", e); }
+    } catch (e) {
+        console.error("Bildiriş göndərilərkən xəta:", e);
+    }
 }
 
-// İstifadəçi vəziyyətini izləyirik
+// 3. İstifadəçi vəziyyətini izləyirik
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const displayNick = user.displayName || user.email.split('@')[0];
@@ -58,69 +62,95 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Bildirişləri Canlı Dinləmə (YENİ)
+// 4. Bildirişləri Real Vaxtda Dinləmə (UI Dəyişikliyi Buradadır)
 function setupNotifListener(uid) {
     const nDot = document.getElementById('notif-dot');
     const nList = document.getElementById('notif-list');
-    const q = query(collection(db, "notifications"), where("toUserId", "==", uid), orderBy("timestamp", "desc"));
+    
+    const q = query(
+        collection(db, "notifications"), 
+        where("toUserId", "==", uid), 
+        orderBy("timestamp", "desc")
+    );
 
     onSnapshot(q, (snap) => {
         if (!nList) return;
         nList.innerHTML = "";
         let unread = false;
+
         snap.forEach(d => {
             const data = d.data();
-            if (!data.read) unread = true;
+            if (data.read === false) unread = true;
+
             nList.innerHTML += `
                 <div class="notif-item">
                     <img src="${data.fromUserPhoto || 'https://ui-avatars.com/api/?name='+data.fromUserName}">
-                    <div class="notif-text"><b>${data.fromUserName}</b> ${data.type}</div>
+                    <div class="notif-text">
+                        <b>${data.fromUserName}</b> ${data.type}
+                    </div>
                 </div>`;
         });
+
+        // Əgər oxunmamış bildiriş varsa nöqtəni göstər
         if (nDot) nDot.style.display = unread ? 'block' : 'none';
-        if (snap.empty) nList.innerHTML = "<p style='padding:15px; text-align:center; color:gray;'>Bildiriş yoxdur.</p>";
+        
+        if (snap.empty) {
+            nList.innerHTML = "<p style='padding:15px; text-align:center; color:gray;'>Bildiriş yoxdur.</p>";
+        }
     });
 }
 
-// Naviqasiyadakı kiçik avatarı yeniləyir
-function updateNavAvatar(user, nick) {
-    const navAvatar = document.getElementById('nav-user-avatar');
-    if (navAvatar) {
-        const userPhoto = user.photoURL || `https://ui-avatars.com/api/?name=${nick}&background=random&color=fff`;
-        navAvatar.innerHTML = `<img src="${userPhoto}" class="nav-profile-img">`;
-    }
-}
+// 5. Post Paylaşma, Like, Follow və Yorum Funksiyaları
+window.handleLike = async (id, postOwnerId) => {
+    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+    if (liked.includes(id)) return;
+    
+    try {
+        await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+        liked.push(id);
+        localStorage.setItem('vibeLikes', JSON.stringify(liked));
+        
+        // Bildiriş göndər
+        await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+    } catch (e) { console.error(e); }
+};
 
-// Post Paylaşma
-async function uploadPost() {
-    const fileInp = document.getElementById('fileInput');
-    fileInp.onchange = async () => {
-        const user = auth.currentUser;
-        if (!user || !fileInp.files[0]) return;
-        const fd = new FormData();
-        fd.append("image", fileInp.files[0]);
-        try {
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
-            const result = await res.json();
-            if (result.success) {
-                const text = prompt("Açıqlama yazın:");
-                await addDoc(collection(db, "posts"), {
-                    url: result.data.url,
-                    text: text || "",
-                    userName: user.displayName || user.email.split('@')[0],
-                    userPhoto: user.photoURL || "",
-                    userId: user.uid,
-                    likes: 0,
-                    comments: [],
-                    timestamp: serverTimestamp()
-                });
-            }
-        } catch (e) { alert("Xəta baş verdi!"); }
-    };
-    fileInp.click();
-}
+window.addComment = async (postId, postOwnerId) => {
+    const input = document.getElementById(`input-${postId}`);
+    const commentText = input.value.trim();
+    if (!commentText || !auth.currentUser) return;
 
-// Postları yükləyir
+    try {
+        await updateDoc(doc(db, "posts", postId), {
+            comments: arrayUnion({
+                user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                text: commentText,
+                time: Date.now()
+            })
+        });
+        input.value = "";
+        // Bildiriş göndər
+        await sendNotification(postOwnerId, "postunuza şərh yazdı.");
+    } catch (e) { console.error(e); }
+};
+
+window.handleFollow = async (targetUserId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid === targetUserId) return;
+
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
+        await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
+        
+        const btn = document.getElementById(`follow-${targetUserId}`);
+        if(btn) btn.innerText = "• İzlənilir";
+        
+        // Bildiriş göndər
+        await sendNotification(targetUserId, "sizi izləməyə başladı.");
+    } catch (error) { console.error(error); }
+};
+
+// 6. UI Render və Digər Köməkçi Funksiyalar
 function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list) return;
@@ -140,6 +170,7 @@ function loadPosts() {
 function renderPostHTML(id, data, isLiked, author) {
     const avatarImg = data.userPhoto ? data.userPhoto : `https://ui-avatars.com/api/?name=${author}&background=random`;
     const commentsHTML = (data.comments || []).map(c => `<div class="comment-item"><b>${c.user}</b> ${c.text}</div>`).join('');
+    
     return `
         <div class="post-card">
             <div class="post-header">
@@ -168,57 +199,31 @@ function renderPostHTML(id, data, isLiked, author) {
         </div>`;
 }
 
-// Bəyənmə + Bildiriş
-window.handleLike = async (id, postOwnerId) => {
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
-    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-    liked.push(id);
-    localStorage.setItem('vibeLikes', JSON.stringify(liked));
-    await sendNotification(postOwnerId, "postunuzu bəyəndi.");
-};
+function updateNavAvatar(user, nick) {
+    const navAvatar = document.getElementById('nav-user-avatar');
+    if (navAvatar) {
+        const userPhoto = user.photoURL || `https://ui-avatars.com/api/?name=${nick}&background=random&color=fff`;
+        navAvatar.innerHTML = `<img src="${userPhoto}" class="nav-profile-img">`;
+    }
+}
 
-// Şərh + Bildiriş
-window.addComment = async (postId, postOwnerId) => {
-    const input = document.getElementById(`input-${postId}`);
-    const commentText = input.value.trim();
-    if (!commentText || !auth.currentUser) return;
-    await updateDoc(doc(db, "posts", postId), {
-        comments: arrayUnion({
-            user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-            text: commentText,
-            time: Date.now()
-        })
-    });
-    input.value = "";
-    await sendNotification(postOwnerId, "postunuza şərh yazdı.");
-};
-
-// İzləmə + Bildiriş
-window.handleFollow = async (targetUserId) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || currentUser.uid === targetUserId) return;
-    try {
-        await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
-        await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
-        document.getElementById(`follow-${targetUserId}`).innerText = "• İzlənilir";
-        await sendNotification(targetUserId, "sizi izləməyə başladı.");
-    } catch (error) { console.error(error); }
-};
-
-// Modal və Panel İdarəetməsi
+// 7. Panel İdarəetməsi
 const nBtn = document.getElementById('notif-btn');
 if(nBtn) {
     nBtn.onclick = (e) => {
         e.stopPropagation();
         const panel = document.getElementById('notif-panel');
+        if(!panel) return;
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        document.getElementById('notif-dot').style.display = 'none';
+        // Paneli açanda nöqtəni gizlət
+        const dot = document.getElementById('notif-dot');
+        if(dot) dot.style.display = 'none';
     };
 }
+
 document.addEventListener('click', () => { 
-    if(document.getElementById('notif-panel')) document.getElementById('notif-panel').style.display = 'none'; 
+    const panel = document.getElementById('notif-panel');
+    if(panel) panel.style.display = 'none'; 
 });
 
-if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

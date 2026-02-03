@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 // Firebase Konfiqurasiyası
 const firebaseConfig = {
@@ -20,56 +20,61 @@ const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 // İstifadəçi vəziyyətini izləyirik
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // Mövcud məlumatları tətbiq edirik
-        const cleanName = user.displayName || user.email.split('@')[0]; 
+        const cleanName = user.displayName || user.email.split('@')[0];
         
+        // 1. Ümumi məlumatları doldururuq
         document.getElementById('header-username').innerText = cleanName;
         document.getElementById('profile-display-name').innerText = cleanName;
         document.getElementById('profile-email').innerText = user.email;
         
-        // Profil şəkillərini Firebase-dən gələnə görə yeniləyirik
         if(user.photoURL) {
             document.getElementById('main-profile-img').src = user.photoURL;
             if(document.getElementById('nav-img')) document.getElementById('nav-img').src = user.photoURL;
         }
 
+        // 2. İzləyici və Takip saylarını Firestore-dan real vaxtda oxuyuruq
+        const userDocRef = doc(db, "users", user.uid);
+        onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                // HTML-də ID-ləri olan span-ları yeniləyirik
+                document.getElementById('follower-count').innerText = data.followers ? data.followers.length : 0;
+                document.getElementById('following-count').innerText = data.following ? data.following.length : 0;
+            } else {
+                // Əgər user sənədi yoxdursa, ilkin sənəd yaradırıq
+                setDoc(userDocRef, { followers: [], following: [], uid: user.uid });
+            }
+        });
+
+        // 3. Postları yükləyirik
         loadUserPosts(cleanName);
     } else {
         window.location.href = "login.html";
     }
 });
 
-/**
- * Postları Firestore-dan "userName" sahəsinə görə filtrləyib gətirir
- */
+// Postları Grid şəklində yükləyən funksiya
 function loadUserPosts(userNameToFind) {
     const grid = document.getElementById('user-posts-grid');
     const postCountText = document.getElementById('post-count');
-    
     const q = query(collection(db, "posts"), where("userName", "==", userNameToFind));
 
     onSnapshot(q, (snapshot) => {
         grid.innerHTML = ""; 
         let count = 0;
-        
         snapshot.forEach((doc) => {
             count++;
             const postData = doc.data();
-            
             grid.innerHTML += `
                 <div class="grid-item">
                     <img src="${postData.url}" alt="VibeAz Post">
                 </div>`;
         });
-        
         postCountText.innerText = count;
-    }, (error) => {
-        console.error("Postlar yüklənərkən xəta: ", error);
     });
 }
 
-// --- BURADAN AŞAĞI REDAKTƏ FUNKSİYALARI ƏLAVƏ EDİLDİ (SİLMƏDƏN) ---
-
+// --- REDAKTƏ MODALI ÜÇÜN ELEMENTLƏR ---
 const modal = document.getElementById('editProfileModal');
 const editBtn = document.getElementById('edit-profile-btn');
 const closeBtn = document.getElementById('close-modal-btn');
@@ -78,7 +83,6 @@ const saveBtn = document.getElementById('save-profile-changes');
 const previewImg = document.getElementById('modal-preview-img');
 const nameInput = document.getElementById('edit-display-name');
 
-// Modalı aç
 if(editBtn) {
     editBtn.onclick = () => {
         const user = auth.currentUser;
@@ -90,20 +94,15 @@ if(editBtn) {
     };
 }
 
-// Modalı bağla
 if(closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
 
-// Şəkil seçimi
-if(document.getElementById('change-photo-btn')) {
-    document.getElementById('change-photo-btn').onclick = () => fileInput.click();
-}
+document.getElementById('change-photo-btn').onclick = () => fileInput.click();
 
 fileInput.onchange = (e) => {
     const file = e.target.files[0];
     if(file) previewImg.src = URL.createObjectURL(file);
 };
 
-// Məlumatları yadda saxla
 saveBtn.onclick = async () => {
     const user = auth.currentUser;
     if(!user) return;
@@ -114,7 +113,6 @@ saveBtn.onclick = async () => {
     let finalPhotoURL = user.photoURL;
 
     try {
-        // 1. Əgər yeni şəkil seçilibsə ImgBB-yə yüklə
         if(fileInput.files[0]) {
             const fd = new FormData();
             fd.append("image", fileInput.files[0]);
@@ -123,8 +121,14 @@ saveBtn.onclick = async () => {
             if(result.success) finalPhotoURL = result.data.url;
         }
 
-        // 2. Firebase Profilini yenilə
+        // Auth Profilini yenilə
         await updateProfile(user, {
+            displayName: nameInput.value,
+            photoURL: finalPhotoURL
+        });
+
+        // Firestore-dakı user sənədini də yenilə (Axtarışda düzgün görünmək üçün)
+        await updateDoc(doc(db, "users", user.uid), {
             displayName: nameInput.value,
             photoURL: finalPhotoURL
         });
@@ -132,7 +136,6 @@ saveBtn.onclick = async () => {
         alert("Profil uğurla yeniləndi!");
         location.reload();
     } catch (error) {
-        console.error("Yeniləmə xətası:", error);
         alert("Xəta baş verdi!");
         saveBtn.innerText = "Yadda saxla";
         saveBtn.disabled = false;

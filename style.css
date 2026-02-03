@@ -407,6 +407,75 @@ transition: width 5s linear;
 }
 
 
+/* --- MODERN ŞƏRH (YORUM) SİSTEMİ --- */
+.modern-comments-box {
+    max-height: 150px; /* Şərhlər çox olsa postu böyütmür, daxildə sürüşür */
+    overflow-y: auto;
+    margin-top: 10px;
+    padding-right: 5px;
+    scrollbar-width: none; /* Firefox üçün */
+}
+
+.modern-comments-box::-webkit-scrollbar {
+    display: none; /* Chrome/Safari üçün scrollbarı gizlədir */
+}
+
+.modern-comment {
+    font-size: 13.5px;
+    margin-bottom: 6px;
+    line-height: 1.4;
+    display: block; /* Hər şərh yeni sətirdən */
+    word-wrap: break-word;
+}
+
+.comment-user {
+    font-weight: 700;
+    margin-right: 6px;
+    color: var(--text); /* Ağ rəng */
+}
+
+.comment-text {
+    color: var(--text-dim); /* Bir az solğun ağ/boz rəng */
+}
+
+/* Şərh yazma sahəsi (Input) */
+.modern-comment-input-area {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+    padding-top: 10px;
+}
+
+.modern-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    padding: 6px 0;
+    outline: none;
+}
+
+.modern-input::placeholder {
+    color: #555; /* Daha sönük placeholder */
+}
+
+/* Paylaş düyməsi */
+.modern-post-btn {
+    background: transparent;
+    border: none;
+    color: #0095f6; /* İnstagram mavisi */
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    padding-left: 10px;
+    transition: opacity 0.2s;
+}
+
+.modern-post-btn:hover {
+    opacity: 0.7;
+}
 
 
 

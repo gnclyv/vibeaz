@@ -24,20 +24,17 @@ body {
     background-color: var(--bg-black);
 }
 
-/* HEADER */
 .app-header {
-    height: 60px;
+    height: 48px; /* 60px-dən 48px-ə salındı */
     display: flex;
-    justify-content: center; /* Əsas mərkəzləmə */
+    justify-content: center;
     align-items: center;
-    padding: 0 15px;
     background: #000;
     border-bottom: 1px solid #262626;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
-
 /* Yan tərəflər üçün görünməz balans blokları */
 .header-side-space {
     flex: 1;
@@ -51,9 +48,13 @@ body {
 }
 
 .main-logo {
-    height: 120px; /* Mərkəzdə tək olanda bir az iri daha möhtəşəm görünür */
+    height: 120px;
     width: auto;
     object-fit: contain;
+    /* Loqonu yuxarı qaldırmaq üçün mənfi margin əlavə et */
+    margin-top: -5px; 
+    /* VƏ YA padding-bottom əlavə edərək loqonu yuxarı itələyə bilərsən */
+    /* padding-bottom: 5px; */
 }
 
 /* Bildiriş və Çıxış düymələrini gizlədirik (lazım olanda CSS-dən bu hissəni silərsən) */
@@ -118,6 +119,7 @@ body {
     width: 9px; height: 9px; background: #ff3040;
     border-radius: 50%; border: 2px solid #000;
 }
+
 
 
 

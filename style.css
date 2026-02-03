@@ -51,7 +51,7 @@ body {
 }
 
 .main-logo {
-    height: 38px; /* Mərkəzdə tək olanda bir az iri daha möhtəşəm görünür */
+    height: 52px; /* Mərkəzdə tək olanda bir az iri daha möhtəşəm görünür */
     width: auto;
     object-fit: contain;
 }
@@ -118,6 +118,7 @@ body {
     width: 9px; height: 9px; background: #ff3040;
     border-radius: 50%; border: 2px solid #000;
 }
+
 
 
 

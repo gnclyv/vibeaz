@@ -40,12 +40,32 @@ body {
     z-index: 1000;
 }
 
-/* Şəkil loqo üçün stil */
-.logo-img {
-    height: 35px; /* Loqonun hündürlüyü */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #000;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.main-logo {
+    height: 30px; /* Köhnə VibeAz yazısının hündürlüyü ilə eynidir */
     width: auto;
     object-fit: contain;
-    cursor: pointer;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .header-icons {
@@ -275,3 +295,4 @@ body {
     width: 28px;
     height: 28px;
 }
+

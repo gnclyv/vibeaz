@@ -90,24 +90,25 @@ body {
     margin-left: 10px;
 }
 
-/* Şəkil konteyneri - 1:1 Kvadrat saxlayır */
+/* Konteyneri mütləq kvadrat edirik */
 .post-img-container {
-    width: 100%;
-    aspect-ratio: 1 / 1; /* Bu, konteyneri mütləq kvadrat edir */
-    background-color: #1a1a1a; /* Şəkil yüklənənə qədər boş qalmasın */
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100% !important;
+    position: relative !important;
+    /* Kvadrat yaratmaq üçün köhnə amma ən etibarlı üsul: */
+    padding-top: 100% !important; 
+    background-color: #1a1a1a;
+    overflow: hidden !important;
 }
 
-/* Şəklin özü - Deformasiya olmadan kvadratın içinə sığır */
+/* Şəkli kvadratın içinə mütləq şəkildə sığdırırıq */
 .post-img-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Əsas sirr buradadır: Şəkli uzatmır, kənarlarını kəsib tam otuzdurur */
-    object-position: center; /* Şəklin mərkəzini əsas götürür */
-    display: block;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important; /* Hündürlük mütləq 100% olmalıdır */
+    object-fit: cover !important; /* Şəkli dartmır, kənarlarını kəsib doldurur */
+    object-position: center !important;
 }
 
 /* 5. Post Actions (Like/Comment) */
@@ -273,4 +274,5 @@ body {
     z-index: 2000;
     backdrop-filter: blur(5px);
 }
+
 

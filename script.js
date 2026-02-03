@@ -14,21 +14,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/demo/video/upload";
+const CLOUDINARY_UPLOAD_PRESET = "docs_upload_example_us_preset";
 
-// --- 1. MEDIA RENDER (Video və ya Şəkil fərqləndirmə) ---
-function renderMedia(url) {
-    const isVideo = url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
-    if (isVideo) {
-        return `<video src="${url}" class="post-video" loop muted autoplay playsinline onclick="this.paused ? this.play() : this.pause()"></video>`;
-    }
-    return `<img src="${url}" loading="lazy" alt="VibeAz Content">`;
-}
-
-// --- 2. ANA SƏHİFƏ POSTLARINI RENDER ETMƏK ---
+// --- 1. POST RENDER (Şəkil və ya Video) ---
 function renderPostHTML(id, data, isLiked, isFollowing) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
+    const isVideo = data.url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || data.type === 'video';
+    
+    const mediaContent = isVideo 
+        ? `<video src="${data.url}" class="post-video" loop muted autoplay playsinline onclick="this.paused ? this.play() : this.pause()"></video>` 
+        : `<img src="${data.url}" loading="lazy">`;
+
     const commentsHTML = (data.comments || []).map(c => `
         <div class="modern-comment">
             <span class="comment-user">${c.user}</span>
@@ -48,7 +48,7 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
                 </div>
             </div>
             <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
-                ${renderMedia(data.url)}
+                ${mediaContent}
             </div>
             <div class="post-actions">
                 <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}"></i>
@@ -66,12 +66,10 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
         </div>`;
 }
 
-// --- 3. MULTIMEDIA SEÇİMİ VƏ YÜKLƏMƏ ---
+// --- 2. MULTIMEDIA UPLOAD (Cloudinary + ImgBB) ---
 async function uploadMedia() {
     const fileInp = document.getElementById('fileInput');
     if(!fileInp) return;
-
-    // VİDEO SEÇMƏYƏ İCAZƏ VERİR
     fileInp.setAttribute("accept", "image/*,video/*");
     
     fileInp.onchange = async (e) => {
@@ -79,19 +77,26 @@ async function uploadMedia() {
         const user = auth.currentUser;
         if (!file || !user) return;
 
+        alert("Yükləmə başladı, zəhmət olmasa gözləyin...");
+
         if (file.type.startsWith("video/")) {
-            // Video üçün Firebase Storage yoxdursa link istəyirik
-            const videoUrl = prompt("Video yükləmək üçün hələlik birbaşa link daxil edin (məs: .mp4):");
-            if(videoUrl) await savePostToFirestore(videoUrl, "video");
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+            try {
+                const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+                const result = await res.json();
+                if (result.secure_url) await savePostToFirestore(result.secure_url, "video");
+            } catch (err) { alert("Video yüklənmədi!"); }
         } else {
-            // Şəkil yükləmə
             const fd = new FormData();
             fd.append("image", file);
             try {
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
                 const result = await res.json();
                 if (result.success) await savePostToFirestore(result.data.url, "image");
-            } catch (err) { alert("Yükləmə xətası!"); }
+            } catch (e) { alert("Şəkil yüklənmədi!"); }
         }
     };
     fileInp.click();
@@ -111,56 +116,67 @@ async function savePostToFirestore(url, type) {
         comments: [],
         timestamp: serverTimestamp()
     });
+    alert("Uğurla paylaşıldı!");
 }
 
-// --- 4. PROFİL POSTLARINI QUERİ ETMƏK (Grid Üçün) ---
-function loadUserPosts(userNameToFind) {
-    const grid = document.getElementById('user-posts-grid');
-    if(!grid) return;
-    const q = query(collection(db, "posts"), where("userName", "==", userNameToFind));
+// --- 3. GLOBAL FUNKSİYALAR (Like, Comment, Follow) ---
+window.handleLike = async (id, postOwnerId) => {
+    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+    if (liked.includes(id)) return;
+    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+    liked.push(id);
+    localStorage.setItem('vibeLikes', JSON.stringify(liked));
+};
 
-    onSnapshot(q, (snapshot) => {
-        grid.innerHTML = ""; 
-        snapshot.forEach((doc) => {
-            const postData = doc.data();
-            const isVideo = postData.url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
-            grid.innerHTML += `
-                <div class="grid-item">
-                    ${isVideo ? `<video src="${postData.url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video><i class="fa-solid fa-play video-icon"></i>` : `<img src="${postData.url}">`}
-                </div>`;
-        });
+window.addComment = async (postId, postOwnerId) => {
+    const input = document.getElementById(`input-${postId}`);
+    const commentText = input.value.trim();
+    if (!commentText || !auth.currentUser) return;
+    await updateDoc(doc(db, "posts", postId), {
+        comments: arrayUnion({
+            user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+            text: commentText,
+            time: Date.now()
+        })
     });
-}
+    input.value = "";
+};
 
-// --- 5. AUTH VƏ GLOBAL EVENTLƏR ---
+window.handleFollow = async (targetUserId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid === targetUserId) return;
+    await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
+    await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
+    document.querySelectorAll(`[id="follow-${targetUserId}"]`).forEach(btn => {
+        btn.innerText = "İzlənilir";
+        btn.classList.add('following');
+    });
+};
+
+// --- 4. AUTH VƏ BAŞLANĞIÇ ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        const cleanName = user.displayName || user.email.split('@')[0];
-        
-        // Header və Profil yeniləmələri
-        if(document.getElementById('header-username')) document.getElementById('header-username').innerText = cleanName;
-        if(document.getElementById('profile-display-name')) document.getElementById('profile-display-name').innerText = cleanName;
-        
-        // Postları yüklə
         const postList = document.getElementById('post-list');
-        if(postList) {
-            onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
-                postList.innerHTML = '';
-                snap.forEach(d => postList.innerHTML += renderPostHTML(d.id, d.data(), false, false));
-            });
-        }
+        const userDocRef = doc(db, "users", user.uid);
         
-        loadUserPosts(cleanName);
+        const userDoc = await getDoc(userDocRef);
+        const following = userDoc.exists() ? (userDoc.data().following || []) : [];
+
+        onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
+            if (postList) {
+                postList.innerHTML = '';
+                snap.forEach(d => {
+                    const data = d.data();
+                    const isFollowing = following.includes(data.userId);
+                    postList.innerHTML += renderPostHTML(d.id, data, false, isFollowing);
+                });
+            }
+        });
     } else {
         if (!window.location.pathname.includes("login.html")) window.location.href = "login.html";
     }
 });
 
-// Window-a bağlanan funksiyalar (HTML-dən çağırılanlar)
-window.handleFollow = async (id) => { /* Follow kodu bura */ };
-window.handleLike = async (id, owner) => { /* Like kodu bura */ };
-window.addComment = async (id, owner) => { /* Comment kodu bura */ };
-window.closeNewsModal = () => { document.getElementById('news-modal').style.display='none'; localStorage.setItem('vibe_news_seen','true'); };
-
+// Event Listeners
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadMedia;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

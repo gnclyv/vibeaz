@@ -20,29 +20,41 @@ const storyInput = document.getElementById('storyInput');
 const addStoryBtn = document.getElementById('add-story-btn');
 const storiesListInner = document.getElementById('stories-list');
 
-// --- 1. FIREBASE STORY SİSTEMİ ---
-addStoryBtn?.addEventListener('click', () => storyInput.click());
+// --- 1. STORY SİSTEMİ (Açılma və 5 saniyəlik bağlanma) ---
 
-storyInput?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    const user = auth.currentUser;
-    if (!file || !user) return;
-    const fd = new FormData();
-    fd.append("image", file);
-    try {
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
-        const result = await res.json();
-        if (result.success) {
-            await addDoc(collection(db, "stories"), {
-                url: result.data.url,
-                userId: user.uid,
-                username: user.displayName || user.email.split('@')[0],
-                timestamp: serverTimestamp(),
-                createdAt: Date.now()
-            });
-        }
-    } catch (e) { alert("Story xətası!"); }
-});
+window.openStoryViewer = function(url, username) {
+    const viewer = document.getElementById('story-viewer');
+    const fullImg = document.getElementById('story-full-img');
+    const viewerUser = document.getElementById('viewer-username');
+    
+    if(!viewer || !fullImg) return;
+
+    fullImg.src = url;
+    viewerUser.innerText = username;
+    viewer.style.display = 'flex';
+    
+    const progress = document.getElementById('progress-fill');
+    if(progress) {
+        progress.style.transition = 'none';
+        progress.style.width = '0%';
+        setTimeout(() => {
+            progress.style.transition = 'width 5s linear';
+            progress.style.width = '100%';
+        }, 100);
+    }
+
+    // 5 saniyə sonra avtomatik bağla
+    clearTimeout(window.storyTimeout);
+    window.storyTimeout = setTimeout(window.closeStory, 5000);
+}
+
+window.closeStory = function() {
+    const viewer = document.getElementById('story-viewer');
+    if(viewer) viewer.style.display = 'none';
+    clearTimeout(window.storyTimeout);
+}
+
+// --- 2. FIREBASE STORY LİSTELƏMƏ ---
 
 function listenToStories() {
     if (!storiesListInner) return;
@@ -62,7 +74,8 @@ function listenToStories() {
     });
 }
 
-// --- 2. BİLDİRİŞ VƏ POST SİSTEMİ ---
+// --- 3. BİLDİRİŞ VƏ POST SİSTEMİ (İzləmə vəziyyəti ilə) ---
+
 async function sendNotification(targetUserId, typeMessage) {
     const user = auth.currentUser;
     if (!user || user.uid === targetUserId) return;
@@ -82,7 +95,6 @@ async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
 
-    // Cari istifadəçinin datalarını (following listini) çəkirik
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
 
@@ -93,7 +105,6 @@ async function loadPosts() {
             const data = d.data();
             const id = d.id;
             const isLiked = likedPosts.includes(id);
-            // Burada yoxlayırıq: Əgər bu postun sahibi bizim "following" listimizdə varsa
             const isFollowing = following.includes(data.userId);
             list.innerHTML += renderPostHTML(id, data, isLiked, isFollowing);
         });
@@ -105,7 +116,6 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
     const commentsHTML = (data.comments || []).map(c => `<div class="comment-item"><b>${c.user}</b> ${c.text}</div>`).join('');
     
-    // Düymənin mətni və class-ı izləmə vəziyyətinə görə dəyişir
     const btnText = isFollowing ? "İzlənilir" : "İzlə";
     const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
 
@@ -137,15 +147,15 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
         </div>`;
 }
 
+// --- GLOBAL FUNKSİYALAR ---
+
 window.handleFollow = async (targetUserId) => {
     const currentUser = auth.currentUser;
     if (!currentUser || currentUser.uid === targetUserId) return;
     
-    // Verilənlər bazasını yeniləyirik
     await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
     await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
     
-    // Düymənin vizual tərəfini dərhal dəyişirik
     const btns = document.querySelectorAll(`[id="follow-${targetUserId}"]`);
     btns.forEach(btn => {
         btn.innerText = "İzlənilir";
@@ -155,7 +165,6 @@ window.handleFollow = async (targetUserId) => {
     await sendNotification(targetUserId, "sizi izləməyə başladı.");
 };
 
-// Digər funksiyalar (handleLike, addComment, uploadPost, openStoryViewer və s.) eyni qalır...
 window.handleLike = async (id, postOwnerId) => {
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
     if (liked.includes(id)) return;
@@ -180,6 +189,8 @@ window.addComment = async (postId, postOwnerId) => {
     await sendNotification(postOwnerId, "postunuza şərh yazdı.");
 };
 
+// --- AUTH VƏ DİGƏRLƏRİ ---
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loadPosts();
@@ -188,3 +199,6 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "login.html";
     }
 });
+
+addStoryBtn?.addEventListener('click', () => storyInput.click());
+if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;

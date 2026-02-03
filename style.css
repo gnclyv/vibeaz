@@ -99,18 +99,40 @@ body {
 .post-feed {
     padding-top: 10px; /* Header-dən sonra nəfəs alma boşluğu */
 }
-
 .post-card {
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 10px;
+    background-color: #0a0a0a; /* Postun arxa fonu bir az fərqlənsin */
+    border: 1px solid var(--border-color);
+    border-radius: 12px; /* Küncləri yuvarlaqlaşdırırıq */
+    margin: 16px 12px; /* Postlar arasında yuxarı-aşağı və sağ-sol boşluq */
+    overflow: hidden; /* Şəkillərin künclərdən kənara çıxmaması üçün */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Qabarıqlıq verən kölgə */
+    transition: transform 0.2s ease; /* Kiçik toxunuş effekti */
 }
 
+/* Postun üzərinə gələndə cüzi böyümə (istəyə bağlı) */
+.post-card:hover {
+    transform: translateY(-2px);
+}
+/* Postun başlığı (istifadəçi adı olan hissə) */
 .post-header {
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 12px;
+    background-color: #0f0f0f; /* Başlıq hissəsini bir az ayırırıq */
 }
 
+/* Şəkil konteyneri */
+.post-img-container {
+    width: 100%;
+    position: relative;
+    padding-top: 100%; /* 1:1 Kvadrat formatı qorunur */
+    background: #1a1a1a;
+}
+
+/* Postun altındakı məlumat hissəsi */
+.post-info-section {
+    padding: 12px;
+}
 .nav-avatar-wrapper {
     width: 32px; height: 32px;
     border-radius: 50%; overflow: hidden;
@@ -167,3 +189,4 @@ body {
     border-radius: 10px;
     display: flex; justify-content: center; align-items: center;
 }
+

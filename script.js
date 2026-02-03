@@ -19,18 +19,15 @@ const db = getFirestore(app);
 const messaging = getMessaging(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// 2. İstifadəçi Statusu və Push Bildiriş İcazəsi
+// 2. İstifadəçi Statusu
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        const userName = user.email.split('@')[0];
-        updateNavAvatar(user, userName);
+        // Gmail əvəzinə displayName (Nickname) istifadə edirik
+        const displayNick = user.displayName || user.email.split('@')[0];
+        updateNavAvatar(user, displayNick);
         loadPosts();
-        
-        // 5 saniyə sonra bildiriş icazəsi istə (Soft Prompt)
         setTimeout(() => setupNotifications(user), 5000);
-        
-        // Gələn bildirişləri dinlə (Sayt açıq olanda)
-        listenNotifications(userName);
+        listenNotifications(displayNick);
     } else {
         if (!window.location.pathname.includes("login.html")) {
             window.location.href = "login.html";
@@ -38,34 +35,28 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 3. Push Bildirişləri Quraşdırma (Həqiqi Push)
+// 3. Push Bildirişləri
 async function setupNotifications(user) {
     try {
         if (Notification.permission === 'default') {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
-                // Token al (VAPID Key-i Firebase-dən alıb bura yapışdır)
                 const token = await getToken(messaging, { 
                     vapidKey: 'BErWSc6Tr3YhkpIjersOOPPZuthPFnJZgeNOHVY2xiD05T3aMDUTUGhWsG4FOz87cWq5F6OghIPzE1EVoPJPONc' 
                 });
-                
                 if (token) {
-                    // Tokeni bazada istifadəçinin altına qeyd et
                     await updateDoc(doc(db, "users", user.uid), { pushToken: token });
-                    console.log("Push Token qeyd edildi.");
                 }
             }
         }
-    } catch (err) {
-        console.log("Bildiriş xətası:", err);
-    }
+    } catch (err) { console.log("Bildiriş xətası:", err); }
 }
 
-// 4. Dinamik Profil Şəkli (Aşağı Menyu)
-function updateNavAvatar(user, userName) {
+// 4. Profil Şəkli
+function updateNavAvatar(user, nick) {
     const navAvatar = document.getElementById('nav-user-avatar');
     if (navAvatar) {
-        const userPhoto = user.photoURL || `https://ui-avatars.com/api/?name=${userName}&background=random&color=fff`;
+        const userPhoto = user.photoURL || `https://ui-avatars.com/api/?name=${nick}&background=random&color=fff`;
         navAvatar.innerHTML = `<img src="${userPhoto}" class="nav-profile-img">`;
     }
 }
@@ -86,7 +77,7 @@ async function uploadPost() {
                 await addDoc(collection(db, "posts"), {
                     url: result.data.url,
                     text: text || "",
-                    userName: user.email.split('@')[0],
+                    userName: user.displayName || user.email.split('@')[0], // Nickname burada qeyd olunur
                     likes: 0,
                     comments: [],
                     timestamp: serverTimestamp()
@@ -110,15 +101,22 @@ function loadPosts() {
             const data = d.data();
             const id = d.id;
             const isLiked = likedPosts.includes(id);
-            const author = data.userName || "User";
+            const author = data.userName || "İstifadəçi";
             list.innerHTML += renderPostHTML(id, data, isLiked, author);
         });
     });
 }
 
+// 7. HTML Render (Şərh bölməsi əlavə edildi)
 function renderPostHTML(id, data, isLiked, author) {
+    const commentsHTML = (data.comments || []).map(c => `
+        <div style="font-size: 13px; margin-top: 5px;">
+            <b style="color: #0095f6;">${c.user}:</b> <span>${c.text}</span>
+        </div>
+    `).join('');
+
     return `
-        <div class="post-card">
+        <div class="post-card" style="margin-bottom: 20px; border-bottom: 1px solid #222;">
             <div class="post-header" style="padding:10px; display:flex; align-items:center; gap:10px;">
                 <img src="https://ui-avatars.com/api/?name=${author}&background=random" style="width:30px; border-radius:50%;">
                 <span style="font-weight:bold;">${author}</span>
@@ -126,28 +124,53 @@ function renderPostHTML(id, data, isLiked, author) {
             <img src="${data.url}" style="width:100%;" ondblclick="handleLike('${id}')">
             <div style="padding:10px;">
                 <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
-                   onclick="handleLike('${id}')" style="font-size:20px; color:${isLiked ? '#ff3040' : 'white'}"></i>
+                   onclick="handleLike('${id}')" style="font-size:20px; color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer;"></i>
                 <div style="font-weight:bold; margin-top:5px;">${data.likes || 0} bəyənmə</div>
                 <div><b>${author}</b> ${data.text || ""}</div>
+                
+                <div id="comments-${id}" style="margin-top: 10px; border-top: 1px solid #111; padding-top: 5px;">
+                    ${commentsHTML}
+                </div>
+
+                <div style="display: flex; margin-top: 10px; gap: 5px;">
+                    <input type="text" id="input-${id}" placeholder="Şərh yaz..." 
+                           style="flex: 1; background: transparent; border: none; border-bottom: 1px solid #333; color: white; outline: none;">
+                    <button onclick="addComment('${id}')" style="background: none; border: none; color: #0095f6; font-weight: bold; cursor: pointer;">Paylaş</button>
+                </div>
             </div>
         </div>`;
 }
 
-// 7. Admin Qlobal Bildiriş Göndərmə
-window.sendGlobalNotification = async () => {
-    const msg = document.getElementById('admin-msg').value;
-    if (!msg) return;
-    await addDoc(collection(db, "notifications"), {
-        from: "Admin",
-        to: "all",
-        text: msg,
-        type: "system",
-        timestamp: serverTimestamp()
-    });
-    alert("Göndərildi!");
+// 8. Şərh Əlavə Etmə Funksiyası
+window.addComment = async (postId) => {
+    const input = document.getElementById(`input-${postId}`);
+    const commentText = input.value.trim();
+    const user = auth.currentUser;
+
+    if (!commentText || !user) return;
+
+    try {
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, {
+            comments: arrayUnion({
+                user: user.displayName || user.email.split('@')[0],
+                text: commentText,
+                time: Date.now()
+            })
+        });
+        input.value = ""; // Xananı təmizlə
+    } catch (e) { console.error("Şərh xətası:", e); }
 };
 
-// 8. Bildirişləri Dinləmə
+// ... (Bəyənmə və Bildiriş funksiyaları eyni qalır) ...
+window.handleLike = async (id) => {
+    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+    if (liked.includes(id)) return;
+    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+    liked.push(id);
+    localStorage.setItem('vibeLikes', JSON.stringify(liked));
+};
+
 function listenNotifications(userName) {
     const q = query(collection(db, "notifications"), where("to", "in", [userName, "all"]));
     onSnapshot(q, (snap) => {
@@ -168,14 +191,4 @@ function showToast(msg) {
     setTimeout(() => t.remove(), 4000);
 }
 
-// Qlobal Funksiyalar
-window.handleLike = async (id) => {
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
-    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-    liked.push(id);
-    localStorage.setItem('vibeLikes', JSON.stringify(liked));
-};
-
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
-

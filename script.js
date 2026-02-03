@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -16,56 +16,66 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- STORY FUNKSİYALARI (YENİ ƏLAVƏ) ---
 const storyInput = document.getElementById('storyInput');
 const addStoryBtn = document.getElementById('add-story-btn');
 const storiesListInner = document.getElementById('stories-list');
 
+// --- 1. FIREBASE STORY SİSTEMİ (Qlobal) ---
+
 addStoryBtn?.addEventListener('click', () => storyInput.click());
 
-storyInput?.addEventListener('change', (e) => {
+storyInput?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const user = auth.currentUser;
-            const stories = JSON.parse(localStorage.getItem('vibe_stories') || '[]');
-            stories.push({
-                url: event.target.result,
-                username: user ? (user.displayName || user.email.split('@')[0]) : "İstifadəçi",
-                time: Date.now()
+    const user = auth.currentUser;
+    if (!file || !user) return;
+
+    const fd = new FormData();
+    fd.append("image", file);
+
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
+        const result = await res.json();
+
+        if (result.success) {
+            await addDoc(collection(db, "stories"), {
+                url: result.data.url,
+                userId: user.uid,
+                username: user.displayName || user.email.split('@')[0],
+                timestamp: serverTimestamp(),
+                createdAt: Date.now() // 24 saatlıq yoxlanış üçün
             });
-            localStorage.setItem('vibe_stories', JSON.stringify(stories));
-            renderStories();
-        };
-        reader.readAsDataURL(file);
-    }
+        }
+    } catch (e) { alert("Story yüklənərkən xəta baş verdi!"); }
 });
 
-function renderStories() {
-    const stories = JSON.parse(localStorage.getItem('vibe_stories') || '[]');
-    const now = Date.now();
-    const validStories = stories.filter(s => now - s.time < 86400000);
-    localStorage.setItem('vibe_stories', JSON.stringify(validStories));
-
-    if(storiesListInner) {
-        storiesListInner.innerHTML = validStories.map((s, i) => `
-            <div class="story-item active" onclick="openStory(${i})">
-                <div class="story-circle"><img src="${s.url}"></div>
-                <span class="story-username">${s.username}</span>
-            </div>
-        `).join('');
-    }
+function listenToStories() {
+    if (!storiesListInner) return;
+    const q = query(collection(db, "stories"), orderBy("timestamp", "desc"));
+    
+    onSnapshot(q, (snap) => {
+        const now = Date.now();
+        storiesListInner.innerHTML = '';
+        
+        snap.forEach(d => {
+            const data = d.data();
+            // 24 saatdan köhnə story-ləri göstərmə (86400000 ms)
+            if (now - data.createdAt < 86400000) {
+                storiesListInner.innerHTML += `
+                    <div class="story-item active" onclick="openStoryViewer('${data.url}', '${data.username}')">
+                        <div class="story-circle"><img src="${data.url}"></div>
+                        <span class="story-username">${data.username}</span>
+                    </div>
+                `;
+            }
+        });
+    });
 }
 
-window.openStory = function(i) {
-    const stories = JSON.parse(localStorage.getItem('vibe_stories') || '[]');
-    const s = stories[i];
+window.openStoryViewer = function(url, username) {
     const viewer = document.getElementById('story-viewer');
-    
-    document.getElementById('story-full-img').src = s.url;
-    document.getElementById('viewer-username').innerText = s.username;
-    document.getElementById('viewer-avatar').src = s.url;
+    document.getElementById('story-full-img').src = url;
+    document.getElementById('viewer-username').innerText = username;
+    document.getElementById('viewer-avatar').src = url;
     viewer.style.display = 'flex';
     
     const progress = document.getElementById('progress-fill');
@@ -85,7 +95,8 @@ window.closeStory = function() {
     clearTimeout(window.storyTimeout);
 }
 
-// --- BİLDİRİŞ VƏ POST SİSTEMİ (SƏNİN KODUN) ---
+// --- 2. BİLDİRİŞ VƏ POST SİSTEMİ ---
+
 async function sendNotification(targetUserId, typeMessage) {
     const user = auth.currentUser;
     if (!user || user.uid === targetUserId) return;
@@ -98,7 +109,7 @@ async function sendNotification(targetUserId, typeMessage) {
             timestamp: serverTimestamp(),
             read: false
         });
-    } catch (e) { console.error("Notif error:", e); }
+    } catch (e) { console.error(e); }
 }
 
 function loadPosts() {
@@ -150,7 +161,6 @@ function renderPostHTML(id, data, isLiked) {
         </div>`;
 }
 
-// Global funksiyalar (HTML-dən çağırıldığı üçün window obyektinə bağlanır)
 window.addComment = async (postId, postOwnerId) => {
     const input = document.getElementById(`input-${postId}`);
     const commentText = input.value.trim();
@@ -165,7 +175,7 @@ window.addComment = async (postId, postOwnerId) => {
         });
         input.value = "";
         await sendNotification(postOwnerId, "postunuza şərh yazdı.");
-    } catch (e) { console.error("Şərh xətası:", e); }
+    } catch (e) { console.error(e); }
 };
 
 window.handleLike = async (id, postOwnerId) => {
@@ -215,11 +225,12 @@ async function uploadPost() {
     fileInp.click();
 }
 
-// AUTH MUSHAHIDƏSİ
+// --- 3. AUTH MUSHAHIDƏSİ ---
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         loadPosts();
-        renderStories(); // Story-ləri yüklə
+        listenToStories(); // Firebase story-ləri dinləməyə başla
         const displayNick = user.displayName || user.email.split('@')[0];
         updateNavAvatar(user, displayNick);
     } else if (!window.location.pathname.includes("login.html")) {
@@ -235,6 +246,5 @@ function updateNavAvatar(user, nick) {
     }
 }
 
-// Event Listeners
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

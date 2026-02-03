@@ -53,7 +53,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Postları Grid şəklində yükləyən funksiya
 function loadUserPosts(userNameToFind) {
     const grid = document.getElementById('user-posts-grid');
     const postCountText = document.getElementById('post-count');
@@ -65,15 +64,23 @@ function loadUserPosts(userNameToFind) {
         snapshot.forEach((doc) => {
             count++;
             const postData = doc.data();
+            
+            // Media növünü yoxlayırıq
+            const isVideo = postData.url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/) || postData.type === 'video';
+            
+            let mediaHTML = isVideo 
+                ? `<video src="${postData.url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`
+                : `<img src="${postData.url}" alt="VibeAz Post">`;
+
             grid.innerHTML += `
                 <div class="grid-item">
-                    <img src="${postData.url}" alt="VibeAz Post">
+                    ${mediaHTML}
+                    ${isVideo ? '<i class="fa-solid fa-play video-icon"></i>' : ''}
                 </div>`;
         });
         postCountText.innerText = count;
     });
 }
-
 // --- REDAKTƏ MODALI ÜÇÜN ELEMENTLƏR ---
 const modal = document.getElementById('editProfileModal');
 const editBtn = document.getElementById('edit-profile-btn');

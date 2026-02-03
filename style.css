@@ -42,22 +42,26 @@ body {
 
 .app-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Loqonu sola, ikonları sağa sıxır */
     align-items: center;
-    padding: 10px 15px;
+    padding: 10px 10px; /* Sağ-sol boşluğunu azaltdıq (15px-dən 10px-ə) */
     background: #000;
     position: sticky;
     top: 0;
     z-index: 1000;
+    width: 100%;
+    box-sizing: border-box; /* Padding-in genişliyə təsir etməməsi üçün */
 }
 
 .logo-container {
     display: flex;
     align-items: center;
+    margin-left: 0; /* Sol boşluğu tam sıfırlayırıq */
+    padding-left: 5px; /* Çox yapışıq görünməməsi üçün cüzi boşluq */
 }
 
 .main-logo {
-    height: 50%; /* Köhnə VibeAz yazısının hündürlüyü ilə eynidir */
+    height:120px; /* İstəsən bir az böyüdüb 32px də edə bilərsən */
     width: auto;
     object-fit: contain;
 }
@@ -295,6 +299,7 @@ body {
     width: 28px;
     height: 28px;
 }
+
 
 
 

@@ -12,7 +12,16 @@
         <header class="app-header">
             <h1 class="logo">VibeAz</h1>
             <div class="header-icons">
-                <i class="fa-regular fa-heart"></i>
+                <div class="notif-wrapper" id="notif-btn">
+                    <i class="fa-regular fa-heart"></i>
+                    <span id="notif-dot" class="notification-dot" style="display:none;"></span>
+                    
+                    <div id="notif-panel" class="notif-panel" style="display:none;">
+                        <div class="notif-header">Bildirişlər</div>
+                        <div id="notif-list"></div>
+                    </div>
+                </div>
+
                 <i class="fa-regular fa-paper-plane"></i>
                 <button id="logout-btn" title="Çıxış">
                     <i class="fa-solid fa-right-from-bracket"></i>

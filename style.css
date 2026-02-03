@@ -168,21 +168,43 @@ align-items: center;
 justify-content: center;
 }
 
+/* Post Header düzəlişi */
 .post-header-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Bu sətr düyməni sağa itələyir */
-    flex: 1;
-    margin-left: 10px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex: 1 !important;
+    margin-left: 12px !important;
 }
 
+.post-username-text {
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: #fff !important;
+}
+
+/* Instagram Stillli Buton */
 .follow-btn {
-    background: transparent;
-    color: #fff;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    margin-left: auto; /* Zəmanət üçün sağa sıxışdırır */
+    background-color: #0095f6 !important; /* İnstagram mavisi */
+    color: white !important;
+    border: none !important;
+    padding: 6px 16px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+    margin-left: auto !important;
+}
+
+.follow-btn:hover {
+    background-color: #1877f2 !important;
+}
+
+/* İzlənilir vəziyyəti üçün stil */
+.follow-btn.following {
+    background-color: #363636 !important; /* Tünd boz */
+    color: white !important;
 }
 
 .post-img-container {
@@ -324,6 +346,7 @@ width: 0%;
 background: #fff;
 transition: width 5s linear;
 }
+
 
 
 

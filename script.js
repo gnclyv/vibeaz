@@ -129,3 +129,96 @@ function loadPosts() {
         list.innerHTML = '';
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
         snap.forEach(d => {
+            const data = d.data();
+            const id = d.id;
+            const isLiked = likedPosts.includes(id);
+            list.innerHTML += renderPostHTML(id, data, isLiked, data.userName || "İstifadəçi");
+        });
+    });
+}
+
+function renderPostHTML(id, data, isLiked, author) {
+    const avatarImg = data.userPhoto ? data.userPhoto : `https://ui-avatars.com/api/?name=${author}&background=random`;
+    const commentsHTML = (data.comments || []).map(c => `<div class="comment-item"><b>${c.user}</b> ${c.text}</div>`).join('');
+    return `
+        <div class="post-card">
+            <div class="post-header">
+                <div class="nav-avatar-wrapper"><img src="${avatarImg}" class="nav-profile-img"></div>
+                <div class="post-header-info">
+                    <span>${author}</span>
+                    <button class="follow-btn" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">• İzlə</button>
+                </div>
+            </div>
+            <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
+                <img src="${data.url}" loading="lazy">
+            </div>
+            <div class="post-actions">
+                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}"></i>
+                <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()"></i>
+            </div>
+            <div class="post-info-section">
+                <div class="likes-count">${data.likes || 0} bəyənmə</div>
+                <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
+                <div class="comments-container" id="comments-${id}">${commentsHTML}</div>
+                <div class="comment-input-wrapper">
+                    <input type="text" id="input-${id}" placeholder="Şərh yaz...">
+                    <button class="comment-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
+                </div>
+            </div>
+        </div>`;
+}
+
+// Bəyənmə + Bildiriş
+window.handleLike = async (id, postOwnerId) => {
+    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+    if (liked.includes(id)) return;
+    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
+    liked.push(id);
+    localStorage.setItem('vibeLikes', JSON.stringify(liked));
+    await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+};
+
+// Şərh + Bildiriş
+window.addComment = async (postId, postOwnerId) => {
+    const input = document.getElementById(`input-${postId}`);
+    const commentText = input.value.trim();
+    if (!commentText || !auth.currentUser) return;
+    await updateDoc(doc(db, "posts", postId), {
+        comments: arrayUnion({
+            user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+            text: commentText,
+            time: Date.now()
+        })
+    });
+    input.value = "";
+    await sendNotification(postOwnerId, "postunuza şərh yazdı.");
+};
+
+// İzləmə + Bildiriş
+window.handleFollow = async (targetUserId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid === targetUserId) return;
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
+        await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
+        document.getElementById(`follow-${targetUserId}`).innerText = "• İzlənilir";
+        await sendNotification(targetUserId, "sizi izləməyə başladı.");
+    } catch (error) { console.error(error); }
+};
+
+// Modal və Panel İdarəetməsi
+const nBtn = document.getElementById('notif-btn');
+if(nBtn) {
+    nBtn.onclick = (e) => {
+        e.stopPropagation();
+        const panel = document.getElementById('notif-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('notif-dot').style.display = 'none';
+    };
+}
+document.addEventListener('click', () => { 
+    if(document.getElementById('notif-panel')) document.getElementById('notif-panel').style.display = 'none'; 
+});
+
+if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
+if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

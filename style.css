@@ -48,11 +48,11 @@ body {
 }
 
 .main-logo {
-    height: 120px;
+    height: 180px;
     width: auto;
     object-fit: contain;
     /* Loqonu yuxarı qaldırmaq üçün mənfi margin əlavə et */
-    margin-top: -5px; 
+    margin-top: -33px; 
     /* VƏ YA padding-bottom əlavə edərək loqonu yuxarı itələyə bilərsən */
     /* padding-bottom: 5px; */
 }
@@ -119,6 +119,7 @@ body {
     width: 9px; height: 9px; background: #ff3040;
     border-radius: 50%; border: 2px solid #000;
 }
+
 
 
 

@@ -169,10 +169,20 @@ justify-content: center;
 }
 
 .post-header-info {
-margin-left: 10px;
-flex: 1;
-font-weight: 600;
-font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Bu sətr düyməni sağa itələyir */
+    flex: 1;
+    margin-left: 10px;
+}
+
+.follow-btn {
+    background: transparent;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto; /* Zəmanət üçün sağa sıxışdırır */
 }
 
 .post-img-container {
@@ -314,6 +324,7 @@ width: 0%;
 background: #fff;
 transition: width 5s linear;
 }
+
 
 
 

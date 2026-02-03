@@ -99,12 +99,20 @@ body {
 .post-feed {
     padding-top: 10px; /* Header-dən sonra nəfəs alma boşluğu */
 }
-
 .post-card {
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 10px;
+    background-color: #0a0a0a; /* Postun arxa fonu bir az fərqlənsin */
+    border: 1px solid var(--border-color);
+    border-radius: 12px; /* Küncləri yuvarlaqlaşdırırıq */
+    margin: 16px 12px; /* Postlar arasında yuxarı-aşağı və sağ-sol boşluq */
+    overflow: hidden; /* Şəkillərin künclərdən kənara çıxmaması üçün */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Qabarıqlıq verən kölgə */
+    transition: transform 0.2s ease; /* Kiçik toxunuş effekti */
 }
 
+/* Postun üzərinə gələndə cüzi böyümə (istəyə bağlı) */
+.post-card:hover {
+    transform: translateY(-2px);
+}
 .post-header {
     display: flex;
     align-items: center;
@@ -167,4 +175,5 @@ body {
     border-radius: 10px;
     display: flex; justify-content: center; align-items: center;
 }
+
 

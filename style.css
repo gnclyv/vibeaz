@@ -44,7 +44,7 @@ body {
     display: flex;
     justify-content: space-between; /* Loqonu sola, ikonları sağa sıxır */
     align-items: center;
-    padding: 10px 10px; /* Sağ-sol boşluğunu azaltdıq (15px-dən 10px-ə) */
+    padding: 4px 10px; /* Sağ-sol boşluğunu azaltdıq (15px-dən 10px-ə) */
     background: #000;
     position: sticky;
     top: 0;
@@ -299,6 +299,7 @@ body {
     width: 28px;
     height: 28px;
 }
+
 
 
 

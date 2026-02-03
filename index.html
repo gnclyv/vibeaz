@@ -2,10 +2,9 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VibeAz</title>
-    <link href="https://fonts.cdnfonts.com/css/billabong" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=103">
+    <link rel="stylesheet" href="style.css?v=104">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -14,22 +13,12 @@
             <div class="logo-container">
                 <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" class="main-logo" alt="VibeAz">
             </div>
-
-            <div class="header-icons">
+            <div class="header-right">
                 <div class="notif-wrapper" id="notif-btn">
                     <i class="fa-regular fa-heart"></i>
                     <span id="notif-dot" class="notification-dot" style="display:none;"></span>
-                    
-                    <div id="notif-panel" class="notif-panel" style="display:none;">
-                        <div class="notif-header">Bildirişlər</div>
-                        <div id="notif-list"></div>
-                    </div>
                 </div>
-
-                <i class="fa-regular fa-paper-plane"></i>
-                <button id="logout-btn" title="Çıxış">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
+                <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
         </header>
 
@@ -43,7 +32,7 @@
                 <i class="fa-regular fa-square-plus"></i>
             </div>
             
-            <i class="fa-solid fa-clapperboard"></i>
+            <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
             
             <a href="profile.html" class="nav-profile-link">
                 <div id="nav-user-avatar" class="nav-avatar-wrapper">
@@ -55,6 +44,6 @@
         <input type="file" id="fileInput" hidden accept="image/*">
     </div>
 
-    <script type="module" src="script.js?v=103"></script>
+    <script type="module" src="script.js?v=104"></script>
 </body>
 </html>

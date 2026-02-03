@@ -26,9 +26,9 @@ body {
 
 /* HEADER */
 .app-header {
-    height: 60px; /* Loqo mərkəzdə olanda bir az daha geniş header yaxşı görünür */
+    height: 60px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Əsas mərkəzləmə */
     align-items: center;
     padding: 0 15px;
     background: #000;
@@ -38,28 +38,28 @@ body {
     z-index: 1000;
 }
 
-.header-left, .header-right {
-    flex: 1; /* Hər iki tərəfə bərabər yer veririk */
-    display: flex;
-    align-items: center;
-}
-
-.header-right {
-    justify-content: flex-end; /* Çıxış düyməsini sağa sıxır */
+/* Yan tərəflər üçün görünməz balans blokları */
+.header-side-space {
+    flex: 1;
 }
 
 .logo-container {
-    flex: 2; /* Loqo üçün daha geniş yer */
+    flex: 2; /* Loqo üçün daha geniş və mərkəzi yer */
     display: flex;
-    justify-content: center; /* Loqonu mərkəzləyir */
+    justify-content: center;
     align-items: center;
 }
 
 .main-logo {
-    height: 50px; /* Mərkəzdə olanda bir az daha iri (35px) daha gözəl görünür */
+    height: 38px; /* Mərkəzdə tək olanda bir az iri daha möhtəşəm görünür */
     width: auto;
+    object-fit: contain;
 }
 
+/* Bildiriş və Çıxış düymələrini gizlədirik (lazım olanda CSS-dən bu hissəni silərsən) */
+.notif-wrapper, #logout-btn, .header-right, .header-left {
+    display: none !important;
+}
 
 .header-right { display: flex; align-items: center; gap: 20px; }
 .header-right i { font-size: 22px; cursor: pointer; }
@@ -118,5 +118,6 @@ body {
     width: 9px; height: 9px; background: #ff3040;
     border-radius: 50%; border: 2px solid #000;
 }
+
 
 

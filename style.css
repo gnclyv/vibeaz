@@ -31,16 +31,17 @@ body {
 /* 3. HEADER (MƏRKƏZİ LOQO) */
 /* HEADER KONTEYNERİ */
 .app-header {
-    height: 60px; /* Hündürlüyü sabitlədik */
+    height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
     background: #000;
-    border-bottom: 1px solid var(--border);
+    /* border-bottom: 1px solid var(--border);  <-- Bu sətri sil və ya rəngini 'transparent' et */
+    border-bottom: none; /* Xətti tamamilə ləğv edir */
     position: sticky;
     top: 0;
     z-index: 1000;
-    overflow: hidden; /* Loqonun kənara çıxmaması üçün */
+    overflow: hidden;
 }
 
 .logo-container {
@@ -312,5 +313,6 @@ body {
     background: #fff;
     transition: width 5s linear;
 }
+
 
 

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -19,9 +19,12 @@ const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 // --- 1. STORY SİSTEMİ ---
 window.openStoryViewer = function(url, username) {
     const viewer = document.getElementById('story-viewer');
-    if(!viewer) return;
-    document.getElementById('story-full-img').src = url;
-    document.getElementById('viewer-username').innerText = username;
+    const fullImg = document.getElementById('story-full-img');
+    const viewerUser = document.getElementById('viewer-username');
+    if(!viewer || !fullImg) return;
+
+    fullImg.src = url;
+    viewerUser.innerText = username;
     viewer.style.display = 'flex';
     
     const progress = document.getElementById('progress-fill');
@@ -34,22 +37,45 @@ window.openStoryViewer = function(url, username) {
         }, 100);
     }
     clearTimeout(window.storyTimeout);
-    window.storyTimeout = setTimeout(() => viewer.style.display = 'none', 5000);
+    window.storyTimeout = setTimeout(window.closeStory, 5000);
 };
 
-window.closeStory = () => {
+window.closeStory = function() {
     const viewer = document.getElementById('story-viewer');
     if(viewer) viewer.style.display = 'none';
 };
 
-// --- 2. POST RENDER (Yalnız Şəkillər) ---
+// --- 2. İZLƏ FUNKSİYASI (FOLLOW) ---
+window.handleFollow = async (targetUserId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid === targetUserId) return;
+
+    const myDocRef = doc(db, "users", currentUser.uid);
+    const targetDocRef = doc(db, "users", targetUserId);
+
+    try {
+        // İzləyən şəxsin 'following' siyahısını yenilə
+        await setDoc(myDocRef, { following: arrayUnion(targetUserId) }, { merge: true });
+        // İzlənilən şəxsin 'followers' siyahısını yenilə
+        await setDoc(targetDocRef, { followers: arrayUnion(currentUser.uid) }, { merge: true });
+
+        // Düyməni dərhal vizual olarave yenilə
+        const btns = document.querySelectorAll(`[id^="follow-${targetUserId}"]`);
+        btns.forEach(btn => {
+            btn.innerText = "İzlənilir";
+            btn.classList.add('following');
+        });
+    } catch (err) {
+        console.error("İzləmə xətası:", err);
+    }
+};
+
+// --- 3. POST RENDER ---
 function renderPostHTML(id, data, isLiked, isFollowing) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
     const commentsHTML = (data.comments || []).map(c => `
-        <div class="modern-comment">
-            <span><b>${c.user}</b> ${c.text}</span>
-        </div>`).join('');
+        <div class="modern-comment"><span><b>${c.user}</b> ${c.text}</span></div>`).join('');
     
     const btnText = isFollowing ? "İzlənilir" : "İzlə";
     const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
@@ -82,48 +108,7 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
         </div>`;
 }
 
-// --- 3. YÜKLƏMƏ MƏNTİQİ (Yalnız ImgBB) ---
-async function uploadMedia(targetType = "post") {
-    const fileInp = document.createElement('input');
-    fileInp.type = 'file';
-    fileInp.accept = "image/*";
-    
-    fileInp.onchange = async (e) => {
-        const file = e.target.files[0];
-        const user = auth.currentUser;
-        if (!file || !user) return;
-
-        alert("Yüklənir...");
-        const fd = new FormData();
-        fd.append("image", file);
-
-        try {
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
-            const result = await res.json();
-
-            if (result.success) {
-                const col = targetType === "story" ? "stories" : "posts";
-                const docData = {
-                    url: result.data.url,
-                    userName: user.displayName || user.email.split('@')[0],
-                    userPhoto: user.photoURL || "",
-                    userId: user.uid,
-                    timestamp: serverTimestamp()
-                };
-                if (targetType === "post") {
-                    docData.text = prompt("Açıqlama:") || "";
-                    docData.likes = 0;
-                    docData.comments = [];
-                }
-                await addDoc(collection(db, col), docData);
-                alert("Paylaşıldı!");
-            }
-        } catch (err) { alert("Xəta baş verdi!"); }
-    };
-    fileInp.click();
-}
-
-// --- 4. LIKE, COMMENT, FOLLOW ---
+// --- 4. LIKE VƏ COMMENT ---
 window.handleLike = async (id) => {
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
     if (liked.includes(id)) return;
@@ -146,24 +131,48 @@ window.addComment = async (postId) => {
     input.value = "";
 };
 
-window.handleFollow = async (targetUserId) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || currentUser.uid === targetUserId) return;
-    await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
-    await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
-};
+// --- 5. YÜKLƏMƏ MƏNTİQİ ---
+async function uploadMedia(targetType = "post") {
+    const fileInp = document.createElement('input');
+    fileInp.type = 'file';
+    fileInp.accept = "image/*";
+    fileInp.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const fd = new FormData();
+        fd.append("image", file);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: fd });
+        const result = await res.json();
+        if (result.success) {
+            const user = auth.currentUser;
+            const docData = {
+                url: result.data.url,
+                userName: user.displayName || user.email.split('@')[0],
+                userId: user.uid,
+                timestamp: serverTimestamp()
+            };
+            if (targetType === "post") {
+                docData.text = prompt("Açıqlama:") || "";
+                docData.likes = 0;
+                docData.comments = [];
+            }
+            await addDoc(collection(db, targetType === "story" ? "stories" : "posts"), docData);
+        }
+    };
+    fileInp.click();
+}
 
-// --- 5. AUTH VƏ SNAPSHOT ---
+// --- 6. AUTH VƏ SNAPSHOT ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // Story-ləri gətir
+        // Story-lər
         onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
             const list = document.getElementById('stories-list');
             if(list) {
                 list.innerHTML = '';
                 snap.forEach(d => {
                     const s = d.data();
-                    list.innerHTML += `<div class="story-item" onclick="openStoryViewer('${s.url}', '${s.userName}')">
+                    list.innerHTML += `<div class="story-item active" onclick="openStoryViewer('${s.url}', '${s.userName}')">
                         <div class="story-circle"><img src="${s.url}"></div>
                         <span class="story-username">${s.userName}</span>
                     </div>`;
@@ -171,26 +180,30 @@ onAuthStateChanged(auth, async (user) => {
             }
         });
 
-        // Postları gətir
-        const postList = document.getElementById('post-list');
-        onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
-            if (postList) {
-                postList.innerHTML = '';
-                const liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-                snap.forEach(d => {
-                    postList.innerHTML += renderPostHTML(d.id, d.data(), liked.includes(d.id), false);
-                });
-            }
+        // Postlar və İzləmə yoxlaması
+        onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), async (snap) => {
+            const postList = document.getElementById('post-list');
+            if (!postList) return;
+
+            // Cari istifadəçinin kimi izlədiyini tapırıq
+            const myDoc = await getDoc(doc(db, "users", user.uid));
+            const following = myDoc.exists() ? (myDoc.data().following || []) : [];
+            const liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
+
+            postList.innerHTML = '';
+            snap.forEach(d => {
+                const data = d.data();
+                const isFollowing = following.includes(data.userId);
+                postList.innerHTML += renderPostHTML(d.id, data, liked.includes(d.id), isFollowing);
+            });
         });
     } else {
         if (!window.location.pathname.includes("login.html")) window.location.href = "login.html";
     }
 });
 
-// Event Listeners
 document.addEventListener('click', (e) => {
     if (e.target.id === 'mainAddBtn') uploadMedia('post');
     if (e.target.id === 'add-story-btn') uploadMedia('story');
     if (e.target.id === 'logout-btn') signOut(auth);
 });
-

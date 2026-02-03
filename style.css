@@ -79,7 +79,7 @@ body {
     gap: 15px;
     padding: 15px 10px;
     background: #000;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     overflow-x: auto;
     scrollbar-width: none; /* Firefox üçün */
 }
@@ -313,6 +313,7 @@ body {
     background: #fff;
     transition: width 5s linear;
 }
+
 
 
 

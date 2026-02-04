@@ -90,7 +90,6 @@ function loadDirectUsers() {
         snapshot.forEach((doc) => {
             const userData = doc.data();
             if (userData.uid !== auth.currentUser?.uid) {
-                // Mavi tik yoxlanışı
                 const blueTick = userData.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 10px; margin-left: 3px;"></i>' : '';
                 
                 const userCard = document.createElement('div');
@@ -142,7 +141,6 @@ async function loadPosts() {
             const isLiked = likedPosts.includes(id);
             const isFollowing = following.includes(data.userId);
             
-            // Post sahibinin Verified (mavi tik) statusunu bazadan yoxlayırıq
             const authorDoc = await getDoc(doc(db, "users", data.userId));
             const isVerified = authorDoc.exists() ? authorDoc.data().isVerified : false;
 
@@ -154,8 +152,6 @@ async function loadPosts() {
 function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
-    
-    // Mavi tik HTML-i
     const blueTick = isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 13px; margin-left: 4px;"></i>' : '';
 
     const commentsHTML = (data.comments || []).map(c => `
@@ -184,7 +180,9 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
                 <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()"></i>
             </div>
             <div class="post-info-section">
-                <div class="likes-count">${data.likes || 0} bəyənmə</div>
+                <div class="likes-count" onclick="showLikes('${id}')" style="cursor:pointer; font-weight:600; margin-bottom:5px;">
+                    ${data.likes || 0} bəyənmə
+                </div>
                 <div class="post-description">
                     <b style="display: flex; align-items: center;">${author} ${blueTick}</b> ${data.text || ""}
                 </div>
@@ -209,12 +207,59 @@ window.handleFollow = async (targetUserId) => {
 };
 
 window.handleLike = async (id, postOwnerId) => {
+    const user = auth.currentUser;
+    if (!user) return;
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
     if (liked.includes(id)) return;
-    await updateDoc(doc(db, "posts", id), { likes: increment(1) });
-    liked.push(id);
-    localStorage.setItem('vibeLikes', JSON.stringify(liked));
-    await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+
+    try {
+        await updateDoc(doc(db, "posts", id), { 
+            likes: increment(1),
+            likedBy: arrayUnion(user.uid) // Bəyənənlər siyahısına əlavə edir
+        });
+        liked.push(id);
+        localStorage.setItem('vibeLikes', JSON.stringify(liked));
+        await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+    } catch (e) { console.error(e); }
+};
+
+// Bəyənənlər siyahısını göstərən funksiyalar
+window.showLikes = async (postId) => {
+    const modal = document.getElementById('like-modal');
+    const content = document.getElementById('like-list-content');
+    if (!modal || !content) return;
+
+    modal.style.display = 'flex';
+    content.innerHTML = '<div style="color:#888; text-align:center; padding:10px;">Yüklənir...</div>';
+
+    try {
+        const postSnap = await getDoc(doc(db, "posts", postId));
+        const likedBy = postSnap.data().likedBy || [];
+
+        if (likedBy.length === 0) {
+            content.innerHTML = '<div style="color:#888; text-align:center; padding:10px;">Hələ bəyənmə yoxdur.</div>';
+            return;
+        }
+
+        content.innerHTML = '';
+        for (const uid of likedBy) {
+            const userSnap = await getDoc(doc(db, "users", uid));
+            const uData = userSnap.data();
+            if (uData) {
+                const tick = uData.isVerified ? '<i class="fa-solid fa-circle-check" style="color:#3897f0; font-size:12px; margin-left:5px;"></i>' : '';
+                content.innerHTML += `
+                    <div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #222;">
+                        <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name='+uData.displayName}" style="width:35px; height:35px; border-radius:50%; object-fit:cover;">
+                        <span style="color:white; font-size:14px; display:flex; align-items:center;">${uData.displayName} ${tick}</span>
+                    </div>`;
+            }
+        }
+    } catch (e) { content.innerHTML = '<div style="color:red;">Xəta!</div>'; }
+};
+
+window.closeLikeModal = () => {
+    const modal = document.getElementById('like-modal');
+    if (modal) modal.style.display = 'none';
 };
 
 window.addComment = async (postId, postOwnerId) => {
@@ -253,6 +298,7 @@ async function uploadPost() {
                     userPhoto: user.photoURL || "",
                     userId: user.uid,
                     likes: 0,
+                    likedBy: [], // İlkin olaraq boş massiv
                     comments: [],
                     timestamp: serverTimestamp()
                 });
@@ -314,16 +360,9 @@ window.closeNewsModal = function() {
     const modal = document.getElementById('news-modal');
     if (modal) {
         modal.style.display = 'none';
-        localStorage.setItem('newsSeen', 'true');
+        localStorage.setItem('vibe_news_seen', 'true');
     }
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('news-modal');
-    if (modal && !localStorage.getItem('newsSeen')) {
-        modal.style.display = 'flex';
-    }
-});
 
 if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;

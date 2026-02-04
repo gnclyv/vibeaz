@@ -26,7 +26,7 @@ async function setupPushNotifications(user) {
         if (permission === 'granted') {
             // VAPID KEY: Firebase Console -> Cloud Messaging-dən almalısan
             const token = await getToken(messaging, { 
-                vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' 
+                vapidKey: 'BErWSc6Tr3YhkpIjersOOPPZuthPFnJZgeNOHVY2xiD05T3aMDUTUGhWsG4FOz87cWq5F6OghIPzE1EVoPJPONc' 
             });
             
             if (token) {
@@ -317,3 +317,4 @@ onAuthStateChanged(auth, async (user) => {
 if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+

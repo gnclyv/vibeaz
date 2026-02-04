@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 1. YUXARI: Bütün istifadəçiləri "Story" stilində göstər
+// 1. YUXARI: Bütün istifadəçilər (Aktiv Bar)
 function loadActiveUsers(myUid) {
     const activeList = document.getElementById('active-users-list');
     if (!activeList) return;
@@ -28,41 +28,44 @@ function loadActiveUsers(myUid) {
             
             const userImg = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'U'}&background=333&color=fff`;
             
+            // Sənin HTML stilinə uyğun struktur
             activeList.innerHTML += `
-                <div class="active-user-card" onclick="window.location.href='chat.html?uid=${user.uid}'">
-                    <div class="avatar-ring">
-                        <img src="${userImg}">
-                        ${user.status === 'online' ? '<div class="online-indicator"></div>' : ''}
-                    </div>
-                    <span class="active-user-name">${user.displayName || 'İstifadəçi'}</span>
+                <div class="active-u" onclick="window.location.href='chat.html?uid=${user.uid}'">
+                    <img src="${userImg}">
+                    ${user.status === 'online' ? '<div class="dot"></div>' : ''}
+                    <span>${user.displayName || 'İstifadəçi'}</span>
                 </div>`;
         });
     });
 }
 
-// 2. AŞAĞI: Yalnız mesaj yazışması olan şəxsləri göstər
+// 2. AŞAĞI: Yazışma Keçmişi (Söhbət Siyahısı)
 function loadChatHistory(myUid) {
-    const chatContainer = document.getElementById('chats-list-container');
+    const chatContainer = document.getElementById('chat-list-container'); // HTML ilə eyni ID
     if (!chatContainer) return;
 
-    // "participants" massivində mənim UID-m olan mesajları tapırıq
+    // "participants" filtrini işlədirik (İndeks xətası olmasın deyə orderBy sildik)
     const q = query(
         collection(db, "direct_messages"),
-        where("participants", "array-contains", myUid),
-        orderBy("createdAt", "desc")
+        where("participants", "array-contains", myUid)
     );
 
     onSnapshot(q, (snapshot) => {
         chatContainer.innerHTML = '';
         const chatteredUsers = new Set(); 
+        let messages = [];
 
-        if (snapshot.empty) {
-            chatContainer.innerHTML = '<p style="text-align:center; color:#555; margin-top:20px;">Hələ ki, yazışma yoxdur.</p>';
+        snapshot.forEach(doc => messages.push(doc.data()));
+
+        // JS tərəfində vaxta görə sıralayırıq (İndeks tələb olunmur)
+        messages.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+        if (messages.length === 0) {
+            chatContainer.innerHTML = '<p style="text-align:center; color:#555; margin-top:30px; font-size:13px;">Hələ ki, yazışma yoxdur.</p>';
             return;
         }
 
-        snapshot.forEach((msgDoc) => {
-            const msgData = msgDoc.data();
+        messages.forEach((msgData) => {
             const otherUid = msgData.senderId === myUid ? msgData.receiverId : msgData.senderId;
 
             if (!chatteredUsers.has(otherUid)) {
@@ -78,23 +81,20 @@ async function renderChatItem(uid, lastMsg, container) {
         const userData = userDoc.data();
         if (!userData) return;
 
-        const oldItem = document.getElementById(`chat-${uid}`);
-        if (oldItem) oldItem.remove();
+        let existingItem = document.getElementById(`chat-item-${uid}`);
+        if (existingItem) existingItem.remove();
 
         const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'U'}`;
         
         const chatItem = document.createElement('a');
-        chatItem.id = `chat-${uid}`;
+        chatItem.id = `chat-item-${uid}`;
         chatItem.className = 'chat-item';
         chatItem.href = `chat.html?uid=${uid}`;
         chatItem.innerHTML = `
-            <img src="${userImg}" class="chat-avatar">
+            <img src="${userImg}" class="chat-img">
             <div class="chat-info">
                 <h4>${userData.displayName || 'İstifadəçi'}</h4>
-                <p>${lastMsg.substring(0, 30)}${lastMsg.length > 30 ? '...' : ''}</p>
-            </div>
-            <div class="chat-meta">
-                ${userData.status === 'online' ? '<span style="color:#1ed760; font-size:10px;">●</span>' : ''}
+                <p>${lastMsg.substring(0, 35)}${lastMsg.length > 35 ? '...' : ''}</p>
             </div>
         `;
         container.appendChild(chatItem);

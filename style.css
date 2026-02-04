@@ -1,21 +1,24 @@
-/* 1. RƏNG PALİTRASI VƏ DEYİŞƏNLƏR */
+/* =========================================
+   1. RƏNG PALİTRASI VƏ ÜMUMİ AYARLAR
+   ========================================= */
 :root {
     --bg-black: #000000;
     --bg-card: #121212;
     --border: #262626;
-    --vibe-gradient: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
     --text: #ffffff;
     --text-dim: #a8a8a8;
+    --vibe-gradient: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    --instagram-blue: #0095f6;
+    --online-green: #1ed760;
 }
 
-/* 2. ÜMUMİ RESET */
 body {
     margin: 0;
+    padding: 0;
     background-color: var(--bg-black);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
 }
 
 #app {
@@ -23,145 +26,29 @@ body {
     margin: 0 auto;
     min-height: 100vh;
     background-color: var(--bg-black);
-    position: relative;
 }
 
-/* 3. HEADER */
+/* =========================================
+   2. HEADER VƏ NAVİQASİYA
+   ========================================= */
 .app-header {
     height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
     background: #000;
-    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: 1000;
-}
-
-.logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    border-bottom: 1px solid var(--border);
 }
 
 .main-logo {
-    height: 100px; /* Loqonun ölçüsü */
+    height: 50px;
     width: auto;
     object-fit: contain;
 }
 
-/* 4. STORY SİSTEMİ (Postlarla məsafə burda tənzimlənir) */
-.stories-container {
-    display: flex;
-    gap: 15px;
-    padding: 10px 10px 15px 10px;
-    background: #000;
-    border-bottom: 1px solid var(--border); /* Story bitəndə incə bir xətt */
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.stories-container::-webkit-scrollbar {
-    display: none;
-}
-
-.stories-list-inner {
-    display: flex;
-    gap: 15px;
-}
-
-.story-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 70px;
-    cursor: pointer;
-}
-
-.story-circle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    padding: 2px;
-    background: #000;
-    border: 2px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.story-item.active .story-circle {
-    border: 2px solid transparent;
-    background: var(--vibe-gradient) border-box;
-}
-
-.story-circle img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.story-username {
-    font-size: 11px;
-    color: var(--text);
-    margin-top: 5px;
-}
-
-/* 5. POST FEED (Postların yerləşməsi) */
-.post-feed {
-    padding-bottom: 80px; /* Navigasiya üçün yer */
-    margin-top: 0; /* Boşluqları tam sildik */
-}
-
-.post-card {
-    background-color: var(--bg-card);
-    margin: 10px 0; /* Üstdən və altdan kiçik məsafə */
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    overflow: hidden;
-}
-
-.post-header {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-}
-
-.nav-avatar-wrapper { 
-    width: 32px;
-    height: 32px;
-    border-radius: 50%; 
-    overflow: hidden;
-    margin-right: 10px;
-}
-
-.nav-avatar-wrapper img, .nav-avatar-wrapper i {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.post-username-text {
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.post-img-container {
-    width: 100%;
-    position: relative;
-    padding-top: 100%; /* Kvadrat postlar */
-}
-
-.post-img-container img {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-}
-
-/* 6. BOTTOM NAV */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -185,49 +72,227 @@ body {
 
 .add-post-btn {
     background: var(--vibe-gradient);
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* 7. STORY VIEWER */
-.story-viewer {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #000;
-    z-index: 9999;
-    display: none;
+/* =========================================
+   3. STORIES (ANA SƏHİFƏ)
+   ========================================= */
+.stories-container {
+    display: flex;
+    gap: 15px;
+    padding: 15px 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+}
+
+.stories-container::-webkit-scrollbar { display: none; }
+
+.story-item {
+    display: flex;
     flex-direction: column;
-}
-
-/* 8. MODAL */
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9);
-    display: none;
-    justify-content: center;
     align-items: center;
-    z-index: 10000;
+    min-width: 75px;
 }
 
-.modal-content {
-    background: #121212;
-    padding: 20px;
+.story-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    padding: 2px;
+    border: 2px solid var(--border);
+}
+
+.story-item.active .story-circle {
+    border: 2px solid transparent;
+    background: var(--vibe-gradient) border-box;
+}
+
+.story-circle img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.story-username {
+    font-size: 11px;
+    margin-top: 5px;
+    color: var(--text-dim);
+}
+
+/* =========================================
+   4. QABARIQ POST KARTLARI VƏ İZLƏMƏ
+   ========================================= */
+.post-feed { padding-bottom: 80px; }
+
+.post-card {
+    background-color: var(--bg-card);
+    margin: 15px 10px;
     border-radius: 15px;
-    width: 80%;
-    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Qabarıq effekt */
+    overflow: hidden;
 }
 
-.modal-close-btn {
-    background: #0095f6;
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+}
+
+.nav-avatar-wrapper {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 12px;
+}
+
+.post-header-info {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-username-text {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.follow-btn {
+    background-color: var(--instagram-blue);
     color: white;
     border: none;
-    padding: 10px;
-    width: 100%;
-    border-radius: 5px;
-    margin-top: 15px;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
 }
+
+.follow-btn.following {
+    background-color: #363636;
+}
+
+.post-img-container {
+    width: 100%;
+    background: #000;
+}
+
+.post-img-container img {
+    width: 100%;
+    display: block;
+}
+
+/* =========================================
+   5. MODERN YORUM (ŞƏRH) SİSTEMİ
+   ========================================= */
+.post-info-section { padding: 12px; }
+
+.likes-count { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+
+.modern-comments-box {
+    max-height: 100px;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.modern-comment { font-size: 13px; margin-bottom: 5px; }
+.comment-user { font-weight: 700; margin-right: 5px; }
+.comment-text { color: #efefef; }
+
+.modern-comment-input-area {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    border-top: 1px solid #262626;
+    padding-top: 10px;
+}
+
+.modern-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 13px;
+    outline: none;
+}
+
+.modern-post-btn {
+    background: transparent;
+    color: var(--instagram-blue);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* =========================================
+   6. MESAJLAR VƏ AKTİVLİK (DIRECT)
+   ========================================= */
+.active-users-bar {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+}
+
+.active-user-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 65px;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: 20px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    background-color: var(--online-green);
+    border: 3px solid #000;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.chat-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: white;
+}
+
+.chat-row:active { background: #121212; }
+
+.chat-row-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+/* =========================================
+   7. CHAT EKRANI (YAZIŞMA)
+   ========================================= */
+.msg {
+    max-width: 75%;
+    padding: 10px 15px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.sent { align-self: flex-end; background: var(--instagram-blue); color: white; }
+.received { align-self: flex-start; background: #262626; color: white; }

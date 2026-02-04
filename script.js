@@ -66,7 +66,7 @@ function listenToStories() {
     });
 }
 
-// --- 2. DM ÜÇÜN İSTİFADƏÇİ SİSTEMİ (YENİLƏNDİ) ---
+// --- 2. DM ÜÇÜN İSTİFADƏÇİ SİSTEMİ ---
 async function registerUserInFirestore(user) {
     if (!user) return;
     const userRef = doc(db, "users", user.uid);
@@ -78,7 +78,6 @@ async function registerUserInFirestore(user) {
             photoURL: user.photoURL || "",
             lastSeen: serverTimestamp()
         }, { merge: true });
-        console.log("İstifadəçi bazada qeydiyyata alındı.");
     } catch (e) { console.error("User Reg Error:", e); }
 }
 
@@ -90,8 +89,10 @@ function loadDirectUsers() {
         usersListContainer.innerHTML = '';
         snapshot.forEach((doc) => {
             const userData = doc.data();
-            // YALNIZ başqa istifadəçiləri göstər
             if (userData.uid !== auth.currentUser?.uid) {
+                // Mavi tik yoxlanışı
+                const blueTick = userData.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 10px; margin-left: 3px;"></i>' : '';
+                
                 const userCard = document.createElement('div');
                 userCard.className = 'user-card';
                 const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=0095f6&color=fff`;
@@ -99,7 +100,7 @@ function loadDirectUsers() {
                 userCard.innerHTML = `
                     <a href="mesaj.html?uid=${userData.uid}">
                         <img src="${userImg}" alt="${userName}">
-                        <span>${userName}</span>
+                        <span>${userName} ${blueTick}</span>
                     </a>
                 `;
                 usersListContainer.appendChild(userCard);
@@ -127,37 +128,53 @@ async function sendNotification(targetUserId, typeMessage) {
 async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
+    
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
+
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
         list.innerHTML = '';
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-        snap.forEach(d => {
+        
+        snap.forEach(async (d) => {
             const data = d.data();
             const id = d.id;
             const isLiked = likedPosts.includes(id);
             const isFollowing = following.includes(data.userId);
-            list.innerHTML += renderPostHTML(id, data, isLiked, isFollowing);
+            
+            // Post sahibinin Verified (mavi tik) statusunu bazadan yoxlayırıq
+            const authorDoc = await getDoc(doc(db, "users", data.userId));
+            const isVerified = authorDoc.exists() ? authorDoc.data().isVerified : false;
+
+            list.innerHTML += renderPostHTML(id, data, isLiked, isFollowing, isVerified);
         });
     });
 }
 
-function renderPostHTML(id, data, isLiked, isFollowing) {
+function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
+    
+    // Mavi tik HTML-i
+    const blueTick = isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 13px; margin-left: 4px;"></i>' : '';
+
     const commentsHTML = (data.comments || []).map(c => `
         <div class="modern-comment">
             <span class="comment-user">${c.user}</span>
             <span class="comment-text">${c.text}</span>
         </div>`).join('');
+    
     const btnText = isFollowing ? "İzlənilir" : "İzlə";
     const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
+
     return `
         <div class="post-card">
             <div class="post-header">
                 <div class="nav-avatar-wrapper"><img src="${avatarImg}" class="nav-profile-img"></div>
-                <div class="post-header-info">
-                    <span class="post-username-text">${author}</span>
+                <div class="post-header-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <span class="post-username-text" style="display: flex; align-items: center; font-weight: 600;">
+                        ${author} ${blueTick}
+                    </span>
                     <button class="${btnClass}" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">${btnText}</button>
                 </div>
             </div>
@@ -168,7 +185,9 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
             </div>
             <div class="post-info-section">
                 <div class="likes-count">${data.likes || 0} bəyənmə</div>
-                <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
+                <div class="post-description">
+                    <b style="display: flex; align-items: center;">${author} ${blueTick}</b> ${data.text || ""}
+                </div>
                 <div class="modern-comments-box">${commentsHTML}</div>
                 <div class="modern-comment-input-area">
                     <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input">
@@ -243,12 +262,9 @@ async function uploadPost() {
     fileInp.click();
 }
 
-// --- 5. GİRİŞ YOXLANIŞI (ƏSAS HİSSƏ) ---
+// --- 5. GİRİŞ YOXLANIŞI ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        console.log("Giriş uğurludur:", user.email);
-        
-        // Bu ardıcıllıq mütləqdir
         await registerUserInFirestore(user); 
         loadPosts();
         listenToStories();
@@ -293,25 +309,22 @@ document.addEventListener('click', (e) => {
         window.location.href = 'mesaj.html';
     }
 });
-// Modalın id-si "news-modal" olduğu üçün onu tapıb gizlədirik
+
 window.closeNewsModal = function() {
     const modal = document.getElementById('news-modal');
     if (modal) {
         modal.style.display = 'none';
-        // İstəsən, istifadəçinin bunu bir də görməməsi üçün yaddaşa yaza bilərsən
         localStorage.setItem('newsSeen', 'true');
     }
 };
 
-// Səhifə yüklənəndə modalı avtomatik açmaq üçün (əgər hələ görməyibsə)
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('news-modal');
     if (modal && !localStorage.getItem('newsSeen')) {
         modal.style.display = 'flex';
     }
 });
+
 if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
-
-

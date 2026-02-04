@@ -11,7 +11,50 @@ const firebaseConfig = {
     messagingSenderId: "953434260285",
     appId: "1:953434260285:web:6263b4372487ba6d673b54"
 };
+import { query, where, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+function loadActiveUsers() {
+    const listContainer = document.getElementById('active-users-list');
+    if (!listContainer) return;
+
+    // Yalnız statusu "online" olanları gətir
+    const q = query(collection(db, "users"), where("status", "==", "online"));
+
+    onSnapshot(q, (snapshot) => {
+        listContainer.innerHTML = '';
+        snapshot.forEach((doc) => {
+            const userData = doc.data();
+            
+            // Özümüzü siyahıda göstərmirik
+            if (userData.uid !== auth.currentUser?.uid) {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.onclick = () => {
+                    window.location.href = `mesaj.html?uid=${userData.uid}`;
+                };
+                
+                const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=333&color=fff`;
+                
+                userCard.innerHTML = `
+                    <div class="avatar-wrapper">
+                        <img src="${userImg}" alt="Avatar">
+                        <div class="status-dot"></div>
+                    </div>
+                    <span>${userData.displayName || 'İstifadəçi'}</span>
+                `;
+                listContainer.appendChild(userCard);
+            }
+        });
+    });
+}
+
+// onAuthStateChanged daxilində çağır:
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadActiveUsers(); // Aktivləri yüklə
+        // ... digər kodların
+    }
+});
 // Firebase-i başlat
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

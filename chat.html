@@ -1,29 +1,111 @@
-<div id="app-chat">
-    <header class="chat-header">
-        <a href="mesaj.html" style="color: white; font-size: 20px; margin-right: 15px;">
-            <i class="fa-solid fa-arrow-left-long"></i>
-        </a>
-        <img id="target-user-img" src="https://via.placeholder.com/42" alt="">
-        <div class="target-info">
-            <h4 id="target-user-name">Yüklənir...</h4>
-            <span id="target-status">aktiv</span>
-        </div>
-        <div class="header-icons" style="color: #888; font-size: 18px;">
-            <i class="fa-solid fa-phone" style="margin-right: 20px;"></i>
-            <i class="fa-solid fa-video"></i>
-        </div>
-    </header>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Söhbət - VibeAz</title>
+    <link rel="stylesheet" href="chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
 
-    <div id="messages-display">
-        </div>
+    <div id="app-chat">
+        <header class="chat-header">
+            <a href="mesaj.html" class="back-btn">
+                <i class="fa-solid fa-arrow-left-long"></i>
+            </a>
+            
+            <div class="header-user">
+                <div class="avatar-wrapper">
+                    <img id="target-user-img" src="https://ui-avatars.com/api/?name=U&background=333&color=fff" alt="Profil">
+                </div>
+                <div class="target-info">
+                    <h4 id="target-user-name">Yüklənir...</h4>
+                    <span id="target-status">aktiv</span>
+                </div>
+            </div>
 
-    <div class="chat-input-area">
-        <form id="chat-form">
-            <i class="fa-regular fa-face-smile" style="color: #888; margin-right: 10px; font-size: 20px;"></i>
-            <input type="text" id="msg-input" placeholder="Mesajınızı yazın..." autocomplete="off">
-            <button type="submit" class="send-btn">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </form>
+            <div class="header-actions">
+                <button class="icon-btn"><i class="fa-solid fa-phone"></i></button>
+                <button class="icon-btn"><i class="fa-solid fa-video"></i></button>
+            </div>
+        </header>
+
+        <main id="messages-display">
+            <div class="loading-messages">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <p>Mesajlar yüklənir...</p>
+            </div>
+        </main>
+
+        <footer class="chat-input-area">
+            <form id="chat-form">
+                <button type="button" class="action-btn">
+                    <i class="fa-regular fa-face-smile"></i>
+                </button>
+                
+                <input type="text" id="msg-input" placeholder="Mesajınızı yazın..." autocomplete="off">
+                
+                <button type="button" class="action-btn camera-btn">
+                    <i class="fa-solid fa-camera"></i>
+                </button>
+
+                <button type="submit" class="send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </footer>
     </div>
-</div>
+
+    <script type="module" src="chat.js"></script>
+
+    <style>
+        /* HTML daxilində bəzi kiçik struktur tənzimləmələri */
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 22px;
+            margin-right: 15px;
+            transition: 0.3s;
+        }
+        .header-user {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+        .loading-messages {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #444;
+            gap: 10px;
+        }
+        /* Telefonda klaviatura açıldıqda ekranın daralması üçün */
+        @media (max-height: 450px) {
+            .chat-header { display: none; }
+        }
+    </style>
+
+</body>
+</html>

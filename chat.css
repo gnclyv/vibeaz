@@ -1,125 +1,110 @@
-:root {
-    --vibe-gradient: linear-gradient(135deg, #ff0080 0%, #7928ca 100%);
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --border-glass: rgba(255, 255, 255, 0.1);
+/* 1. ÜMUMİ AYARLAR - ZOOM QARŞISINI ALMAQ ÜÇÜN */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-body {
-    background: radial-gradient(circle at top right, #1a1a2e, #000);
-    color: #fff;
-    height: 100vh;
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0b0b0e; /* Tək rəng, dərin tünd ton */
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden; /* Ekranın oynamaması üçün */
+}
+
+#app-chat {
     display: flex;
     flex-direction: column;
+    height: 100vh;
 }
 
-/* 1. Header: Apple stilində Glassmorphism */
+/* 2. HEADER - ŞƏKİLDƏKİ KİMİ */
 .chat-header {
-    padding: 15px 20px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-glass);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid #1f1f23;
+    padding: 10px 15px;
     display: flex;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    z-index: 10;
 }
 
-.chat-header img {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px; /* Kvadratik-dairəvi (Squircle) */
-    border: 2px solid #7928ca;
-    padding: 2px;
-}
-
-.target-info { margin-left: 15px; flex: 1; }
-.target-info h4 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
-.target-info span { font-size: 11px; opacity: 0.7; display: flex; align-items: center; }
-.target-info span::before { content: ''; width: 8px; height: 8px; background: #1ed760; border-radius: 50%; margin-right: 5px; box-shadow: 0 0 10px #1ed760; }
-
-/* 2. Mesaj Balonları: İşıqlı və Müasir */
+/* 3. MESAJ SAHƏSİ - YAPİŞMAMASI ÜÇÜN */
 #messages-display {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 20px 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    background: transparent;
+    gap: 12px; /* Mesajların bir-birinə yapışmaması üçün mütləqdir */
 }
 
+/* MESAJ BALONLARI */
 .msg {
     max-width: 80%;
-    padding: 14px 18px;
-    font-size: 14.5px;
+    padding: 12px 16px;
+    font-size: 15px;
+    line-height: 1.4;
     position: relative;
-    transition: all 0.3s ease;
-    animation: fadeIn 0.4s ease forwards;
+    word-wrap: break-word;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
+/* Sənin mesajların (Sağ) */
 .sent {
     align-self: flex-end;
-    background: var(--vibe-gradient);
-    color: white;
-    border-radius: 22px 22px 4px 22px;
-    box-shadow: 0 8px 20px rgba(121, 40, 202, 0.3);
+    background: linear-gradient(135deg, #ff0080, #7928ca);
+    color: #fff;
+    border-radius: 20px 20px 4px 20px; /* Modern dairəvi künclər */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
+/* Gələn mesajlar (Sol) */
 .received {
     align-self: flex-start;
-    background: var(--glass-bg);
-    backdrop-filter: blur(5px);
-    border: 1px solid var(--border-glass);
+    background: #1f1f23;
     color: #efefef;
-    border-radius: 22px 22px 22px 4px;
+    border-radius: 20px 20px 20px 4px;
 }
 
-/* 3. Giriş Sahəsi: "Floating" (Üzən) İnput */
+/* 4. INPUT SAHƏSİ - STABİL QALMASI ÜÇÜN */
 .chat-input-area {
-    padding: 20px;
-    background: transparent;
+    padding: 10px 15px 30px 15px; /* iPhone home bar üçün boşluq */
+    background: #0b0b0e;
 }
 
 #chat-form {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border-glass);
-    backdrop-filter: blur(15px);
+    background: #1f1f23;
     border-radius: 25px;
     display: flex;
-    padding: 6px 6px 6px 18px;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    padding: 5px 5px 5px 15px;
+    border: 1px solid #2d2d33;
 }
 
+/* Zoom problemini həll edən əsas hissə: font-size 16px olmalıdır */
 #msg-input {
     flex: 1;
     background: transparent;
     border: none;
     color: white;
-    font-size: 15px;
-    outline: none;
+    font-size: 16px; /* iPhone-da zoom etməməsi üçün minimum 16px olmalıdır */
     padding: 10px 0;
+    outline: none;
 }
 
 .send-btn {
-    width: 42px;
-    height: 42px;
-    background: var(--vibe-gradient);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ff0080, #7928ca);
     border: none;
-    border-radius: 20px;
+    border-radius: 50%;
     color: white;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    margin-left: 10px;
     cursor: pointer;
-    transition: 0.3s;
-    box-shadow: 0 4px 15px rgba(255, 0, 128, 0.4);
 }
-
-.send-btn:hover { transform: scale(1.05); filter: brightness(1.1); }

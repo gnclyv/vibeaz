@@ -19,26 +19,26 @@ const db = getFirestore(app);
 const messaging = getMessaging(app); // Messaging-i başlat
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- 0. PUSH BİLDİRİŞ SİSTEMİ (YENİ) ---
 async function setupPushNotifications(user) {
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            // VAPID KEY: Firebase Console -> Cloud Messaging-dən almalısan
             const token = await getToken(messaging, { 
                 vapidKey: 'BErWSc6Tr3YhkpIjersOOPPZuthPFnJZgeNOHVY2xiD05T3aMDUTUGhWsG4FOz87cWq5F6OghIPzE1EVoPJPONc' 
             });
             
             if (token) {
-                // Tokeni istifadəçinin bazadakı profilinə yazırıq
+                // Tokeni istifadəçinin sənədinə yazırıq ki, başqaları ona bildiriş göndərə bilsin
                 await updateDoc(doc(db, "users", user.uid), {
                     fcmToken: token
                 });
+                console.log("Bildiriş ünvanı yadda saxlanıldı.");
             }
         }
     } catch (error) {
-        console.error("Bildiriş quraşdırma xətası:", error);
+        console.error("Xəta:", error);
     }
+}
 }
 
 // Sayt açıq olanda gələn mesajları tutmaq üçün
@@ -317,4 +317,5 @@ onAuthStateChanged(auth, async (user) => {
 if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+
 

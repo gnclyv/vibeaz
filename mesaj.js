@@ -38,7 +38,16 @@ function loadActiveUsers(myUid) {
         });
     });
 }
-
+// Aktiv istifadəçiləri yaradan hissə
+const userHtml = `
+    <div class="active-u" onclick="openChat('${user.uid}')">
+        <div style="position: relative;">
+            <img src="${user.photoURL || 'default-avatar.png'}" alt="">
+            ${user.status === 'online' ? '<span class="status-dot online"></span>' : ''}
+        </div>
+        <span>${user.displayName}</span>
+    </div>
+`;
 // 2. AŞAĞI: Yazışma Keçmişi (Söhbət Siyahısı)
 function loadChatHistory(myUid) {
     const chatContainer = document.getElementById('chat-list-container'); // HTML ilə eyni ID

@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+// PUSH BİLDİRİŞ ÜÇÜN IMPORTLAR
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -14,7 +16,36 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const messaging = getMessaging(app); // Messaging-i başlat
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
+
+// --- 0. PUSH BİLDİRİŞ SİSTEMİ (YENİ) ---
+async function setupPushNotifications(user) {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            // VAPID KEY: Firebase Console -> Cloud Messaging-dən almalısan
+            const token = await getToken(messaging, { 
+                vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' 
+            });
+            
+            if (token) {
+                // Tokeni istifadəçinin bazadakı profilinə yazırıq
+                await updateDoc(doc(db, "users", user.uid), {
+                    fcmToken: token
+                });
+            }
+        }
+    } catch (error) {
+        console.error("Bildiriş quraşdırma xətası:", error);
+    }
+}
+
+// Sayt açıq olanda gələn mesajları tutmaq üçün
+onMessage(messaging, (payload) => {
+    console.log('Mesaj gəldi: ', payload);
+    // Buraya kiçik bir pop-up bildiriş əlavə edə bilərsən
+});
 
 const storyInput = document.getElementById('storyInput');
 const addStoryBtn = document.getElementById('add-story-btn');
@@ -93,7 +124,6 @@ function loadDirectUsers() {
                 const userCard = document.createElement('div');
                 userCard.className = 'user-card';
                 const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=0095f6&color=fff`;
-                // Bu hissəni profilə (up.html) yönləndirmə üçün düzəltdim
                 userCard.innerHTML = `<a href="up.html?uid=${userData.uid}"><img src="${userImg}"><span>${userData.displayName || "İstifadəçi"} ${blueTick}</span></a>`;
                 usersListContainer.appendChild(userCard);
             }
@@ -125,8 +155,6 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
     const author = data.userName || "İstifadəçi";
     const blueTick = isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 13px; margin-left: 4px;"></i>' : '';
     const commentsHTML = (data.comments || []).map(c => `<div class="modern-comment"><span class="comment-user">${c.user}</span><span class="comment-text">${c.text}</span></div>`).join('');
-    
-    // BURADA YENİ PROFIL LINKINI ƏLAVƏ ETDİM
     const profileLink = `up.html?uid=${data.userId}`;
 
     return `
@@ -194,6 +222,7 @@ window.sendNotification = async (targetUserId, typeMessage) => {
             timestamp: serverTimestamp(),
             read: false
         });
+        // QEYD: Buradan sonra Firebase Cloud Functions işə düşməli və Push göndərməlidir.
     } catch (e) { console.error(e); }
 };
 
@@ -276,6 +305,7 @@ async function uploadPost() {
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         await registerUserInFirestore(user); 
+        setupPushNotifications(user); // Giriş edəndə bildirişləri aktivləşdir
         loadPosts();
         listenToStories();
         loadDirectUsers();

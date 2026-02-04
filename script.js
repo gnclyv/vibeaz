@@ -66,7 +66,7 @@ function listenToStories() {
     });
 }
 
-// --- 2. DM ÜÇÜN İSTİFADƏÇİ SİSTEMİ ---
+// --- 2. İSTİFADƏÇİ QEYDİYYATI ---
 async function registerUserInFirestore(user) {
     if (!user) return;
     const userRef = doc(db, "users", user.uid);
@@ -91,7 +91,6 @@ function loadDirectUsers() {
             const userData = doc.data();
             if (userData.uid !== auth.currentUser?.uid) {
                 const blueTick = userData.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 10px; margin-left: 3px;"></i>' : '';
-                
                 const userCard = document.createElement('div');
                 userCard.className = 'user-card';
                 const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=0095f6&color=fff`;
@@ -131,11 +130,11 @@ async function loadPosts() {
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
 
-    onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
+    onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), async (snap) => {
         list.innerHTML = '';
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
         
-        snap.forEach(async (d) => {
+        for (const d of snap.docs) {
             const data = d.data();
             const id = d.id;
             const isLiked = likedPosts.includes(id);
@@ -145,7 +144,7 @@ async function loadPosts() {
             const isVerified = authorDoc.exists() ? authorDoc.data().isVerified : false;
 
             list.innerHTML += renderPostHTML(id, data, isLiked, isFollowing, isVerified);
-        });
+        }
     });
 }
 
@@ -164,7 +163,7 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
     const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
 
     return `
-        <div class="post-card">
+        <div class="post-card" id="post-${id}">
             <div class="post-header">
                 <div class="nav-avatar-wrapper"><img src="${avatarImg}" class="nav-profile-img"></div>
                 <div class="post-header-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
@@ -174,10 +173,14 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
                     <button class="${btnClass}" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">${btnText}</button>
                 </div>
             </div>
-            <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')"><img src="${data.url}" loading="lazy"></div>
+            <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}', event)">
+                <img src="${data.url}" loading="lazy">
+            </div>
             <div class="post-actions">
-                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}"></i>
-                <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()"></i>
+                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
+                   onclick="handleLike('${id}', '${data.userId}', event)" 
+                   style="color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer;"></i>
+                <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()" style="cursor:pointer;"></i>
             </div>
             <div class="post-info-section">
                 <div class="likes-count" onclick="showLikes('${id}')" style="cursor:pointer; font-weight:600; margin-bottom:5px;">
@@ -195,35 +198,63 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
         </div>`;
 }
 
-// --- 4. GLOBAL EVENTLƏR ---
-window.handleFollow = async (targetUserId) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || currentUser.uid === targetUserId) return;
-    await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
-    await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
-    const btns = document.querySelectorAll(`[id="follow-${targetUserId}"]`);
-    btns.forEach(btn => { btn.innerText = "İzlənilir"; btn.classList.add('following'); });
-    await sendNotification(targetUserId, "sizi izləməyə başladı.");
-};
+// --- 4. GLOBAL EVENTLƏR (Yenilənməyə qarşı optimallaşdırılmış) ---
+window.handleLike = async (id, postOwnerId, event) => {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
 
-window.handleLike = async (id, postOwnerId) => {
     const user = auth.currentUser;
     if (!user) return;
+
     let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
     if (liked.includes(id)) return;
 
+    // --- OPTIMISTIC UI: Dərhal rəngi və rəqəmi dəyişirik ---
+    const postCard = document.getElementById(`post-${id}`);
+    if (postCard) {
+        const heartIcon = postCard.querySelector('.fa-heart');
+        const countDiv = postCard.querySelector('.likes-count');
+        
+        if (heartIcon) {
+            heartIcon.classList.replace('fa-regular', 'fa-solid');
+            heartIcon.style.color = '#ff3040';
+        }
+        if (countDiv) {
+            let currentLikes = parseInt(countDiv.innerText) || 0;
+            countDiv.innerText = `${currentLikes + 1} bəyənmə`;
+        }
+    }
+
     try {
-        await updateDoc(doc(db, "posts", id), { 
-            likes: increment(1),
-            likedBy: arrayUnion(user.uid) // Bəyənənlər siyahısına əlavə edir
-        });
         liked.push(id);
         localStorage.setItem('vibeLikes', JSON.stringify(liked));
+
+        await updateDoc(doc(db, "posts", id), { 
+            likes: increment(1),
+            likedBy: arrayUnion(user.uid)
+        });
+
         await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+    } catch (e) { console.error("Like Error:", e); }
+};
+
+window.handleFollow = async (targetUserId) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid === targetUserId) return;
+    try {
+        await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
+        await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
+        const btns = document.querySelectorAll(`[id="follow-${targetUserId}"]`);
+        btns.forEach(btn => { 
+            btn.innerText = "İzlənilir"; 
+            btn.classList.add('following'); 
+        });
+        await sendNotification(targetUserId, "sizi izləməyə başladı.");
     } catch (e) { console.error(e); }
 };
 
-// Bəyənənlər siyahısını göstərən funksiyalar
 window.showLikes = async (postId) => {
     const modal = document.getElementById('like-modal');
     const content = document.getElementById('like-list-content');
@@ -298,7 +329,7 @@ async function uploadPost() {
                     userPhoto: user.photoURL || "",
                     userId: user.uid,
                     likes: 0,
-                    likedBy: [], // İlkin olaraq boş massiv
+                    likedBy: [],
                     comments: [],
                     timestamp: serverTimestamp()
                 });

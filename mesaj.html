@@ -3,46 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mesajlar - VibeAz</title>
-    <link rel="stylesheet" href="style.css?v=108">
+    <title>Mesajlar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .messaging-container { display: flex; flex-direction: column; height: 100vh; background: #000; }
-        
-        /* Aktivlər Barı */
-        .active-now-container { padding: 15px 10px; border-bottom: 1px solid #262626; overflow-x: auto; scrollbar-width: none; }
-        .active-now-container::-webkit-scrollbar { display: none; }
-        .active-users-scroll { display: flex; gap: 15px; }
+        :root { --border: #262626; --bg: #000; }
+        body { background: var(--bg); color: #fff; margin: 0; font-family: -apple-system, sans-serif; }
 
-        .active-user-card { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 65px; cursor: pointer; }
-        .active-user-card img { width: 58px; height: 58px; border-radius: 50%; border: 2px solid #262626; object-fit: cover; }
-        .online-indicator { position: absolute; bottom: 18px; right: 6px; width: 14px; height: 14px; background: #1ed760; border: 3px solid #000; border-radius: 50%; }
-        .active-user-card span { font-size: 11px; color: #8e8e8e; margin-top: 6px; text-align: center; }
+        /* Header */
+        .header { padding: 15px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+        .header a { color: #fff; text-decoration: none; margin-right: 20px; font-size: 20px; }
 
-        /* Çat siyahısı */
-        .chats-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .chat-item { display: flex; align-items: center; padding: 12px; border-radius: 8px; text-decoration: none; color: white; margin-bottom: 5px; }
+        /* Yuxarı: Aktiv Avatarlar */
+        .active-bar {
+            display: flex; gap: 15px; padding: 15px;
+            overflow-x: auto; border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+        }
+        .active-bar::-webkit-scrollbar { display: none; }
+        .active-u { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 65px; cursor: pointer; }
+        .active-u img { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #262626; object-fit: cover; }
+        .dot { position: absolute; bottom: 18px; right: 8px; width: 12px; height: 12px; background: #1ed760; border: 2px solid #000; border-radius: 50%; }
+        .active-u span { font-size: 11px; color: #8e8e8e; margin-top: 5px; }
+
+        /* Aşağı: Söhbət Siyahısı */
+        .chat-list { padding: 5px 0; }
+        .chat-item {
+            display: flex; align-items: center; padding: 12px 15px;
+            text-decoration: none; color: #fff;
+        }
         .chat-item:active { background: #121212; }
-        .chat-avatar { width: 52px; height: 52px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
+        .chat-img { width: 52px; height: 52px; border-radius: 50%; margin-right: 15px; }
         .chat-info h4 { margin: 0; font-size: 15px; font-weight: 500; }
         .chat-info p { margin: 4px 0 0; font-size: 13px; color: #8e8e8e; }
     </style>
 </head>
 <body>
-    <div class="messaging-container">
-        <header class="app-header" style="justify-content: flex-start; padding: 0 15px; border-bottom: 1px solid #262626;">
-            <a href="index.html" style="color: white; font-size: 20px; margin-right: 20px;"><i class="fa-solid fa-arrow-left"></i></a>
-            <h3 style="font-size: 18px;">Mesajlar</h3>
-        </header>
+    <header class="header">
+        <a href="index.html"><i class="fa-solid fa-arrow-left"></i></a>
+        <h3 style="margin:0; font-size:18px;">Mesajlar</h3>
+    </header>
 
-        <div class="active-now-container">
-            <div id="active-users-list" class="active-users-scroll">
-                </div>
-        </div>
+    <div class="active-bar" id="active-users-list"></div>
 
-        <div class="chats-list" id="chats-list-container">
-            </div>
-    </div>
-    <script type="module" src="mesaj.js?v=108"></script>
+    <div class="chat-list" id="chat-list-container"></div>
+
+    <script type="module" src="mesaj.js"></script>
 </body>
 </html>

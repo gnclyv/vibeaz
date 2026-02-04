@@ -1,41 +1,31 @@
-<!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeAZ | Chat</title>
-    <link rel="stylesheet" href="mesaj.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <div class="app-container">
-        <header class="chat-header">
-            <a href="index.html" class="back-btn"><i class="fa-solid fa-chevron-left"></i></a>
-            <div class="user-info">
-                <div class="avatar-status">
-                    <img src="https://ui-avatars.com/api/?name=Global+Chat&background=0095f6&color=fff" alt="Avatar">
-                    <span class="online-dot"></span>
-                </div>
-                <div>
-                    <h3>VibeAZ Community</h3>
-                    <span>Online</span>
-                </div>
+<div class="chat-app">
+    <header class="chat-header">
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+        <div class="chat-user-profile">
+            <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" alt="Group">
+            <div class="chat-user-details">
+                <h3>VibeAz Community</h3>
+                <span>Aktualdır</span>
             </div>
-            <i class="fa-solid fa-circle-info info-btn"></i>
-        </header>
+        </div>
+        <div class="header-icons">
+            <i class="fa-solid fa-phone"></i>
+            <i class="fa-solid fa-video"></i>
+        </div>
+    </header>
 
-        <main id="chat-messages" class="message-area">
-            </main>
+    <main id="chat-messages" class="chat-body">
+        </main>
 
-        <footer class="chat-footer">
-            <div class="input-wrapper">
-                <button class="action-btn"><i class="fa-regular fa-face-smile"></i></button>
-                <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." autocomplete="off">
-                <button class="action-btn"><i class="fa-solid fa-paperclip"></i></button>
-                <button id="send-btn" class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+    <footer class="chat-footer">
+        <div class="input-area">
+            <i class="fa-solid fa-camera camera-icon"></i>
+            <input type="text" id="chat-input" placeholder="Mesaj yazın..." autocomplete="off">
+            <div class="input-actions">
+                <i class="fa-solid fa-microphone"></i>
+                <i class="fa-regular fa-image"></i>
+                <button id="send-btn">Göndər</button>
             </div>
-        </footer>
-    </div>
-    <script type="module" src="mesaj.js"></script>
-</body>
-</html>
+        </div>
+    </footer>
+</div>

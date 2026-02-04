@@ -22,17 +22,37 @@ const msgDisplay = document.getElementById('messages-display');
 const chatForm = document.getElementById('chat-form');
 const msgInput = document.getElementById('msg-input');
 
+// Qarşı tərəfin məlumatlarını və profil şəklini yükləyən funksiya
 async function loadTargetUserInfo() {
+    if (!targetUid) return;
+    
     const userRef = doc(db, "users", targetUid);
     const userSnap = await getDoc(userRef);
+    
     if (userSnap.exists()) {
         const data = userSnap.data();
-        document.getElementById('target-user-name').innerText = data.displayName || "İstifadəçi";
-        document.getElementById('target-user-img').src = data.photoURL || "https://ui-avatars.com/api/?name=U";
+        
+        // Elementləri tapırıq
+        const nameEl = document.getElementById('target-user-name');
+        const imgEl = document.getElementById('target-user-img');
+        const statusEl = document.getElementById('target-status');
+
+        // Ad və Şəkil
+        if (nameEl) nameEl.innerText = data.displayName || "İstifadəçi";
+        if (imgEl) imgEl.src = data.photoURL || `https://ui-avatars.com/api/?name=${data.displayName || 'U'}&background=333&color=fff`;
+        
+        // Online/Offline statusu
+        if (statusEl) {
+            statusEl.innerText = data.status === 'online' ? 'aktiv' : 'oflayn';
+            statusEl.style.color = data.status === 'online' ? '#1ed760' : '#8e8e8e';
+        }
     }
 }
 
+// Mesajları real-vaxt rejimində dinləyən funksiya
 function listenMessages(currentUid) {
+    if (!targetUid) return;
+
     const chatId = [currentUid, targetUid].sort().join('_');
     const q = query(
         collection(db, "direct_messages"),
@@ -41,26 +61,35 @@ function listenMessages(currentUid) {
     );
 
     onSnapshot(q, (snapshot) => {
-        msgDisplay.innerHTML = '';
+        msgDisplay.innerHTML = ''; // Köhnə mesajları təmizlə
         snapshot.forEach((doc) => {
             const msgData = doc.data();
             const msgDiv = document.createElement('div');
+            
+            // Premium CSS klasslarını tətbiq edirik
             msgDiv.className = `msg ${msgData.senderId === currentUid ? 'sent' : 'received'}`;
             msgDiv.innerText = msgData.text;
+            
             msgDisplay.appendChild(msgDiv);
         });
-        msgDisplay.scrollTop = msgDisplay.scrollHeight;
+        
+        // Mesaj gələndə avtomatik aşağı düş (smooth scroll)
+        msgDisplay.scrollTo({
+            top: msgDisplay.scrollHeight,
+            behavior: 'smooth'
+        });
     });
 }
 
+// Mesaj göndərmə hadisəsi
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = msgInput.value.trim();
-    if (!text || !auth.currentUser) return;
+    if (!text || !auth.currentUser || !targetUid) return;
 
     const currentUid = auth.currentUser.uid;
     const chatId = [currentUid, targetUid].sort().join('_');
-    msgInput.value = ''; 
+    msgInput.value = ''; // Inputu dərhal təmizləyirik
 
     try {
         await addDoc(collection(db, "direct_messages"), {
@@ -69,13 +98,14 @@ chatForm.addEventListener('submit', async (e) => {
             receiverId: targetUid,
             text: text,
             createdAt: serverTimestamp(),
-            participants: [currentUid, targetUid] // Inbox siyahısı üçün mütləqdir
+            participants: [currentUid, targetUid] 
         });
     } catch (error) {
-        console.error("Xəta:", error);
+        console.error("Mesaj göndərilərkən xəta:", error);
     }
 });
 
+// Giriş statusunu yoxla və çat-ı başlat
 onAuthStateChanged(auth, (user) => {
     if (user) {
         loadTargetUserInfo();

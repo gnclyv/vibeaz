@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+// Firebase Konfiqurasiyası (Sənin məlumatların)
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
     authDomain: "vibeaz-1e98a.firebaseapp.com",
@@ -15,7 +16,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 1. YUXARI: Bütün istifadəçilər (Aktiv Bar)
+// 1. YUXARI BÖLMƏ: Aktiv Dostlar Siyahısı (Yaşıl nöqtə ilə)
 function loadActiveUsers(myUid) {
     const activeList = document.getElementById('active-users-list');
     if (!activeList) return;
@@ -24,36 +25,33 @@ function loadActiveUsers(myUid) {
         activeList.innerHTML = '';
         snap.forEach(userDoc => {
             const user = userDoc.data();
-            if (user.uid === myUid) return;
+            if (user.uid === myUid) return; // Özümüzü siyahıda göstərmirik
             
             const userImg = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'U'}&background=333&color=fff`;
             
-            // Sənin HTML stilinə uyğun struktur
-            activeList.innerHTML += `
-                <div class="active-u" onclick="window.location.href='chat.html?uid=${user.uid}'">
-                    <img src="${userImg}">
-                    ${user.status === 'online' ? '<div class="dot"></div>' : ''}
-                    <span>${user.displayName || 'İstifadəçi'}</span>
-                </div>`;
+            const userDiv = document.createElement('div');
+            userDiv.className = 'active-u';
+            userDiv.onclick = () => window.location.href = `chat.html?uid=${user.uid}`;
+            
+            // Avatar konteyneri və yaşıl status nöqtəsi
+            userDiv.innerHTML = `
+                <div class="avatar-container" style="position: relative; display: inline-block;">
+                    <img src="${userImg}" style="width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid #7928ca; padding: 2px;">
+                    ${user.status === 'online' ? '<span class="status-dot" style="position: absolute; bottom: 5px; right: 5px; width: 14px; height: 14px; background-color: #1ed760; border: 3px solid #0b0b0e; border-radius: 50%; box-shadow: 0 0 5px #1ed760;"></span>' : ''}
+                </div>
+                <span style="display: block; font-size: 11px; margin-top: 5px; color: #888;">${user.displayName || 'İstifadəçi'}</span>
+            `;
+            activeList.appendChild(userDiv);
         });
     });
 }
-// Aktiv istifadəçiləri yaradan hissə
-const userHtml = `
-    <div class="active-u" onclick="openChat('${user.uid}')">
-        <div style="position: relative;">
-            <img src="${user.photoURL || 'default-avatar.png'}" alt="">
-            ${user.status === 'online' ? '<span class="status-dot online"></span>' : ''}
-        </div>
-        <span>${user.displayName}</span>
-    </div>
-`;
-// 2. AŞAĞI: Yazışma Keçmişi (Söhbət Siyahısı)
+
+// 2. AŞAĞI BÖLMƏ: Yazışma Keçmişi (Inbox)
 function loadChatHistory(myUid) {
-    const chatContainer = document.getElementById('chat-list-container'); // HTML ilə eyni ID
+    const chatContainer = document.getElementById('chat-list-container');
     if (!chatContainer) return;
 
-    // "participants" filtrini işlədirik (İndeks xətası olmasın deyə orderBy sildik)
+    // "participants" massivində mənim UID olan bütün mesajları çəkirik
     const q = query(
         collection(db, "direct_messages"),
         where("participants", "array-contains", myUid)
@@ -66,7 +64,7 @@ function loadChatHistory(myUid) {
 
         snapshot.forEach(doc => messages.push(doc.data()));
 
-        // JS tərəfində vaxta görə sıralayırıq (İndeks tələb olunmur)
+        // Mesajları vaxta görə sıralayırıq (İndeks xətası olmasın deyə kod daxilində)
         messages.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
         if (messages.length === 0) {
@@ -75,8 +73,10 @@ function loadChatHistory(myUid) {
         }
 
         messages.forEach((msgData) => {
+            // Qarşı tərəfin UID-sini tapırıq
             const otherUid = msgData.senderId === myUid ? msgData.receiverId : msgData.senderId;
 
+            // Hər istifadəçi siyahıda yalnız bir dəfə (ən son mesajı ilə) görünsün
             if (!chatteredUsers.has(otherUid)) {
                 chatteredUsers.add(otherUid);
                 renderChatItem(otherUid, msgData.text, chatContainer);
@@ -85,11 +85,13 @@ function loadChatHistory(myUid) {
     });
 }
 
+// 3. KÖMƏKÇİ FUNKSİYA: Inbox elementlərini render edir
 async function renderChatItem(uid, lastMsg, container) {
     onSnapshot(doc(db, "users", uid), (userDoc) => {
         const userData = userDoc.data();
         if (!userData) return;
 
+        // Əgər element artıq varsa, köhnəsini silirik (məlumat yenilənəndə təkrar olmasın)
         let existingItem = document.getElementById(`chat-item-${uid}`);
         if (existingItem) existingItem.remove();
 
@@ -99,23 +101,34 @@ async function renderChatItem(uid, lastMsg, container) {
         chatItem.id = `chat-item-${uid}`;
         chatItem.className = 'chat-item';
         chatItem.href = `chat.html?uid=${uid}`;
+        chatItem.style.display = 'flex';
+        chatItem.style.alignItems = 'center';
+        chatItem.style.gap = '15px';
+        chatItem.style.textDecoration = 'none';
+        chatItem.style.marginBottom = '20px';
+
         chatItem.innerHTML = `
-            <img src="${userImg}" class="chat-img">
+            <img src="${userImg}" class="chat-img" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover;">
             <div class="chat-info">
-                <h4>${userData.displayName || 'İstifadəçi'}</h4>
-                <p>${lastMsg.substring(0, 35)}${lastMsg.length > 35 ? '...' : ''}</p>
+                <h4 style="margin: 0; font-size: 15px; color: white;">${userData.displayName || 'İstifadəçi'}</h4>
+                <p style="margin: 5px 0 0; font-size: 13px; color: #666;">${lastMsg.substring(0, 35)}${lastMsg.length > 35 ? '...' : ''}</p>
             </div>
         `;
         container.appendChild(chatItem);
     });
 }
 
+// 4. AUTH MÜŞAHİDƏÇİSİ: Giriş edən kimi hər şeyi başladır
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        // İstifadəçini onlayn statusuna gətiririk
         updateDoc(doc(db, "users", user.uid), { status: "online" });
+        
+        // Funksiyaları çağırırıq
         loadActiveUsers(user.uid);
         loadChatHistory(user.uid);
     } else {
-        window.location.href = "login.html";
+        // Giriş edilməyibsə login səhifəsinə göndər
+        window.location.href = 'login.html';
     }
 });

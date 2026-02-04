@@ -3,51 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mesajlar</title>
-        <link rel="stylesheet" href="mesaj.css">
-
+    <title>Mesajlar - VibeAz</title>
+    <link rel="stylesheet" href="mesaj.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --border: #262626; --bg: #000; }
-        body { background: var(--bg); color: #fff; margin: 0; font-family: -apple-system, sans-serif; }
-
-        /* Header */
-        .header { padding: 15px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
-        .header a { color: #fff; text-decoration: none; margin-right: 20px; font-size: 20px; }
-
-        /* Yuxarı: Aktiv Avatarlar */
-        .active-bar {
-            display: flex; gap: 15px; padding: 15px;
-            overflow-x: auto; border-bottom: 1px solid var(--border);
-            scrollbar-width: none;
-        }
-        .active-bar::-webkit-scrollbar { display: none; }
-        .active-u { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 65px; cursor: pointer; }
-        .active-u img { width: 56px; height: 56px; border-radius: 50%; border: 2px solid #262626; object-fit: cover; }
-        .dot { position: absolute; bottom: 18px; right: 8px; width: 12px; height: 12px; background: #1ed760; border: 2px solid #000; border-radius: 50%; }
-        .active-u span { font-size: 11px; color: #8e8e8e; margin-top: 5px; }
-
-        /* Aşağı: Söhbət Siyahısı */
-        .chat-list { padding: 5px 0; }
-        .chat-item {
-            display: flex; align-items: center; padding: 12px 15px;
-            text-decoration: none; color: #fff;
-        }
-        .chat-item:active { background: #121212; }
-        .chat-img { width: 52px; height: 52px; border-radius: 50%; margin-right: 15px; }
-        .chat-info h4 { margin: 0; font-size: 15px; font-weight: 500; }
-        .chat-info p { margin: 4px 0 0; font-size: 13px; color: #8e8e8e; }
-    </style>
 </head>
 <body>
-    <header class="header">
-        <a href="index.html"><i class="fa-solid fa-arrow-left"></i></a>
-        <h3 style="margin:0; font-size:18px;">Mesajlar</h3>
-    </header>
 
-    <div class="active-bar" id="active-users-list"></div>
+    <div class="inbox-container">
+        <header class="main-header">
+            <a href="index.html" class="back-link"><i class="fa-solid fa-chevron-left"></i></a>
+            <h2>Mesajlar</h2>
+            <div class="header-opts"><i class="fa-solid fa-pen-to-square"></i></div>
+        </header>
 
-    <div class="chat-list" id="chat-list-container"></div>
+        <div class="active-users-section">
+            <div class="section-title">Aktiv dostlar</div>
+            <div class="active-scroll-wrapper" id="active-users-list">
+                </div>
+        </div>
+
+        <div class="chats-section">
+            <div class="section-title">Söhbətlər</div>
+            <div class="chats-list" id="chat-list-container">
+                </div>
+        </div>
+    </div>
 
     <script type="module" src="mesaj.js"></script>
 </body>

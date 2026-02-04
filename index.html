@@ -24,7 +24,8 @@
                 </div>
                 <span class="story-username">Sənin storyn</span>
             </div>
-            <div id="stories-list" class="stories-list-inner"></div>
+            <div id="stories-list" class="stories-list-inner">
+                </div>
         </div>
 
         <main id="post-list" class="post-feed"></main>
@@ -32,12 +33,15 @@
         <nav class="bottom-nav">
             <i class="fa-solid fa-house active"></i>
             <i class="fa-solid fa-magnifying-glass"></i>
+            
             <div class="add-post-btn" id="mainAddBtn">
                 <i class="fa-regular fa-square-plus"></i>
             </div>
+
             <a href="mesaj.html" class="nav-link">
-    <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
-</a>
+                <i class="fa-regular fa-paper-plane" id="chat-nav-btn"></i>
+            </a>
+
             <a href="profile.html" class="nav-profile-link">
                 <div id="nav-user-avatar" class="nav-avatar-wrapper">
                     <i class="fa-solid fa-user"></i>
@@ -54,31 +58,32 @@
                 <span class="close-story" onclick="closeStory()">&times;</span>
             </div>
             <img id="story-full-img" src="" alt="">
-            <div class="story-progress-bar"><div id="progress-fill"></div></div>
+            <div class="story-progress-bar">
+                <div id="progress-fill"></div>
+            </div>
         </div>
 
         <input type="file" id="fileInput" hidden accept="image/*">
         <input type="file" id="storyInput" hidden accept="image/*">
     </div>
-<div id="news-modal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>VibeAz Yenilikləri! 🚀</h3>
+
+    <div id="news-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>VibeAz Yenilikləri! 🚀</h3>
+            </div>
+            <div class="modal-body">
+                <p>Yeni versiyada nələr var?</p>
+                <ul>
+                    <li>✨ Story sistemi təkmilləşdirildi.</li>
+                    <li>🛡️ Məzahir və Nihat tərəfindən logo dizayn edildi.</li>
+                    <li>💬 Real zamanlı chat sistemi əlavə edildi!</li>
+                </ul>
+            </div>
+            <button class="modal-close-btn" onclick="closeNewsModal()">Anladım</button>
         </div>
-        <div class="modal-body">
-            <p>Yeni versiyada nələr var?</p>
-            <ul>
-                <li>✨ Story sistemi təkmilləşdirildi.</li>
-                <li>🛡️ Məzahir və Nihat tərəfindən logo dizayn edildi. </li>
-            </ul>
-        </div>
-        <button class="modal-close-btn" onclick="closeNewsModal()">Anladım</button>
     </div>
-</div>
+
     <script type="module" src="script.js?v=105"></script>
 </body>
 </html>
-
-
-
-

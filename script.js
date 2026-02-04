@@ -84,7 +84,6 @@ async function registerUserInFirestore(user) {
 function loadDirectUsers() {
     const usersListContainer = document.getElementById('users-list');
     if (!usersListContainer) return;
-
     onSnapshot(collection(db, "users"), (snapshot) => {
         usersListContainer.innerHTML = '';
         snapshot.forEach((doc) => {
@@ -94,20 +93,14 @@ function loadDirectUsers() {
                 const userCard = document.createElement('div');
                 userCard.className = 'user-card';
                 const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=0095f6&color=fff`;
-                const userName = userData.displayName || "İstifadəçi";
-                userCard.innerHTML = `
-                    <a href="mesaj.html?uid=${userData.uid}">
-                        <img src="${userImg}" alt="${userName}">
-                        <span>${userName} ${blueTick}</span>
-                    </a>
-                `;
+                userCard.innerHTML = `<a href="mesaj.html?uid=${userData.uid}"><img src="${userImg}"><span>${userData.displayName || "İstifadəçi"} ${blueTick}</span></a>`;
                 usersListContainer.appendChild(userCard);
             }
         });
     });
 }
 
-// --- 3. POST SİSTEMİ (Yenilənməyən Versiya) ---
+// --- 3. POST SİSTEMİ ---
 async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
@@ -116,25 +109,28 @@ async function loadPosts() {
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
 
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
-        const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-        
-        // Əgər list boşdursa, ilk dəfə hamısını yüklə
         if (list.children.length === 0) {
             snap.forEach(async (d) => {
                 const data = d.data();
                 const authorDoc = await getDoc(doc(db, "users", data.userId));
                 const isVerified = authorDoc.exists() ? authorDoc.data().isVerified : false;
-                list.innerHTML += renderPostHTML(d.id, data, likedPosts.includes(d.id), following.includes(data.userId), isVerified);
+                const isLiked = (data.likedBy || []).includes(auth.currentUser.uid);
+                list.innerHTML += renderPostHTML(d.id, data, isLiked, following.includes(data.userId), isVerified);
             });
         } else {
-            // Əgər list doludursa, yalnız dəyişən datanı (məsələn like sayı) yenilə
             snap.docChanges().forEach(change => {
                 if (change.type === "modified") {
                     const data = change.doc.data();
                     const postEl = document.getElementById(`post-${change.doc.id}`);
                     if (postEl) {
-                        const likeCountEl = postEl.querySelector('.likes-count');
-                        if (likeCountEl) likeCountEl.innerText = `${data.likes || 0} bəyənmə`;
+                        const countEl = postEl.querySelector('.likes-count');
+                        if (countEl) countEl.innerText = `${data.likes || 0} bəyənmə`;
+                        
+                        const heart = postEl.querySelector('.fa-heart');
+                        if ((data.likedBy || []).includes(auth.currentUser.uid)) {
+                            heart.className = 'fa-solid fa-heart';
+                            heart.style.color = '#ff3040';
+                        }
                     }
                 }
             });
@@ -144,45 +140,28 @@ async function loadPosts() {
 
 function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
     const author = data.userName || "İstifadəçi";
-    const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
     const blueTick = isVerified ? '<i class="fa-solid fa-circle-check" style="color: #3897f0; font-size: 13px; margin-left: 4px;"></i>' : '';
-
-    const commentsHTML = (data.comments || []).map(c => `
-        <div class="modern-comment">
-            <span class="comment-user">${c.user}</span>
-            <span class="comment-text">${c.text}</span>
-        </div>`).join('');
+    const commentsHTML = (data.comments || []).map(c => `<div class="modern-comment"><span class="comment-user">${c.user}</span><span class="comment-text">${c.text}</span></div>`).join('');
     
-    const btnText = isFollowing ? "İzlənilir" : "İzlə";
-    const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
-
     return `
         <div class="post-card" id="post-${id}">
             <div class="post-header">
-                <div class="nav-avatar-wrapper"><img src="${avatarImg}" class="nav-profile-img"></div>
+                <div class="nav-avatar-wrapper"><img src="${data.userPhoto || 'https://ui-avatars.com/api/?name='+author}" class="nav-profile-img"></div>
                 <div class="post-header-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <span class="post-username-text" style="font-weight: 600;">
-                        ${author} ${blueTick}
-                    </span>
-                    <button class="${btnClass}" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">${btnText}</button>
+                    <span class="post-username-text" style="font-weight: 600;">${author} ${blueTick}</span>
+                    <button class="${isFollowing ? 'follow-btn following' : 'follow-btn'}" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">${isFollowing ? 'İzlənilir' : 'İzlə'}</button>
                 </div>
             </div>
             <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
                 <img src="${data.url}" loading="lazy">
             </div>
             <div class="post-actions">
-                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" 
-                   onclick="handleLike('${id}', '${data.userId}')" 
-                   style="color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer;"></i>
+                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer;"></i>
                 <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()" style="cursor:pointer;"></i>
             </div>
             <div class="post-info-section">
-                <div class="likes-count" onclick="showLikes('${id}')" style="cursor:pointer; font-weight:600; margin-bottom:5px;">
-                    ${data.likes || 0} bəyənmə
-                </div>
-                <div class="post-description">
-                    <b>${author} ${blueTick}</b> ${data.text || ""}
-                </div>
+                <div class="likes-count" onclick="showLikes('${id}')" style="cursor:pointer; font-weight:600; margin-bottom:5px;">${data.likes || 0} bəyənmə</div>
+                <div class="post-description"><b>${author} ${blueTick}</b> ${data.text || ""}</div>
                 <div class="modern-comments-box">${commentsHTML}</div>
                 <div class="modern-comment-input-area">
                     <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input">
@@ -192,26 +171,33 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
         </div>`;
 }
 
-// --- 4. GLOBAL EVENTLƏR ---
+// --- 4. LIKE VƏ DİGƏR EVENTLƏR ---
 window.handleLike = async (id, postOwnerId) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    let liked = JSON.parse(localStorage.getItem('vibeLikes')) || [];
-    if (liked.includes(id)) return;
+    const postRef = doc(db, "posts", id);
+    const postSnap = await getDoc(postRef);
+    if (!postSnap.exists()) return;
 
-    // UI-ni dərhal yenilə (Səhifə yenilənməsin deyə daxili müdaxilə)
+    const data = postSnap.data();
+    const likedBy = data.likedBy || [];
+
+    // 1 İSTİFADƏÇİ = 1 LİKE YOXLANIŞI
+    if (likedBy.includes(user.uid)) return;
+
+    // OPTIMISTIC UI (Dərhal reaksiya)
     const postEl = document.getElementById(`post-${id}`);
     if (postEl) {
         const heart = postEl.querySelector('.fa-heart');
         heart.className = 'fa-solid fa-heart';
         heart.style.color = '#ff3040';
+        const countEl = postEl.querySelector('.likes-count');
+        if (countEl) countEl.innerText = `${(data.likes || 0) + 1} bəyənmə`;
     }
 
     try {
-        liked.push(id);
-        localStorage.setItem('vibeLikes', JSON.stringify(liked));
-        await updateDoc(doc(db, "posts", id), { 
+        await updateDoc(postRef, { 
             likes: increment(1),
             likedBy: arrayUnion(user.uid) 
         });
@@ -257,9 +243,7 @@ window.showLikes = async (postId) => {
         for (const uid of likedBy) {
             const userSnap = await getDoc(doc(db, "users", uid));
             const uData = userSnap.data();
-            if (uData) {
-                content.innerHTML += `<div style="padding:10px; color:white; border-bottom:1px solid #222;">${uData.displayName}</div>`;
-            }
+            if (uData) content.innerHTML += `<div style="padding:10px; color:white; border-bottom:1px solid #222;">${uData.displayName}</div>`;
         }
     } catch (e) { content.innerHTML = 'Xəta!'; }
 };

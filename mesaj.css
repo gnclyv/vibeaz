@@ -166,3 +166,30 @@
 .chat-item:hover .chat-actions i {
     color: #8e8e8e;
 }
+/* Yuxarıdakı İstifadəçi Barı */
+.active-now-section {
+    padding: 15px 0;
+    background: #000;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.active-user-name {
+    font-size: 11px;
+    font-weight: 400;
+    color: #a8a8a8; /* Adlar daha incə və boz */
+}
+
+/* Aşağıdakı Mesaj Siyahısı Başlığı */
+.chats-title {
+    padding: 15px 20px 5px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Mesaj yazılan şəxslər üçün qabarıq kartlar */
+.chat-item {
+    background: linear-gradient(145deg, #121212, #1a1a1a);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.03);
+}

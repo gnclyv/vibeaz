@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 1. YUXARI: Bütün istifadəçiləri avatarları ilə göstər
+// 1. YUXARI: Bütün istifadəçiləri "Story" stilində göstər
 function loadActiveUsers(myUid) {
     const activeList = document.getElementById('active-users-list');
     if (!activeList) return;
@@ -40,22 +40,21 @@ function loadActiveUsers(myUid) {
     });
 }
 
-// 2. AŞAĞI: Yalnız mesaj yazışması olan otaqları (chats) göstər
+// 2. AŞAĞI: Yalnız mesaj yazışması olan şəxsləri göstər
 function loadChatHistory(myUid) {
     const chatContainer = document.getElementById('chats-list-container');
     if (!chatContainer) return;
 
-    // 'direct_messages' kolleksiyasını dinləyirik ki, kiminlə mesajımız var tapaq
-    // Daha yaxşı performans üçün Firestore-da 'chats' kolleksiyası yaratmağın məsləhətdir
+    // "participants" massivində mənim UID-m olan mesajları tapırıq
     const q = query(
         collection(db, "direct_messages"),
         where("participants", "array-contains", myUid),
         orderBy("createdAt", "desc")
     );
 
-    onSnapshot(q, async (snapshot) => {
+    onSnapshot(q, (snapshot) => {
         chatContainer.innerHTML = '';
-        const chatteredUsers = new Set(); // Eyni adamın adının təkrar çıxmaması üçün
+        const chatteredUsers = new Set(); 
 
         if (snapshot.empty) {
             chatContainer.innerHTML = '<p style="text-align:center; color:#555; margin-top:20px;">Hələ ki, yazışma yoxdur.</p>';
@@ -64,7 +63,6 @@ function loadChatHistory(myUid) {
 
         snapshot.forEach((msgDoc) => {
             const msgData = msgDoc.data();
-            // Mesajdakı digər şəxsin UID-sini tapırıq
             const otherUid = msgData.senderId === myUid ? msgData.receiverId : msgData.senderId;
 
             if (!chatteredUsers.has(otherUid)) {
@@ -75,14 +73,11 @@ function loadChatHistory(myUid) {
     });
 }
 
-// Çat kartını ekrana çıxaran köməkçi funksiya
 async function renderChatItem(uid, lastMsg, container) {
-    // Digər istifadəçinin məlumatlarını gətiririk
     onSnapshot(doc(db, "users", uid), (userDoc) => {
         const userData = userDoc.data();
         if (!userData) return;
 
-        // Əgər bu istifadəçi üçün artıq kart varsa, köhnəsini silirik (yenilənmə üçün)
         const oldItem = document.getElementById(`chat-${uid}`);
         if (oldItem) oldItem.remove();
 
@@ -99,17 +94,16 @@ async function renderChatItem(uid, lastMsg, container) {
                 <p>${lastMsg.substring(0, 30)}${lastMsg.length > 30 ? '...' : ''}</p>
             </div>
             <div class="chat-meta">
-                <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: #333;"></i>
+                ${userData.status === 'online' ? '<span style="color:#1ed760; font-size:10px;">●</span>' : ''}
             </div>
         `;
         container.appendChild(chatItem);
     });
 }
 
-// 3. GİRİŞ YOXLANIŞI
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
     if (user) {
-        await updateDoc(doc(db, "users", user.uid), { status: "online" });
+        updateDoc(doc(db, "users", user.uid), { status: "online" });
         loadActiveUsers(user.uid);
         loadChatHistory(user.uid);
     } else {

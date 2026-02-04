@@ -16,24 +16,30 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- 0. ONESIGNAL BİLDİRİŞ SİSTEMİ (YENİLƏNDİ) ---
+// --- 0. ONESIGNAL BİLDİRİŞ SİSTEMİ (TƏKMİLLƏŞDİRİLDİ) ---
 async function setupOneSignal(user) {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
-        // İstifadəçini OneSignal-a giriş etdiririk (Brauzer bağlı olanda tapmaq üçün)
+        // İstifadəçini OneSignal-a bağlayırıq
         await OneSignal.login(user.uid);
-        console.log("OneSignal: İstifadəçi qoşuldu:", user.uid);
+        
+        // Bildiriş pəncərəsinin çıxması üçün məcburi çağırış
+        if (OneSignal.Notifications.permission !== true) {
+            console.log("OneSignal: İcazə istənilir...");
+            await OneSignal.Notifications.requestPermission();
+        }
+        console.log("OneSignal: Giriş edildi:", user.uid);
     });
 }
 
-// Push Bildiriş Göndərmə Funksiyası (REST API)
+// Push Bildiriş Göndərmə Funksiyası
 window.sendPushNotification = async (targetUserId, message) => {
     try {
         await fetch("https://onesignal.com/api/v1/notifications", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json; charset=utf-8",
-                "Authorization": "Basic os_v2_app_ctprix6rdfhq3bzwrjzfgzealsa4sopdyueukoed22ohg4dmexpeke6brlq7xdleb6yjnqdithh5iwbms3ilybx6z7pe37jvf2wmlka" // <-- BURA REST API KEY-İ YAZ!
+                "Authorization": "Basic os_v2_app_ctprix6rdfhq3bzwrjzfgzealsa4sopdyueukoed22ohg4dmexpeke6brlq7xdleb6yjnqdithh5iwbms3ilybx6z7pe37jvf2wmlka"
             },
             body: JSON.stringify({
                 app_id: "14df145f-d119-4f0d-8736-8a725364805c",
@@ -48,7 +54,7 @@ window.sendPushNotification = async (targetUserId, message) => {
     }
 };
 
-// --- 1. STORY SİSTEMİ (Dəyişmədi) ---
+// --- 1. STORY SİSTEMİ ---
 window.openStoryViewer = function(url, username) {
     const viewer = document.getElementById('story-viewer');
     const fullImg = document.getElementById('story-full-img');
@@ -205,7 +211,6 @@ window.handleLike = async (id, postOwnerId) => {
             likedBy: arrayUnion(user.uid) 
         });
         
-        // Həm Firebase-ə həm OneSignal-a bildiriş göndər
         await sendNotification(postOwnerId, "postunuzu bəyəndi.");
         await sendPushNotification(postOwnerId, `${user.displayName || "Biri"} postunuzu bəyəndi!`);
         
@@ -237,20 +242,6 @@ window.handleFollow = async (targetUserId) => {
     await sendPushNotification(targetUserId, `${currentUser.displayName || "Biri"} sizi izləməyə başladı!`);
 };
 
-// --- 5. AUTH DINLƏYİCİ ---
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        await registerUserInFirestore(user); 
-        setupOneSignal(user); // OneSignal qoşulur
-        loadPosts();
-        listenToStories();
-        loadDirectUsers();
-    } else if (!window.location.pathname.includes("login.html")) {
-        window.location.href = "login.html";
-    }
-});
-
-// Digər funksiyalar (showLikes, addComment, uploadPost və s. eynilə qalsın)
 window.showLikes = async (postId) => {
     const modal = document.getElementById('like-modal');
     const content = document.getElementById('like-list-content');
@@ -319,8 +310,24 @@ async function uploadPost() {
     fileInp.click();
 }
 
+// --- 5. AUTH DINLƏYİCİ ---
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        await registerUserInFirestore(user); 
+        setupOneSignal(user); 
+        loadPosts();
+        listenToStories();
+        loadDirectUsers();
+    } else if (!window.location.pathname.includes("login.html")) {
+        window.location.href = "login.html";
+    }
+});
+
 const mainAddBtn = document.getElementById('mainAddBtn');
 if (mainAddBtn) mainAddBtn.onclick = uploadPost;
+
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) logoutBtn.onclick = () => signOut(auth);
 
 const storyInputBtn = document.getElementById('add-story-btn');
 if (storyInputBtn) storyInputBtn.onclick = () => document.getElementById('storyInput').click();

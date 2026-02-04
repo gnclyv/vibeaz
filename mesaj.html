@@ -2,31 +2,32 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mesajlar - VibeAz</title>
     <link rel="stylesheet" href="mesaj.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="inbox-container">
+    <div id="app-container">
         <header class="main-header">
-            <a href="index.html" class="back-link"><i class="fa-solid fa-chevron-left"></i></a>
-            <h2>Mesajlar</h2>
-            <div class="header-opts"><i class="fa-solid fa-pen-to-square"></i></div>
+            <a href="index.html"><i class="fa-solid fa-chevron-left"></i></a>
+            <h1>Mesajlar</h1>
+            <a href="#"><i class="fa-regular fa-pen-to-square"></i></a>
         </header>
 
-        <div class="active-users-section">
-            <div class="section-title">Aktiv dostlar</div>
-            <div class="active-scroll-wrapper" id="active-users-list">
+        <section class="active-section">
+            <h3>AKTİV DOSTLAR</h3>
+            <div id="active-users-list" class="active-scroll-wrapper">
                 </div>
-        </div>
+        </section>
 
-        <div class="chats-section">
-            <div class="section-title">Söhbətlər</div>
-            <div class="chats-list" id="chat-list-container">
-                </div>
-        </div>
+        <section class="inbox-section">
+            <h3>SÖHBƏTLƏR</h3>
+            <div id="chat-list-container">
+                <p class="loading-text">Yüklənir...</p>
+            </div>
+        </section>
     </div>
 
     <script type="module" src="mesaj.js"></script>

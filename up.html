@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe - Profil</title>
+    <link rel="stylesheet" href="profil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="profile-container">
+        <header class="profile-header">
+            <i class="fa-solid fa-arrow-left" onclick="history.back()"></i>
+            <h2 id="header-username">Profil</h2>
+        </header>
+
+        <div class="profile-info">
+            <img id="profile-pic" src="https://via.placeholder.com/150" alt="Avatar">
+            <div class="stats">
+                <div class="stat-item"><b id="post-count">0</b><span>Post</span></div>
+                <div class="stat-item"><b id="follower-count">0</b><span>İzləyici</span></div>
+                <div class="stat-item"><b id="following-count">0</b><span>İzlənilən</span></div>
+            </div>
+        </div>
+
+        <div class="profile-bio">
+            <h3 id="display-name">Yüklənir...</h3>
+            <p id="user-bio">Vibe istifadəçisi</p>
+            <button id="follow-btn" class="main-follow-btn">İzlə</button>
+        </div>
+
+        <hr>
+
+        <div id="user-posts-grid" class="posts-grid">
+            </div>
+    </div>
+
+    <script type="module" src="profil.js"></script>
+</body>
+</html>

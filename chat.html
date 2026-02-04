@@ -1,34 +1,29 @@
-<!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Söhbət - VibeAz</title>
-    <link rel="stylesheet" href="chat.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div id="app-chat">
-        <header class="chat-header">
-            <a href="mesaj.html" style="color: white; margin-right: 15px;"><i class="fa-solid fa-chevron-left"></i></a>
-            <img id="target-user-img" src="" alt="">
-            <div class="user-info">
-                <h4 id="target-user-name">Yüklənir...</h4>
-                <span id="target-status">aktiv</span>
-            </div>
-        </header>
-
-        <div id="messages-display">
-            </div>
-
-        <div class="chat-input-area">
-            <form id="chat-form">
-                <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off">
-                <button type="submit" class="send-btn">Göndər</button>
-            </form>
+<div id="app-chat">
+    <header class="chat-header">
+        <a href="mesaj.html" style="color: white; font-size: 20px; margin-right: 15px;">
+            <i class="fa-solid fa-arrow-left-long"></i>
+        </a>
+        <img id="target-user-img" src="https://via.placeholder.com/42" alt="">
+        <div class="target-info">
+            <h4 id="target-user-name">Yüklənir...</h4>
+            <span id="target-status">aktiv</span>
         </div>
-    </div>
+        <div class="header-icons" style="color: #888; font-size: 18px;">
+            <i class="fa-solid fa-phone" style="margin-right: 20px;"></i>
+            <i class="fa-solid fa-video"></i>
+        </div>
+    </header>
 
-    <script type="module" src="chat.js"></script>
-</body>
-</html>
+    <div id="messages-display">
+        </div>
+
+    <div class="chat-input-area">
+        <form id="chat-form">
+            <i class="fa-regular fa-face-smile" style="color: #888; margin-right: 10px; font-size: 20px;"></i>
+            <input type="text" id="msg-input" placeholder="Mesajınızı yazın..." autocomplete="off">
+            <button type="submit" class="send-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>

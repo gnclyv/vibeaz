@@ -275,7 +275,15 @@ createdAt: Date.now()
 }
 } catch (e) { alert("Story xətası!"); }
 });
-
+// Mesaj ikonuna klikləyəndə keçid etmək üçün
+document.addEventListener('click', (e) => {
+    // Əgər kliklənən element kağız təyyarə ikonudursa
+    if (e.target.id === 'chat-nav-btn' || e.target.closest('#chat-nav-btn')) {
+        console.log("Mesajlara keçid edilir...");
+        window.location.href = 'mesaj.html';
+    }
+});
 addStoryBtn?.addEventListener('click', () => storyInput.click());
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+

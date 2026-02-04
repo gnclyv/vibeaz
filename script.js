@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
@@ -15,35 +14,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const messaging = getMessaging(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
-// --- 0. BİLDİRİŞ SİSTEMİ (DÜZƏLDİLDİ) ---
-async function setupPushNotifications(user) {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            const token = await getToken(messaging, { 
-                vapidKey: 'BErWSc6Tr3YhkpIjersOOPPZuthPFnJZgeNOHVY2xiD05T3aMDUTUGhWsG4FOz87cWq5F6OghIPzE1EVoPJPONc' 
-            });
-            
-            if (token) {
-                await updateDoc(doc(db, "users", user.uid), {
-                    fcmToken: token
-                });
-                console.log("Push Token yadda saxlanıldı.");
-            }
-        }
-    } catch (error) {
-        console.error("Bildiriş xətası:", error);
-    }
+// --- 0. ONESIGNAL BİLDİRİŞ SİSTEMİ (YENİLƏNDİ) ---
+async function setupOneSignal(user) {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+        // İstifadəçini OneSignal-a giriş etdiririk (Brauzer bağlı olanda tapmaq üçün)
+        await OneSignal.login(user.uid);
+        console.log("OneSignal: İstifadəçi qoşuldu:", user.uid);
+    });
 }
 
-onMessage(messaging, (payload) => {
-    console.log('Mesaj gəldi: ', payload);
-});
+// Push Bildiriş Göndərmə Funksiyası (REST API)
+window.sendPushNotification = async (targetUserId, message) => {
+    try {
+        await fetch("https://onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8",
+                "Authorization": "Basic os_v2_app_ctprix6rdfhq3bzwrjzfgzealsa4sopdyueukoed22ohg4dmexpeke6brlq7xdleb6yjnqdithh5iwbms3ilybx6z7pe37jvf2wmlka" // <-- BURA REST API KEY-İ YAZ!
+            },
+            body: JSON.stringify({
+                app_id: "14df145f-d119-4f0d-8736-8a725364805c",
+                include_external_user_ids: [targetUserId],
+                contents: { "en": message },
+                headings: { "en": "VibeAz" },
+                url: "https://gnclyv.github.io/vibeaz/"
+            })
+        });
+    } catch (e) {
+        console.error("Push göndərmə xətası:", e);
+    }
+};
 
-// --- 1. STORY SİSTEMİ ---
+// --- 1. STORY SİSTEMİ (Dəyişmədi) ---
 window.openStoryViewer = function(url, username) {
     const viewer = document.getElementById('story-viewer');
     const fullImg = document.getElementById('story-full-img');
@@ -124,28 +129,21 @@ function loadDirectUsers() {
     });
 }
 
-// --- 3. POST SİSTEMİ (OPTIMALLAŞDIRILDI) ---
+// --- 3. POST SİSTEMİ ---
 async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
     
-    // Əvvəlcə izləmə məlumatlarını alırıq
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
 
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
         list.innerHTML = ''; 
-        if (snap.empty) {
-            list.innerHTML = '<p style="color:gray; text-align:center; padding:20px;">Hələlik heç bir post yoxdur.</p>';
-            return;
-        }
-        snap.forEach(async (d) => {
+        snap.forEach((d) => {
             const data = d.data();
             const isLiked = (data.likedBy || []).includes(auth.currentUser.uid);
             const isFollowing = following.includes(data.userId);
-            
-            // Postu ekrana basırıq
-            const postHTML = renderPostHTML(d.id, data, isLiked, isFollowing, false); // isVerified ilkin olaraq false
+            const postHTML = renderPostHTML(d.id, data, isLiked, isFollowing, false);
             list.insertAdjacentHTML('beforeend', postHTML);
         });
     });
@@ -206,7 +204,11 @@ window.handleLike = async (id, postOwnerId) => {
             likes: increment(1),
             likedBy: arrayUnion(user.uid) 
         });
+        
+        // Həm Firebase-ə həm OneSignal-a bildiriş göndər
         await sendNotification(postOwnerId, "postunuzu bəyəndi.");
+        await sendPushNotification(postOwnerId, `${user.displayName || "Biri"} postunuzu bəyəndi!`);
+        
     } catch (e) { console.error(e); }
 };
 
@@ -230,11 +232,25 @@ window.handleFollow = async (targetUserId) => {
     if (!currentUser || currentUser.uid === targetUserId) return;
     await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
     await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
-    const btns = document.querySelectorAll(`[id="follow-${targetUserId}"]`);
-    btns.forEach(btn => { btn.innerText = "İzlənilir"; btn.classList.add('following'); });
+    
     await sendNotification(targetUserId, "sizi izləməyə başladı.");
+    await sendPushNotification(targetUserId, `${currentUser.displayName || "Biri"} sizi izləməyə başladı!`);
 };
 
+// --- 5. AUTH DINLƏYİCİ ---
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        await registerUserInFirestore(user); 
+        setupOneSignal(user); // OneSignal qoşulur
+        loadPosts();
+        listenToStories();
+        loadDirectUsers();
+    } else if (!window.location.pathname.includes("login.html")) {
+        window.location.href = "login.html";
+    }
+});
+
+// Digər funksiyalar (showLikes, addComment, uploadPost və s. eynilə qalsın)
 window.showLikes = async (postId) => {
     const modal = document.getElementById('like-modal');
     const content = document.getElementById('like-list-content');
@@ -269,6 +285,7 @@ window.addComment = async (postId, postOwnerId) => {
         });
         input.value = "";
         await sendNotification(postOwnerId, "postunuza şərh yazdı.");
+        await sendPushNotification(postOwnerId, `${auth.currentUser.displayName} postunuza şərh yazdı.`);
     } catch (e) { console.error(e); }
 };
 
@@ -302,25 +319,8 @@ async function uploadPost() {
     fileInp.click();
 }
 
-// --- 5. AUTH DINLƏYİCİ ---
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        await registerUserInFirestore(user); 
-        setupPushNotifications(user); 
-        loadPosts();
-        listenToStories();
-        loadDirectUsers();
-    } else if (!window.location.pathname.includes("login.html")) {
-        window.location.href = "login.html";
-    }
-});
-
-// Event Listeners
 const mainAddBtn = document.getElementById('mainAddBtn');
 if (mainAddBtn) mainAddBtn.onclick = uploadPost;
-
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) logoutBtn.onclick = () => signOut(auth);
 
 const storyInputBtn = document.getElementById('add-story-btn');
 if (storyInputBtn) storyInputBtn.onclick = () => document.getElementById('storyInput').click();

@@ -4,8 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VibeAz</title>
-    <link rel="stylesheet" href="style.css?v=105">
+    <link rel="stylesheet" href="style.css?v=106">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Yeni əlavə edilən İstifadəçi Siyahısı Stili */
+        .users-list-container { 
+            padding: 10px; 
+            background: #000; 
+            border-bottom: 1px solid #262626; 
+        }
+        .users-horizontal-list { 
+            display: flex; 
+            gap: 15px; 
+            overflow-x: auto; 
+            padding: 10px 0; 
+            scrollbar-width: none; 
+        }
+        .users-horizontal-list::-webkit-scrollbar { display: none; }
+        .user-card { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-width: 75px; 
+            text-align: center; 
+            cursor: pointer;
+        }
+        .user-card img { 
+            width: 56px; 
+            height: 56px; 
+            border-radius: 50%; 
+            border: 2px solid #0095f6; 
+            object-fit: cover; 
+            padding: 2px;
+        }
+        .user-card span { 
+            font-size: 11px; 
+            color: #fff; 
+            margin-top: 5px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            width: 70px;
+        }
+        .user-card a { text-decoration: none; display: flex; flex-direction: column; align-items: center; }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -25,6 +67,12 @@
                 <span class="story-username">Sənin storyn</span>
             </div>
             <div id="stories-list" class="stories-list-inner">
+                </div>
+        </div>
+
+        <div class="users-list-container">
+            <h4 style="font-size: 13px; color: #8e8e8e; margin-left: 5px; margin-bottom: 5px; font-weight: 600;">Mesaj göndər</h4>
+            <div id="users-list" class="users-horizontal-list">
                 </div>
         </div>
 
@@ -77,13 +125,13 @@
                 <ul>
                     <li>✨ Story sistemi təkmilləşdirildi.</li>
                     <li>🛡️ Məzahir və Nihat tərəfindən logo dizayn edildi.</li>
-                    <li>💬 Real zamanlı chat sistemi əlavə edildi!</li>
+                    <li>💬 Özəl (DM) və Global mesajlaşma aktiv edildi!</li>
                 </ul>
             </div>
             <button class="modal-close-btn" onclick="closeNewsModal()">Anladım</button>
         </div>
     </div>
 
-    <script type="module" src="script.js?v=105"></script>
+    <script type="module" src="script.js?v=106"></script>
 </body>
 </html>

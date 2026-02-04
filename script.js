@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, increment, arrayUnion, query, orderBy, setDoc, getDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-// PUSH BİLDİRİŞ ÜÇÜN IMPORTLAR
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging.js";
 
 const firebaseConfig = {
@@ -16,9 +15,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const messaging = getMessaging(app); // Messaging-i başlat
+const messaging = getMessaging(app);
 const IMGBB_API_KEY = "c405e03c9dde65d450d8be8bdcfda25f";
 
+// --- 0. BİLDİRİŞ SİSTEMİ (DÜZƏLDİLDİ) ---
 async function setupPushNotifications(user) {
     try {
         const permission = await Notification.requestPermission();
@@ -28,28 +28,20 @@ async function setupPushNotifications(user) {
             });
             
             if (token) {
-                // Tokeni istifadəçinin sənədinə yazırıq ki, başqaları ona bildiriş göndərə bilsin
                 await updateDoc(doc(db, "users", user.uid), {
                     fcmToken: token
                 });
-                console.log("Bildiriş ünvanı yadda saxlanıldı.");
+                console.log("Push Token yadda saxlanıldı.");
             }
         }
     } catch (error) {
-        console.error("Xəta:", error);
+        console.error("Bildiriş xətası:", error);
     }
 }
-}
 
-// Sayt açıq olanda gələn mesajları tutmaq üçün
 onMessage(messaging, (payload) => {
     console.log('Mesaj gəldi: ', payload);
-    // Buraya kiçik bir pop-up bildiriş əlavə edə bilərsən
 });
-
-const storyInput = document.getElementById('storyInput');
-const addStoryBtn = document.getElementById('add-story-btn');
-const storiesListInner = document.getElementById('stories-list');
 
 // --- 1. STORY SİSTEMİ ---
 window.openStoryViewer = function(url, username) {
@@ -80,6 +72,7 @@ window.closeStory = function() {
 }
 
 function listenToStories() {
+    const storiesListInner = document.getElementById('stories-list');
     if (!storiesListInner) return;
     onSnapshot(query(collection(db, "stories"), orderBy("timestamp", "desc")), (snap) => {
         const now = Date.now();
@@ -131,22 +124,29 @@ function loadDirectUsers() {
     });
 }
 
-// --- 3. POST SİSTEMİ ---
+// --- 3. POST SİSTEMİ (OPTIMALLAŞDIRILDI) ---
 async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
     
+    // Əvvəlcə izləmə məlumatlarını alırıq
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
 
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
         list.innerHTML = ''; 
+        if (snap.empty) {
+            list.innerHTML = '<p style="color:gray; text-align:center; padding:20px;">Hələlik heç bir post yoxdur.</p>';
+            return;
+        }
         snap.forEach(async (d) => {
             const data = d.data();
-            const authorDoc = await getDoc(doc(db, "users", data.userId));
-            const isVerified = authorDoc.exists() ? authorDoc.data().isVerified : false;
             const isLiked = (data.likedBy || []).includes(auth.currentUser.uid);
-            list.innerHTML += renderPostHTML(d.id, data, isLiked, following.includes(data.userId), isVerified);
+            const isFollowing = following.includes(data.userId);
+            
+            // Postu ekrana basırıq
+            const postHTML = renderPostHTML(d.id, data, isLiked, isFollowing, false); // isVerified ilkin olaraq false
+            list.insertAdjacentHTML('beforeend', postHTML);
         });
     });
 }
@@ -171,27 +171,27 @@ function renderPostHTML(id, data, isLiked, isFollowing, isVerified) {
                 </div>
             </div>
             <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
-                <img src="${data.url}" loading="lazy">
+                <img src="${data.url}" loading="lazy" style="width:100%; display:block;">
             </div>
-            <div class="post-actions">
-                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer;"></i>
-                <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()" style="cursor:pointer;"></i>
+            <div class="post-actions" style="padding: 10px; font-size: 20px;">
+                <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}; cursor:pointer; margin-right: 15px;"></i>
+                <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()" style="cursor:pointer; color: white;"></i>
             </div>
-            <div class="post-info-section">
-                <div class="likes-count" onclick="showLikes('${id}')" style="cursor:pointer; font-weight:600; margin-bottom:5px;">${data.likes || 0} bəyənmə</div>
-                <div class="post-description">
+            <div class="post-info-section" style="padding: 0 12px 12px 12px;">
+                <div class="likes-count" onclick="showLikes('${id}')" style="cursor:pointer; font-weight:600; margin-bottom:5px; color:white;">${data.likes || 0} bəyənmə</div>
+                <div class="post-description" style="color:white;">
                     <b onclick="location.href='${profileLink}'" style="cursor:pointer;">${author} ${blueTick}</b> ${data.text || ""}
                 </div>
                 <div class="modern-comments-box">${commentsHTML}</div>
-                <div class="modern-comment-input-area">
-                    <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input">
-                    <button class="modern-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
+                <div class="modern-comment-input-area" style="margin-top:10px; display:flex;">
+                    <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input" style="flex:1; background:transparent; border:none; color:white; outline:none;">
+                    <button class="modern-post-btn" onclick="addComment('${id}', '${data.userId}')" style="background:none; border:none; color:#0095f6; font-weight:600; cursor:pointer;">Paylaş</button>
                 </div>
             </div>
         </div>`;
 }
 
-// --- 4. LIKE VƏ DİGƏR EVENTLƏR ---
+// --- 4. HADİSƏLƏR ---
 window.handleLike = async (id, postOwnerId) => {
     const user = auth.currentUser;
     if (!user) return;
@@ -222,7 +222,6 @@ window.sendNotification = async (targetUserId, typeMessage) => {
             timestamp: serverTimestamp(),
             read: false
         });
-        // QEYD: Buradan sonra Firebase Cloud Functions işə düşməli və Push göndərməlidir.
     } catch (e) { console.error(e); }
 };
 
@@ -275,6 +274,7 @@ window.addComment = async (postId, postOwnerId) => {
 
 async function uploadPost() {
     const fileInp = document.getElementById('fileInput');
+    if(!fileInp) return;
     fileInp.onchange = async () => {
         const user = auth.currentUser;
         if (!user || !fileInp.files[0]) return;
@@ -302,10 +302,11 @@ async function uploadPost() {
     fileInp.click();
 }
 
+// --- 5. AUTH DINLƏYİCİ ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         await registerUserInFirestore(user); 
-        setupPushNotifications(user); // Giriş edəndə bildirişləri aktivləşdir
+        setupPushNotifications(user); 
         loadPosts();
         listenToStories();
         loadDirectUsers();
@@ -314,8 +315,12 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
-if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
-if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+// Event Listeners
+const mainAddBtn = document.getElementById('mainAddBtn');
+if (mainAddBtn) mainAddBtn.onclick = uploadPost;
 
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) logoutBtn.onclick = () => signOut(auth);
 
+const storyInputBtn = document.getElementById('add-story-btn');
+if (storyInputBtn) storyInputBtn.onclick = () => document.getElementById('storyInput').click();

@@ -1,31 +1,49 @@
-<div class="chat-app">
-    <header class="chat-header">
-        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-        <div class="chat-user-profile">
-            <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" alt="Group">
-            <div class="chat-user-details">
-                <h3>VibeAz Community</h3>
-                <span>Aktualdır</span>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VibeAz | Direct</title>
+    <link rel="stylesheet" href="mesaj.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="chat-wrapper">
+        <header class="chat-header">
+            <div class="header-left">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-chevron-left"></i></a>
+                <div class="chat-user">
+                    <img src="https://i.ibb.co/KjyG5m6R/83cd8dce-0092-4e7b-9d09-8bf222bf2dbb-removebg-preview.png" class="chat-avatar">
+                    <div class="user-meta">
+                        <h3>VibeAz Community</h3>
+                        <span class="online-status">Aktualdır</span>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="header-icons">
-            <i class="fa-solid fa-phone"></i>
-            <i class="fa-solid fa-video"></i>
-        </div>
-    </header>
-
-    <main id="chat-messages" class="chat-body">
-        </main>
-
-    <footer class="chat-footer">
-        <div class="input-area">
-            <i class="fa-solid fa-camera camera-icon"></i>
-            <input type="text" id="chat-input" placeholder="Mesaj yazın..." autocomplete="off">
-            <div class="input-actions">
-                <i class="fa-solid fa-microphone"></i>
-                <i class="fa-regular fa-image"></i>
-                <button id="send-btn">Göndər</button>
+            <div class="header-right">
+                <i class="fa-solid fa-phone"></i>
+                <i class="fa-solid fa-video"></i>
             </div>
-        </div>
-    </footer>
-</div>
+        </header>
+
+        <main id="chat-messages" class="chat-main"></main>
+
+        <footer class="chat-footer">
+            <div class="input-bar">
+                <div class="input-left">
+                    <i class="fa-solid fa-camera camera-btn"></i>
+                </div>
+                <input type="text" id="chat-input" placeholder="Mesaj yazın..." autocomplete="off">
+                <div class="input-right" id="input-tools">
+                    <i class="fa-solid fa-microphone"></i>
+                    <i class="fa-regular fa-image" onclick="document.getElementById('img-upload').click()"></i>
+                    <input type="file" id="img-upload" hidden accept="image/*">
+                </div>
+                <button id="send-btn" class="send-btn">Göndər</button>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module" src="mesaj.js"></script>
+</body>
+</html>

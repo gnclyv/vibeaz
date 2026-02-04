@@ -118,3 +118,28 @@ body, html {
     border-radius: 50%;
     box-shadow: 0 0 10px #1ed760;
 }
+/* Avatarın konteynerini nisbi etmək lazımdır */
+.active-u {
+    position: relative; /* Nöqtənin yerini buna görə təyin edəcəyik */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Yaşıl Onlayn Nöqtəsi */
+.status-dot {
+    position: absolute;
+    bottom: 25px; /* Şəklin aşağı hissəsinə uyğun */
+    right: 5px;   /* Sağ tərəfə uyğun */
+    width: 14px;
+    height: 14px;
+    background-color: #1ed760; /* Instagram/Spotify yaşılı */
+    border: 3px solid #0b0b0e; /* Arxa fonla qarışmaması üçün qalın çərçivə */
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* Onlayn olanlara parıltı effekti (istəyə bağlı) */
+.status-dot.online {
+    box-shadow: 0 0 8px #1ed760;
+}

@@ -1,186 +1,61 @@
-:root {
-    --bg-black: #000000;
-    --border-gray: #262626;
-    --text-white: #ffffff;
-    --text-gray: #8e8e8e;
-    --insta-blue: #0095f6;
-    --msg-gradient: linear-gradient(135deg, #a13388, #405de6);
-    --msg-others: #262626;
-}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+const firebaseConfig = {
+    apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
+    authDomain: "vibeaz-1e98a.firebaseapp.com",
+    projectId: "vibeaz-1e98a",
+    storageBucket: "vibeaz-1e98a.firebasestorage.app",
+    messagingSenderId: "953434260285",
+    appId: "1:953434260285:web:6263b4372487ba6d673b54"
+};
 
-body { 
-    background-color: var(--bg-black); 
-    color: var(--text-white); 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    height: 100vh;
-    overflow: hidden;
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-.instagram-chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-width: 500px;
-    margin: 0 auto;
-    background: var(--bg-black);
-}
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadData(user.uid);
+    } else {
+        window.location.href = 'login.html';
+    }
+});
 
-/* Header Dizaynı */
-.direct-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    border-bottom: 1px solid var(--border-gray);
-    background: var(--bg-black);
-}
+function loadData(myUid) {
+    const activeList = document.getElementById('active-users-list');
+    const chatList = document.getElementById('chat-list-container');
 
-.header-left { display: flex; align-items: center; gap: 12px; }
-.back-icon { color: white; font-size: 20px; text-decoration: none; }
-.header-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
-.name-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-.activity { font-size: 11px; color: var(--insta-blue); }
-.header-right { display: flex; gap: 20px; font-size: 18px; }
+    onSnapshot(collection(db, "users"), (snap) => {
+        activeList.innerHTML = '';
+        chatList.innerHTML = '';
 
-/* Mesajlar Sahəsi */
-.direct-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
+        snap.forEach(doc => {
+            const data = doc.data();
+            if (data.uid === myUid) return;
 
-.msg {
-    max-width: 75%;
-    padding: 10px 16px;
-    font-size: 14px;
-    line-height: 1.4;
-    position: relative;
-    word-wrap: break-word;
-}
+            const userImg = data.photoURL || "https://ui-avatars.com/api/?name=" + data.displayName;
 
-.mine {
-    align-self: flex-end;
-    background: var(--msg-gradient);
-    color: white;
-    border-radius: 22px 22px 4px 22px;
-    margin-bottom: 2px;
-}
+            // 1. Əgər online-dırsa, yuxarı bar-a əlavə et
+            if (data.status === 'online') {
+                activeList.innerHTML += `
+                <div class="active-u" onclick="window.location.href='chat.html?uid=${data.uid}'">
+                    <img src="${userImg}">
+                    <div class="dot"></div>
+                    <span>${data.displayName}</span>
+                </div>`;
+            }
 
-.others {
-    align-self: flex-start;
-    background: var(--msg-others);
-    color: white;
-    border-radius: 22px 22px 22px 4px;
-    margin-bottom: 2px;
-}
-
-.sender-label {
-    font-size: 10px;
-    color: var(--text-gray);
-    margin: 4px 0 2px 12px;
-}
-
-/* Giriş Paneli */
-.direct-footer {
-    padding: 10px 15px 20px 15px;
-}
-
-.input-wrapper {
-    display: flex;
-    align-items: center;
-    background: #121212;
-    border: 1px solid var(--border-gray);
-    border-radius: 30px;
-    padding: 5px 12px;
-    gap: 10px;
-}
-
-.camera-circle {
-    background: var(--insta-blue);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
-
-#chat-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: white;
-    outline: none;
-    padding: 8px 0;
-    font-size: 15px;
-}
-
-.input-icons { display: flex; gap: 15px; font-size: 18px; color: white; }
-
-.send-text-btn {
-    background: transparent;
-    border: none;
-    color: var(--insta-blue);
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    display: none; /* Yazı yoxdursa gizlət */
-}
-.active-users-direct {
-    padding: 10px;
-    border-bottom: 1px solid #262626;
-    background-color: #000;
-}
-
-.users-horizontal-list {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.user-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 65px;
-    cursor: pointer;
-}
-
-.avatar-wrapper {
-    position: relative;
-    width: 50px;
-    height: 50px;
-}
-
-.avatar-wrapper img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #363636;
-}
-
-.status-dot {
-    position: absolute;
-    bottom: 1px;
-    right: 1px;
-    width: 12px;
-    height: 12px;
-    background-color: #1ed760;
-    border: 2px solid #000;
-    border-radius: 50%;
-}
-
-.user-card span {
-    font-size: 10px;
-    color: #8e8e8e;
-    margin-top: 4px;
-    text-align: center;
+            // 2. Hamını aşağıdakı ümumi siyahıya əlavə et
+            chatList.innerHTML += `
+            <a href="chat.html?uid=${data.uid}" class="chat-item">
+                <img src="${userImg}" class="chat-img">
+                <div class="chat-info">
+                    <h4>${data.displayName}</h4>
+                    <p>${data.status === 'online' ? 'İndi aktivdir' : 'Oflayn'}</p>
+                </div>
+            </a>`;
+        });
+    });
 }

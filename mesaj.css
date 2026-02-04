@@ -1,61 +1,147 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+/* 1. ÜMUMİ SƏHİFƏ AYARLARI */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+}
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
-    authDomain: "vibeaz-1e98a.firebaseapp.com",
-    projectId: "vibeaz-1e98a",
-    storageBucket: "vibeaz-1e98a.firebasestorage.app",
-    messagingSenderId: "953434260285",
-    appId: "1:953434260285:web:6263b4372487ba6d673b54"
-};
+/* 2. HEADER (ÜST HİSSƏ) */
+.messaging-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    height: 50px;
+    border-bottom: 1px solid #262626;
+    position: sticky;
+    top: 0;
+    background-color: #000;
+    z-index: 100;
+}
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+.messaging-header a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 20px;
+    margin-right: 20px;
+}
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        loadData(user.uid);
-    } else {
-        window.location.href = 'login.html';
-    }
-});
+.messaging-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
 
-function loadData(myUid) {
-    const activeList = document.getElementById('active-users-list');
-    const chatList = document.getElementById('chat-list-container');
+/* 3. YUXARI: AKTİV İSTİFADƏÇİLƏR (STORIES BAR) */
+.active-users-bar {
+    display: flex;
+    gap: 15px;
+    padding: 15px 10px;
+    overflow-x: auto;
+    border-bottom: 1px solid #262626;
+    scrollbar-width: none; /* Firefox üçün */
+}
 
-    onSnapshot(collection(db, "users"), (snap) => {
-        activeList.innerHTML = '';
-        chatList.innerHTML = '';
+.active-users-bar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari üçün */
+}
 
-        snap.forEach(doc => {
-            const data = doc.data();
-            if (data.uid === myUid) return;
+.active-user-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    cursor: pointer;
+}
 
-            const userImg = data.photoURL || "https://ui-avatars.com/api/?name=" + data.displayName;
+.avatar-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
 
-            // 1. Əgər online-dırsa, yuxarı bar-a əlavə et
-            if (data.status === 'online') {
-                activeList.innerHTML += `
-                <div class="active-u" onclick="window.location.href='chat.html?uid=${data.uid}'">
-                    <img src="${userImg}">
-                    <div class="dot"></div>
-                    <span>${data.displayName}</span>
-                </div>`;
-            }
+.avatar-container img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #262626;
+}
 
-            // 2. Hamını aşağıdakı ümumi siyahıya əlavə et
-            chatList.innerHTML += `
-            <a href="chat.html?uid=${data.uid}" class="chat-item">
-                <img src="${userImg}" class="chat-img">
-                <div class="chat-info">
-                    <h4>${data.displayName}</h4>
-                    <p>${data.status === 'online' ? 'İndi aktivdir' : 'Oflayn'}</p>
-                </div>
-            </a>`;
-        });
-    });
+/* Yaşıl aktivlik nöqtəsi */
+.online-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 3px;
+    width: 14px;
+    height: 14px;
+    background-color: #1ed760;
+    border: 3px solid #000;
+    border-radius: 50%;
+}
+
+.active-username {
+    font-size: 11px;
+    color: #a8a8a8;
+    margin-top: 6px;
+    max-width: 65px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 4. AŞAĞI: SÖHBƏT (CHAT) SİYAHISI */
+.chat-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #fff;
+    transition: background 0.2s;
+}
+
+.chat-item:active {
+    background-color: #121212;
+}
+
+.chat-item-img {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+.chat-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-item-info h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.chat-item-info p {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: #a8a8a8;
+}
+
+/* Əgər yeni mesaj bildirişi istəsən (mavi nöqtə) */
+.unread-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: #0095f6;
+    border-radius: 50%;
+    margin-left: 10px;
 }

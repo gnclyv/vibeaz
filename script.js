@@ -293,28 +293,25 @@ document.addEventListener('click', (e) => {
         window.location.href = 'mesaj.html';
     }
 });
-// Modalı bağlamaq üçün funksiya
-function closeWelcomeModal() {
-    const modal = document.getElementById('welcome-modal');
+// Modalın id-si "news-modal" olduğu üçün onu tapıb gizlədirik
+window.closeNewsModal = function() {
+    const modal = document.getElementById('news-modal');
     if (modal) {
-        modal.style.display = 'none'; // Modalı gizlədir
-        console.log("Modal bağlandı.");
+        modal.style.display = 'none';
+        // İstəsən, istifadəçinin bunu bir də görməməsi üçün yaddaşa yaza bilərsən
+        localStorage.setItem('newsSeen', 'true');
     }
-}
+};
 
-// Alternativ: Butona event listener ilə qoşulma (daha etibarlı yol)
+// Səhifə yüklənəndə modalı avtomatik açmaq üçün (əgər hələ görməyibsə)
 document.addEventListener('DOMContentLoaded', () => {
-    const closeBtn = document.getElementById('modalCloseBtn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            const modal = document.getElementById('welcome-modal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        });
+    const modal = document.getElementById('news-modal');
+    if (modal && !localStorage.getItem('newsSeen')) {
+        modal.style.display = 'flex';
     }
 });
 if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);
+
 

@@ -20,19 +20,15 @@ const storyInput = document.getElementById('storyInput');
 const addStoryBtn = document.getElementById('add-story-btn');
 const storiesListInner = document.getElementById('stories-list');
 
-// --- 1. STORY SİSTEMİ (Qlobal Funksiyalar) ---
-
+// --- 1. STORY SİSTEMİ ---
 window.openStoryViewer = function(url, username) {
     const viewer = document.getElementById('story-viewer');
     const fullImg = document.getElementById('story-full-img');
     const viewerUser = document.getElementById('viewer-username');
-
     if(!viewer || !fullImg) return;
-
     fullImg.src = url;
     viewerUser.innerText = username;
     viewer.style.display = 'flex';
-
     const progress = document.getElementById('progress-fill');
     if(progress) {
         progress.style.transition = 'none';
@@ -42,7 +38,6 @@ window.openStoryViewer = function(url, username) {
             progress.style.width = '100%';
         }, 100);
     }
-
     clearTimeout(window.storyTimeout);
     window.storyTimeout = setTimeout(window.closeStory, 5000);
 }
@@ -71,8 +66,49 @@ function listenToStories() {
     });
 }
 
-// --- 2. BİLDİRİŞ VƏ POST SİSTEMİ ---
+// --- 2. DM ÜÇÜN İSTİFADƏÇİ SİSTEMİ (YENİLƏNDİ) ---
+async function registerUserInFirestore(user) {
+    if (!user) return;
+    const userRef = doc(db, "users", user.uid);
+    try {
+        await setDoc(userRef, {
+            uid: user.uid,
+            displayName: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            photoURL: user.photoURL || "",
+            lastSeen: serverTimestamp()
+        }, { merge: true });
+        console.log("İstifadəçi bazada qeydiyyata alındı.");
+    } catch (e) { console.error("User Reg Error:", e); }
+}
 
+function loadDirectUsers() {
+    const usersListContainer = document.getElementById('users-list');
+    if (!usersListContainer) return;
+
+    onSnapshot(collection(db, "users"), (snapshot) => {
+        usersListContainer.innerHTML = '';
+        snapshot.forEach((doc) => {
+            const userData = doc.data();
+            // YALNIZ başqa istifadəçiləri göstər
+            if (userData.uid !== auth.currentUser?.uid) {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=0095f6&color=fff`;
+                const userName = userData.displayName || "İstifadəçi";
+                userCard.innerHTML = `
+                    <a href="mesaj.html?uid=${userData.uid}">
+                        <img src="${userImg}" alt="${userName}">
+                        <span>${userName}</span>
+                    </a>
+                `;
+                usersListContainer.appendChild(userCard);
+            }
+        });
+    });
+}
+
+// --- 3. BİLDİRİŞ VƏ POST SİSTEMİ ---
 async function sendNotification(targetUserId, typeMessage) {
     const user = auth.currentUser;
     if (!user || user.uid === targetUserId) return;
@@ -91,10 +127,8 @@ async function sendNotification(targetUserId, typeMessage) {
 async function loadPosts() {
     const list = document.getElementById('post-list');
     if (!list || !auth.currentUser) return;
-
     const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
     const following = userDoc.exists() ? (userDoc.data().following || []) : [];
-
     onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (snap) => {
         list.innerHTML = '';
         const likedPosts = JSON.parse(localStorage.getItem('vibeLikes')) || [];
@@ -111,17 +145,13 @@ async function loadPosts() {
 function renderPostHTML(id, data, isLiked, isFollowing) {
     const author = data.userName || "İstifadəçi";
     const avatarImg = data.userPhoto || `https://ui-avatars.com/api/?name=${author}&background=random`;
-
     const commentsHTML = (data.comments || []).map(c => `
         <div class="modern-comment">
             <span class="comment-user">${c.user}</span>
             <span class="comment-text">${c.text}</span>
-        </div>
-    `).join('');
-
+        </div>`).join('');
     const btnText = isFollowing ? "İzlənilir" : "İzlə";
     const btnClass = isFollowing ? "follow-btn following" : "follow-btn";
-
     return `
         <div class="post-card">
             <div class="post-header">
@@ -131,9 +161,7 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
                     <button class="${btnClass}" onclick="handleFollow('${data.userId}')" id="follow-${data.userId}">${btnText}</button>
                 </div>
             </div>
-            <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')">
-                <img src="${data.url}" loading="lazy">
-            </div>
+            <div class="post-img-container" ondblclick="handleLike('${id}', '${data.userId}')"><img src="${data.url}" loading="lazy"></div>
             <div class="post-actions">
                 <i class="${isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}" onclick="handleLike('${id}', '${data.userId}')" style="color:${isLiked ? '#ff3040' : 'white'}"></i>
                 <i class="fa-regular fa-comment" onclick="document.getElementById('input-${id}').focus()"></i>
@@ -141,9 +169,7 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
             <div class="post-info-section">
                 <div class="likes-count">${data.likes || 0} bəyənmə</div>
                 <div class="post-description"><b>${author}</b> ${data.text || ""}</div>
-                <div class="modern-comments-box">
-                    ${commentsHTML}
-                </div>
+                <div class="modern-comments-box">${commentsHTML}</div>
                 <div class="modern-comment-input-area">
                     <input type="text" id="input-${id}" placeholder="Şərh əlavə et..." class="modern-input">
                     <button class="modern-post-btn" onclick="addComment('${id}', '${data.userId}')">Paylaş</button>
@@ -152,21 +178,14 @@ function renderPostHTML(id, data, isLiked, isFollowing) {
         </div>`;
 }
 
-// --- 3. GLOBAL QARŞILIQLI ƏLAQƏ FUNKSİYALARI ---
-
+// --- 4. GLOBAL EVENTLƏR ---
 window.handleFollow = async (targetUserId) => {
     const currentUser = auth.currentUser;
     if (!currentUser || currentUser.uid === targetUserId) return;
-
     await updateDoc(doc(db, "users", currentUser.uid), { following: arrayUnion(targetUserId) });
     await updateDoc(doc(db, "users", targetUserId), { followers: arrayUnion(currentUser.uid) });
-
     const btns = document.querySelectorAll(`[id="follow-${targetUserId}"]`);
-    btns.forEach(btn => {
-        btn.innerText = "İzlənilir";
-        btn.classList.add('following');
-    });
-
+    btns.forEach(btn => { btn.innerText = "İzlənilir"; btn.classList.add('following'); });
     await sendNotification(targetUserId, "sizi izləməyə başladı.");
 };
 
@@ -183,7 +202,6 @@ window.addComment = async (postId, postOwnerId) => {
     const input = document.getElementById(`input-${postId}`);
     const commentText = input.value.trim();
     if (!commentText || !auth.currentUser) return;
-
     try {
         await updateDoc(doc(db, "posts", postId), {
             comments: arrayUnion({
@@ -225,61 +243,15 @@ async function uploadPost() {
     fileInp.click();
 }
 
-// --- 4. MODAL VƏ AUTH SİSTEMİ ---
-
-window.closeNewsModal = function() {
-    const modal = document.getElementById('news-modal');
-    if(modal) modal.style.display = 'none';
-    localStorage.setItem('vibe_news_seen', 'true');
-}
-
-// YENİ: Aktiv İstifadəçiləri Çəkmək üçün Funksiya
-function loadDirectUsers() {
-    const usersListContainer = document.getElementById('users-list');
-    if (!usersListContainer) return;
-
-    onSnapshot(collection(db, "users"), (snapshot) => {
-        usersListContainer.innerHTML = '';
-        snapshot.forEach((doc) => {
-            const userData = doc.data();
-            if (userData.uid !== auth.currentUser?.uid) {
-                const userCard = document.createElement('div');
-                userCard.className = 'user-card';
-                const userImg = userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'User'}&background=0095f6&color=fff`;
-                const userName = userData.displayName || userData.email.split('@')[0];
-                userCard.innerHTML = `
-                    <a href="mesaj.html?uid=${userData.uid}">
-                        <img src="${userImg}" alt="${userName}">
-                        <span>${userName}</span>
-                    </a>
-                `;
-                usersListContainer.appendChild(userCard);
-            }
-        });
-    });
-}
-
-// YENİ: İstifadəçini Bazada Qeydiyyata Almaq
-async function registerUserInFirestore(user) {
-    if (!user) return;
-    const userRef = doc(db, "users", user.uid);
-    await setDoc(userRef, {
-        uid: user.uid,
-        displayName: user.displayName || user.email.split('@')[0],
-        email: user.email,
-        photoURL: user.photoURL || "",
-        lastSeen: serverTimestamp()
-    }, { merge: true });
-}
-
+// --- 5. GİRİŞ YOXLANIŞI (ƏSAS HİSSƏ) ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // Mövcud funksiyalar
+        console.log("Giriş uğurludur:", user.email);
+        
+        // Bu ardıcıllıq mütləqdir
+        await registerUserInFirestore(user); 
         loadPosts();
         listenToStories();
-        
-        // Yeni funksiyalar
-        registerUserInFirestore(user);
         loadDirectUsers();
 
         const hasSeen = localStorage.getItem('vibe_news_seen');
@@ -322,6 +294,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-addStoryBtn?.addEventListener('click', () => storyInput.click());
+if (addStoryBtn) addStoryBtn.onclick = () => storyInput.click();
 if (document.getElementById('mainAddBtn')) document.getElementById('mainAddBtn').onclick = uploadPost;
 if (document.getElementById('logout-btn')) document.getElementById('logout-btn').onclick = () => signOut(auth);

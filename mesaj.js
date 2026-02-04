@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+// Firebase Konfiqurasiyası (Sizin proyektə özəl)
 const firebaseConfig = {
     apiKey: "AIzaSyCUXJcQt0zkmQUul53VzgZOnX9UqvXKz3w",
     authDomain: "vibeaz-1e98a.firebaseapp.com",
@@ -11,30 +12,34 @@ const firebaseConfig = {
     appId: "1:953434260285:web:6263b4372487ba6d673b54"
 };
 
+// Firebase-i başlat
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// HTML Elementlərini seçirik
 const msgBox = document.getElementById('chat-messages');
 const input = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
-const inputTools = document.getElementById('input-tools');
+const inputIcons = document.getElementById('input-icons-group');
 
-// Input yazılarkən düyməni dəyiş
+// --- INTERFEYS MƏNTİQİ ---
+// Yazı yazanda "Göndər" düyməsini göstər, ikonları gizlə
 input.addEventListener('input', () => {
     if (input.value.trim().length > 0) {
         sendBtn.style.display = 'block';
-        inputTools.style.display = 'none';
+        if (inputIcons) inputIcons.style.display = 'none';
     } else {
         sendBtn.style.display = 'none';
-        inputTools.style.display = 'flex';
+        if (inputIcons) inputIcons.style.display = 'flex';
     }
 });
 
-// Mesaj Göndərmə
+// --- MESAJ GÖNDƏRMƏ ---
 async function sendMessage() {
     const text = input.value.trim();
     const user = auth.currentUser;
+
     if (!text || !user) return;
 
     try {
@@ -42,47 +47,44 @@ async function sendMessage() {
             text: text,
             senderId: user.uid,
             senderName: user.displayName || user.email.split('@')[0],
+            senderPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`,
             timestamp: serverTimestamp()
         });
-        input.value = "";
-        sendBtn.style.display = 'none';
-        inputTools.style.display = 'flex';
-    } catch (e) {
-        console.error("Xəta:", e);
+        
+        input.value = ""; // İnputu təmizlə
+        sendBtn.style.display = 'none'; // Düyməni gizlə
+        if (inputIcons) inputIcons.style.display = 'flex'; // İkonları geri gətir
+        
+    } catch (error) {
+        console.error("Mesaj göndərilərkən xəta:", error);
     }
 }
 
-// Mesajları Dinləmə (Real-time)
-function listenMessages() {
+// --- MESAJLARI CANLI DİNLƏMƏ (Real-time) ---
+function listenForMessages() {
     const q = query(collection(db, "global_messages"), orderBy("timestamp", "asc"));
-    onSnapshot(q, (snap) => {
-        msgBox.innerHTML = '';
-        snap.forEach(d => {
-            const m = d.data();
-            const isMine = m.senderId === auth.currentUser?.uid;
-            const time = m.timestamp ? new Date(m.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+    
+    onSnapshot(q, (snapshot) => {
+        msgBox.innerHTML = ''; // Köhnə mesajları təmizlə ki, dublikat olmasın
+        
+        snapshot.forEach((doc) => {
+            const message = doc.data();
+            const isMine = message.senderId === auth.currentUser?.uid;
+            
+            // Vaxtı formatla (məs: 14:30)
+            const time = message.timestamp ? new Date(message.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-            const msgHtml = `
-                <div class="msg-container">
-                    ${!isMine ? `<span class="sender-name">${m.senderName}</span>` : ''}
-                    <div class="msg ${isMine ? 'mine' : 'others'}" ondblclick="alert('Bəyənildi! ❤️')">
-                        <span>${m.text}</span>
-                        <div class="msg-time">${time}</div>
-                    </div>
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `msg-wrapper ${isMine ? 'mine-wrapper' : 'others-wrapper'}`;
+            
+            messageDiv.innerHTML = `
+                ${!isMine ? `<span class="sender-label">${message.senderName}</span>` : ''}
+                <div class="msg ${isMine ? 'mine' : 'others'}">
+                    <span>${message.text}</span>
+                    <div class="msg-time">${time}</div>
                 </div>
             `;
-            msgBox.innerHTML += msgHtml;
+            msgBox.appendChild(messageDiv);
         });
-        msgBox.scrollTop = msgBox.scrollHeight;
-    });
-}
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        listenMessages();
-        sendBtn.onclick = sendMessage;
-        input.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
-    } else {
-        window.location.href = "login.html";
-    }
-});
+        
+        // Səhifə

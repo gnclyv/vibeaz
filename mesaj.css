@@ -125,21 +125,68 @@ body, html {
     flex-direction: column;
     align-items: center;
 }
+/* Mövcud kodlarına toxunmadan bunları sona əlavə et */
 
-/* Yaşıl Onlayn Nöqtəsi */
-.status-dot {
-    position: absolute;
-    bottom: 25px; /* Şəklin aşağı hissəsinə uyğun */
-    right: 5px;   /* Sağ tərəfə uyğun */
-    width: 14px;
-    height: 14px;
-    background-color: #1ed760; /* Instagram/Spotify yaşılı */
-    border: 3px solid #0b0b0e; /* Arxa fonla qarışmaması üçün qalın çərçivə */
-    border-radius: 50%;
-    z-index: 2;
+/* Aktiv Dostlar üçün Yaşıl Nöqtə */
+.avatar-container {
+    position: relative;
+    width: 65px;
+    height: 65px;
 }
 
-/* Onlayn olanlara parıltı effekti (istəyə bağlı) */
-.status-dot.online {
-    box-shadow: 0 0 8px #1ed760;
+.status-dot {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    background-color: #1ed760; /* Canlı yaşıl */
+    border: 3px solid #0b0b0e; /* Fonla qarışmasın */
+    border-radius: 50%;
+    z-index: 5;
+    box-shadow: 0 0 5px rgba(30, 215, 96, 0.5);
+}
+
+/* Söhbətlər (Inbox) siyahısının düzülüşü */
+#chat-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    gap: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.chat-item:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.chat-img {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #333;
+}
+
+.chat-info h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: #fff;
+}
+
+.chat-info p {
+    font-size: 13px;
+    color: #888;
+    margin: 0;
 }

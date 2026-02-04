@@ -18,43 +18,71 @@ const db = getFirestore(app);
 const msgBox = document.getElementById('chat-messages');
 const input = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
+const inputTools = document.getElementById('input-tools');
 
+// Input yazılarkən düyməni dəyiş
+input.addEventListener('input', () => {
+    if (input.value.trim().length > 0) {
+        sendBtn.style.display = 'block';
+        inputTools.style.display = 'none';
+    } else {
+        sendBtn.style.display = 'none';
+        inputTools.style.display = 'flex';
+    }
+});
+
+// Mesaj Göndərmə
 async function sendMessage() {
     const text = input.value.trim();
     const user = auth.currentUser;
     if (!text || !user) return;
 
     try {
-        await addDoc(collection(db, "global_chat"), {
+        await addDoc(collection(db, "global_messages"), {
             text: text,
             senderId: user.uid,
             senderName: user.displayName || user.email.split('@')[0],
             timestamp: serverTimestamp()
         });
         input.value = "";
-    } catch (e) { console.error("Error:", e); }
+        sendBtn.style.display = 'none';
+        inputTools.style.display = 'flex';
+    } catch (e) {
+        console.error("Xəta:", e);
+    }
 }
 
-// mesaj.js içindəki əsas hissə
-function initChat() {
-    // Mesajları zaman sırasına görə düzürük
+// Mesajları Dinləmə (Real-time)
+function listenMessages() {
     const q = query(collection(db, "global_messages"), orderBy("timestamp", "asc"));
-    
-    // onSnapshot bazada dəyişiklik olanda dərhal işə düşür
     onSnapshot(q, (snap) => {
-        msgBox.innerHTML = ''; // Köhnə mesajları təmizlə
+        msgBox.innerHTML = '';
         snap.forEach(d => {
             const m = d.data();
             const isMine = m.senderId === auth.currentUser?.uid;
-            
-            // Mesajı ekrana çıxar
-            msgBox.innerHTML += `
-                <div class="msg ${isMine ? 'mine' : 'others'}">
-                    <small>${isMine ? 'Siz' : m.senderName}</small>
-                    <span>${m.text}</span>
-                </div>`;
+            const time = m.timestamp ? new Date(m.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+            const msgHtml = `
+                <div class="msg-container">
+                    ${!isMine ? `<span class="sender-name">${m.senderName}</span>` : ''}
+                    <div class="msg ${isMine ? 'mine' : 'others'}" ondblclick="alert('Bəyənildi! ❤️')">
+                        <span>${m.text}</span>
+                        <div class="msg-time">${time}</div>
+                    </div>
+                </div>
+            `;
+            msgBox.innerHTML += msgHtml;
         });
-        // Həmişə ən son mesajı göstərmək üçün aşağı sürüşdür
         msgBox.scrollTop = msgBox.scrollHeight;
     });
 }
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        listenMessages();
+        sendBtn.onclick = sendMessage;
+        input.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+    } else {
+        window.location.href = "login.html";
+    }
+});

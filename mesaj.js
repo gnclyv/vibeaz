@@ -35,31 +35,26 @@ async function sendMessage() {
     } catch (e) { console.error("Error:", e); }
 }
 
-function listenMessages() {
-    const q = query(collection(db, "global_chat"), orderBy("timestamp", "asc"));
+// mesaj.js içindəki əsas hissə
+function initChat() {
+    // Mesajları zaman sırasına görə düzürük
+    const q = query(collection(db, "global_messages"), orderBy("timestamp", "asc"));
+    
+    // onSnapshot bazada dəyişiklik olanda dərhal işə düşür
     onSnapshot(q, (snap) => {
-        msgBox.innerHTML = '';
+        msgBox.innerHTML = ''; // Köhnə mesajları təmizlə
         snap.forEach(d => {
             const m = d.data();
             const isMine = m.senderId === auth.currentUser?.uid;
             
+            // Mesajı ekrana çıxar
             msgBox.innerHTML += `
-                <div class="message ${isMine ? 'mine' : 'others'}">
+                <div class="msg ${isMine ? 'mine' : 'others'}">
                     <small>${isMine ? 'Siz' : m.senderName}</small>
                     <span>${m.text}</span>
-                </div>
-            `;
+                </div>`;
         });
-        msgBox.scrollTo({ top: msgBox.scrollHeight, behavior: 'smooth' });
+        // Həmişə ən son mesajı göstərmək üçün aşağı sürüşdür
+        msgBox.scrollTop = msgBox.scrollHeight;
     });
 }
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        listenMessages();
-        sendBtn.onclick = sendMessage;
-        input.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
-    } else {
-        window.location.href = "login.html";
-    }
-});
